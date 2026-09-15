@@ -1,0 +1,305 @@
+import React, { useEffect, useState } from "react";
+import { generateAdaptivePlan } from "../../ai/adaptiveEngine";
+import {
+  ArrowLeft,
+  Brain,
+  CheckCircle2,
+  Clock3,
+  Heart,
+  Lightbulb,
+  RotateCcw,
+  Sparkles,
+  Home,
+} from "lucide-react";
+
+function GameResult({ setCurrentView }) {
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    const savedResult =
+      localStorage.getItem("smriti-last-game-result") ||
+      localStorage.getItem("aura-last-game-result");
+
+    if (!savedResult) return;
+
+    try {
+      const parsedResult = JSON.parse(savedResult);
+      const savedHistory =
+        localStorage.getItem("smriti-game-history") ||
+        localStorage.getItem("aura-game-history");
+      const history = savedHistory ? JSON.parse(savedHistory) : [];
+
+      const adaptivePlan = generateAdaptivePlan(
+        parsedResult,
+        Array.isArray(history) ? history : []
+      );
+
+      setResult({
+        ...parsedResult,
+        adaptivePlan,
+      });
+    } catch (error) {
+      console.error("Unable to load game result:", error);
+      setResult(null);
+    }
+  }, []);
+
+  if (!result) {
+    return (
+      <div className="min-h-full bg-stone-50 p-8">
+        <div className="max-w-3xl mx-auto bg-white rounded-[2rem] p-10 text-center border border-gray-200">
+          <Brain size={48} className="mx-auto text-[#0f3e3a] mb-4" />
+
+          <h1 className="text-2xl font-bold text-gray-900">
+            No game result yet
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Complete a memory game to see your results here.
+          </p>
+
+          <button
+            onClick={() => setCurrentView("patient-game")}
+            className="mt-6 px-6 py-3 rounded-2xl bg-[#0f3e3a] text-white font-bold"
+          >
+            Start Memory Game
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const adaptivePlan = result.adaptivePlan;
+
+  const getRecommendedView = (activityName) => {
+    const act = (activityName || "").toLowerCase();
+    if (act.includes("spot") || act.includes("difference")) return "patient-spot-difference";
+    if (act.includes("pattern")) return "patient-pattern-match";
+    if (act.includes("routine") || act.includes("sequence")) return "patient-daily-routine";
+    if (act.includes("memory")) return "patient-game";
+    return "patient-activities";
+  };
+
+  const getMessage = () => {
+    if (result.accuracy >= 80) return "Excellent memory work!";
+    if (result.accuracy >= 60) {
+      return "Good job! You remembered many of the memories.";
+    }
+    return "Well done for completing the activity!";
+  };
+
+  return (
+    <div className="min-h-full bg-stone-50 p-6 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Back */}
+        <button
+          onClick={() => setCurrentView("patient-dashboard")}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-semibold mb-8"
+        >
+          <ArrowLeft size={20} />
+          Back to Home
+        </button>
+
+        {/* Main Result */}
+        <div className="bg-white rounded-[2rem] border border-gray-200 p-8 md:p-12 text-center">
+          <div className="mx-auto w-20 h-20 rounded-3xl bg-emerald-50 flex items-center justify-center text-[#0f3e3a]">
+            <Sparkles size={38} />
+          </div>
+
+          <p className="text-sm font-bold text-[#0f3e3a] mt-6 uppercase tracking-wider">
+            {result.game || "Cognitive Activity"} • Session Complete
+          </p>
+
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+            {getMessage()}
+          </h1>
+
+          <p className="text-gray-500 mt-3">Overall Activity Score</p>
+
+          <div className="text-6xl font-black text-[#0f3e3a] mt-2">
+            {result.score}
+            <span className="text-2xl font-bold text-gray-400">/100</span>
+          </div>
+
+          <p className="text-sm font-bold text-emerald-800 bg-emerald-100 inline-block px-4 py-1 rounded-full mt-3">
+            {result.performanceLevel || (result.accuracy >= 80 ? "Strong Performance" : "Gentle Exercise")}
+          </p>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+            <div className="rounded-2xl bg-stone-50 p-5">
+              <CheckCircle2 size={24} className="mx-auto text-green-600" />
+              <p className="text-2xl font-bold text-gray-900 mt-2">
+                {result.accuracy}%
+              </p>
+              <p className="text-xs text-gray-500">Accuracy</p>
+            </div>
+
+            <div className="rounded-2xl bg-stone-50 p-5">
+              <Clock3 size={24} className="mx-auto text-gray-700" />
+              <p className="text-2xl font-bold text-gray-900 mt-2">
+                {result.elapsedTime}s
+              </p>
+              <p className="text-xs text-gray-500">Time</p>
+            </div>
+
+            <div className="rounded-2xl bg-stone-50 p-5">
+              <Lightbulb size={24} className="mx-auto text-amber-500" />
+              <p className="text-2xl font-bold text-gray-900 mt-2">
+                {result.hintsUsed || result.mistakes || 0}
+              </p>
+              <p className="text-xs text-gray-500">
+                {result.hintsUsed !== undefined ? "Hints Used" : "Mistakes"}
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-stone-50 p-5">
+              <Heart size={24} className="mx-auto text-[#0f3e3a]" />
+              <p className="text-lg font-bold text-gray-900 mt-3 capitalize">
+                {result.category || "Cognitive"}
+              </p>
+              <p className="text-xs text-gray-500">Focus Area</p>
+            </div>
+          </div>
+
+          {/* Adaptive AI Recommendation */}
+          <div className="mt-8 rounded-3xl border border-teal-100 bg-emerald-50 p-6 text-left">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#0f3e3a] shadow-sm">
+                <Sparkles size={21} />
+              </div>
+
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-bold text-gray-900">
+                    SMRITI Adaptive Recommendation
+                  </h2>
+                  <span className="rounded-full bg-teal-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#0f3e3a]">
+                    AI Adaptive Engine
+                  </span>
+                </div>
+
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  {adaptivePlan?.reason ||
+                    "Your next activity is being personalized from this session's performance."}
+                </p>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl bg-white p-4 border border-teal-50">
+                    <p className="text-xs text-gray-400">
+                      Recommended next activity
+                    </p>
+                    <p className="mt-1 font-bold text-[#0f3e3a]">
+                      {adaptivePlan?.activity || "Memory Game"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white p-4 border border-teal-50">
+                    <p className="text-xs text-gray-400">
+                      Recommended difficulty
+                    </p>
+                    <p className="mt-1 font-bold capitalize text-gray-900">
+                      {adaptivePlan?.difficulty || result.difficulty}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white p-4 border border-teal-50">
+                    <p className="text-xs text-gray-400">
+                      Performance band
+                    </p>
+                    <p className="mt-1 font-bold capitalize text-gray-900">
+                      {adaptivePlan?.performanceBand?.replace(/_/g, " ") ||
+                        "moderate"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white p-4 border border-teal-50">
+                    <p className="text-xs text-gray-400">
+                      Recommended session
+                    </p>
+                    <p className="mt-1 font-bold text-gray-900">
+                      {adaptivePlan?.recommendedTime || "5–10 min"}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setCurrentView(getRecommendedView(adaptivePlan?.activity))}
+                  className="mt-4 w-full rounded-xl bg-[#0f3e3a] py-3 text-sm font-bold text-white transition hover:bg-[#0c312e]"
+                >
+                  Start Recommended Activity
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Session summary */}
+          <div className="mt-8 text-left">
+            <h2 className="font-bold text-gray-900 text-lg">
+              Session summary
+            </h2>
+
+            <div className="mt-4 space-y-3">
+              <div className="flex justify-between bg-gray-50 rounded-xl px-4 py-3">
+                <span className="text-gray-500">Difficulty</span>
+                <span className="font-semibold capitalize">
+                  {result.difficulty}
+                </span>
+              </div>
+
+              <div className="flex justify-between bg-gray-50 rounded-xl px-4 py-3">
+                <span className="text-gray-500">Memory category</span>
+                <span className="font-semibold">{result.category}</span>
+              </div>
+
+              <div className="flex justify-between bg-gray-50 rounded-xl px-4 py-3">
+                <span className="text-gray-500">Items completed</span>
+                <span className="font-semibold">
+                  {result.total ? `${result.total} of ${result.total}` : `${result.score} pts`}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mt-10">
+            <button
+              onClick={() => {
+                if (result.gameId === "spot-the-difference") {
+                  setCurrentView("patient-spot-difference");
+                } else if (result.gameId === "pattern-match") {
+                  setCurrentView("patient-pattern-match");
+                } else if (result.gameId === "daily-routine") {
+                  setCurrentView("patient-daily-routine");
+                } else {
+                  setCurrentView("patient-game");
+                }
+              }}
+              className="px-7 py-4 rounded-2xl bg-[#0f3e3a] text-white font-bold flex items-center justify-center gap-2 hover:bg-[#0c312e] transition"
+            >
+              <RotateCcw size={19} />
+              Play Again
+            </button>
+
+            <button
+              onClick={() => setCurrentView("patient-activities")}
+              className="px-7 py-4 rounded-2xl bg-gray-100 text-gray-700 font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition"
+            >
+              <Home size={19} />
+              All Activities
+            </button>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <p className="text-xs text-gray-400 text-center mt-6 max-w-2xl mx-auto">
+          SMRITI game results describe activity performance for personalization
+          and engagement. They are not a medical diagnosis or clinical
+          assessment.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default GameResult;

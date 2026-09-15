@@ -1,0 +1,682 @@
+{
+  "patient": {
+    "id": "P001",
+    "name": "Asha",
+    "age": 78,
+    "room": "402",
+    "status": "Stable",
+    "memory": 82,
+    "attention": 76,
+    "engagement": 87,
+    "caregiver": "Dr. Sarah Jenkins",
+    "language": "Assamese",
+    "location": "Assam, NER",
+    "medication": "Taken",
+    "hydration": "Good",
+    "sleep": "7h 20m",
+    "familyContact": "Priya Sharma",
+    "familyRelation": "Daughter",
+    "safetyStatus": "Triggered",
+    "emergencyContact": "Priya Sharma",
+    "mood": "Calm"
+  },
+  "patients": [
+    {
+      "id": "P001",
+      "name": "Asha",
+      "age": 78,
+      "room": "402",
+      "status": "Stable",
+      "memory": 93,
+      "attention": 89,
+      "lastActive": "Just now",
+      "recentActivity": "Pattern Match",
+      "gameScore": 95,
+      "mood": "Calm",
+      "alert": "SOS button has been triggered",
+      "activityTime": "Just now",
+      "language": "Assamese",
+      "location": "Assam, NER",
+      "caregiver": "Dr. Sarah Jenkins",
+      "medication": "Taken",
+      "hydration": "Good",
+      "sleep": "7h 20m",
+      "engagement": "87%",
+      "familyContact": "Priya Sharma",
+      "familyRelation": "Daughter",
+      "safetyStatus": "Triggered",
+      "emergencyContact": "Priya Sharma",
+      "activityHistory": [
+        {
+          "name": "Pattern Match",
+          "score": 90,
+          "time": "Today • 8:04 pm",
+          "icon": "🧩"
+        },
+        {
+          "name": "Memory Game",
+          "score": 94,
+          "time": "Today • 7:57 pm",
+          "icon": "🧠"
+        },
+        {
+          "name": "Daily Routine",
+          "score": 95,
+          "time": "Today • 7:56 pm",
+          "icon": "📅"
+        },
+        {
+          "name": "Pattern Match",
+          "score": 100,
+          "time": "Today • 7:56 pm",
+          "icon": "🧩"
+        },
+        {
+          "name": "Spot the Difference",
+          "score": 88,
+          "time": "Today • 7:56 pm",
+          "icon": "🎯"
+        },
+        {
+          "name": "Memory Game",
+          "score": 92,
+          "time": "Today • 7:56 pm",
+          "icon": "🧠"
+        },
+        {
+          "name": "Memory Game",
+          "score": 100,
+          "time": "Today • 7:37 pm",
+          "icon": "🧠"
+        },
+        {
+          "name": "Memory Game",
+          "score": 95,
+          "time": "Today • 7:37 pm",
+          "icon": "🧠"
+        },
+        {
+          "name": "Spot the Difference",
+          "score": 90,
+          "time": "Today • 7:19 pm",
+          "icon": "🎯"
+        },
+        {
+          "name": "Memory Recall",
+          "score": 84,
+          "time": "Today • 2:00 PM",
+          "icon": "🧠"
+        }
+      ]
+    },
+    {
+      "id": "P002",
+      "name": "Martha Washington",
+      "age": 82,
+      "room": "112",
+      "status": "Needs Attention",
+      "memory": 68,
+      "attention": 61,
+      "lastActive": "30 minutes ago",
+      "recentActivity": "Pattern Recognition",
+      "gameScore": 67,
+      "mood": "Neutral",
+      "alert": "Cognitive performance needs review",
+      "activityTime": "30 minutes ago",
+      "language": "English",
+      "location": "NER Facility",
+      "caregiver": "Dr. Sarah Jenkins",
+      "medication": "Overdue 30m",
+      "hydration": "Moderate",
+      "sleep": "6h 10m",
+      "engagement": "62%",
+      "familyContact": "Robert Washington",
+      "familyRelation": "Son",
+      "safetyStatus": "Safe",
+      "emergencyContact": "Robert Washington",
+      "activityHistory": [
+        {
+          "name": "Pattern Recognition",
+          "score": 67,
+          "time": "Today • 1:30 PM",
+          "icon": "🎯"
+        },
+        {
+          "name": "Memory Recall",
+          "score": 64,
+          "time": "Today • 10:15 AM",
+          "icon": "🧠"
+        }
+      ]
+    },
+    {
+      "id": "P003",
+      "name": "Eleanor Vance",
+      "age": 79,
+      "room": "At Home",
+      "status": "Critical Attention",
+      "memory": 58,
+      "attention": 52,
+      "lastActive": "10 minutes ago",
+      "recentActivity": "Daily Check-in",
+      "gameScore": 55,
+      "mood": "Worried",
+      "alert": "SOS button has been triggered",
+      "activityTime": "10 minutes ago",
+      "language": "English",
+      "location": "Home Monitoring",
+      "caregiver": "Dr. Sarah Jenkins",
+      "medication": "Pending",
+      "hydration": "Low",
+      "sleep": "5h 45m",
+      "engagement": "48%",
+      "familyContact": "Claire Vance",
+      "familyRelation": "Daughter",
+      "safetyStatus": "Triggered",
+      "emergencyContact": "Claire Vance",
+      "activityHistory": [
+        {
+          "name": "Memory Recall",
+          "score": 58,
+          "time": "Today • 9:30 AM",
+          "icon": "🧠"
+        }
+      ]
+    },
+    {
+      "id": "P004",
+      "name": "Arthur Pendelton",
+      "age": 78,
+      "room": "402",
+      "status": "Stable",
+      "memory": 80,
+      "attention": 74,
+      "lastActive": "1 hour ago",
+      "recentActivity": "Memory Recall",
+      "gameScore": 82,
+      "mood": "Calm",
+      "alert": "No immediate alerts",
+      "activityTime": "1 hour ago",
+      "language": "English",
+      "location": "NER Facility",
+      "caregiver": "Dr. Sarah Jenkins",
+      "medication": "Taken",
+      "hydration": "Good",
+      "sleep": "7h 00m",
+      "engagement": "82%",
+      "familyContact": "Thomas Pendelton",
+      "familyRelation": "Brother",
+      "safetyStatus": "Safe",
+      "emergencyContact": "Thomas Pendelton",
+      "activityHistory": [
+        {
+          "name": "Memory Recall",
+          "score": 82,
+          "time": "Today • 12:45 PM",
+          "icon": "🧠"
+        }
+      ]
+    },
+    {
+      "id": "P005",
+      "name": "Hector Rivera",
+      "age": 74,
+      "room": "305",
+      "status": "Stable",
+      "memory": 85,
+      "attention": 79,
+      "lastActive": "45 minutes ago",
+      "recentActivity": "Word Association",
+      "gameScore": 86,
+      "mood": "Happy",
+      "alert": "No immediate alerts",
+      "activityTime": "45 minutes ago",
+      "language": "Spanish / English",
+      "location": "NER Facility",
+      "caregiver": "Dr. Sarah Jenkins",
+      "medication": "Taken",
+      "hydration": "Good",
+      "sleep": "7h 40m",
+      "engagement": "89%",
+      "familyContact": "Elena Rivera",
+      "familyRelation": "Spouse",
+      "safetyStatus": "Safe",
+      "emergencyContact": "Elena Rivera",
+      "activityHistory": [
+        {
+          "name": "Word Association",
+          "score": 86,
+          "time": "Today • 1:15 PM",
+          "icon": "🔤"
+        }
+      ]
+    }
+  ],
+  "reminders": [
+    {
+      "id": 1,
+      "type": "Medicine",
+      "title": "Morning Medicine",
+      "time": "8:00 AM",
+      "description": "Take your morning medicine after breakfast.",
+      "completed": false
+    },
+    {
+      "id": 2,
+      "type": "Hydration",
+      "title": "Drink Water",
+      "time": "10:00 AM",
+      "description": "Drink one glass of fresh water.",
+      "completed": true
+    },
+    {
+      "id": 3,
+      "type": "Medicine",
+      "title": "Afternoon Medicine",
+      "time": "2:00 PM",
+      "description": "Take your afternoon medicine.",
+      "completed": false
+    },
+    {
+      "id": 4,
+      "type": "Appointment",
+      "title": "Doctor Appointment",
+      "time": "4:00 PM",
+      "description": "General wellness consultation at 4 PM.",
+      "completed": false
+    }
+  ],
+  "moodLogs": [
+    {
+      "id": 1789501877448,
+      "mood": "sad",
+      "label": "Calm",
+      "emoji": "😌",
+      "timestamp": "2026-09-15T19:51:17.448Z",
+      "dateLabel": "Today",
+      "reasons": [],
+      "note": ""
+    },
+    {
+      "id": 1789501070225,
+      "mood": "Peaceful",
+      "label": "Calm",
+      "emoji": "😌",
+      "timestamp": "2026-09-15T19:37:50.225Z",
+      "dateLabel": "Today",
+      "reasons": [],
+      "note": "Feeling relaxed and engaged"
+    },
+    {
+      "id": 1789501028935,
+      "mood": "Peaceful",
+      "label": "Calm",
+      "emoji": "😌",
+      "timestamp": "2026-09-15T19:37:08.935Z",
+      "dateLabel": "Today",
+      "reasons": [],
+      "note": "Feeling good after morning walk"
+    },
+    {
+      "id": 1,
+      "mood": "happy",
+      "label": "Happy",
+      "emoji": "😊",
+      "timestamp": "2026-09-15T09:00:00.000Z",
+      "dateLabel": "15 Sep 2026",
+      "reasons": [
+        "Family",
+        "Music"
+      ],
+      "note": "Felt cheerful and enjoyed talking with family."
+    }
+  ],
+  "activityResults": [
+    {
+      "id": 1789502670571,
+      "gameId": "pattern-match",
+      "game": "Pattern Match",
+      "difficulty": "medium",
+      "theme": "Family",
+      "category": "attention",
+      "accuracy": 90,
+      "score": 95,
+      "performanceLevel": "Keen Logic & Sequence Recognition",
+      "moves": 0,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 32,
+      "completedAt": "2026-09-15T20:04:30.571Z",
+      "dateLabel": "Today • 8:04 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "hard",
+        "performanceScore": 95,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789502223366,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 94,
+      "score": 96,
+      "performanceLevel": "Strong",
+      "moves": 5,
+      "hintsUsed": 0,
+      "mistakes": 1,
+      "elapsedTime": 36,
+      "completedAt": "2026-09-15T19:57:03.366Z",
+      "dateLabel": "Today • 7:57 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 99,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789502216300,
+      "gameId": "daily-routine",
+      "game": "Daily Routine",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "sequencing",
+      "accuracy": 95,
+      "moves": 2,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 45,
+      "completedAt": "2026-09-15T19:56:56.300Z",
+      "dateLabel": "Today • 7:56 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 95,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789502216293,
+      "gameId": "pattern-match",
+      "game": "Pattern Match",
+      "difficulty": "medium",
+      "theme": "Family",
+      "category": "attention",
+      "accuracy": 100,
+      "moves": 4,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 30,
+      "completedAt": "2026-09-15T19:56:56.293Z",
+      "dateLabel": "Today • 7:56 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "hard",
+        "performanceScore": 100,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789502216286,
+      "gameId": "spot-the-difference",
+      "game": "Spot the Difference",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "attention",
+      "accuracy": 88,
+      "moves": 4,
+      "hintsUsed": 0,
+      "mistakes": 1,
+      "elapsedTime": 38,
+      "completedAt": "2026-09-15T19:56:56.286Z",
+      "dateLabel": "Today • 7:56 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 93,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789502216269,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 92,
+      "moves": 6,
+      "hintsUsed": 0,
+      "mistakes": 1,
+      "elapsedTime": 42,
+      "completedAt": "2026-09-15T19:56:56.269Z",
+      "dateLabel": "Today • 7:56 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 92,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789501070197,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "medium",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 100,
+      "moves": 0,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 0,
+      "completedAt": "2026-09-15T19:37:50.197Z",
+      "dateLabel": "Today • 7:37 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "hard",
+        "performanceScore": 100,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789501028902,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "medium",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 95,
+      "moves": 0,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 0,
+      "completedAt": "2026-09-15T19:37:08.901Z",
+      "dateLabel": "Today • 7:37 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "hard",
+        "performanceScore": 95,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789499942769,
+      "gameId": "spot-the-difference",
+      "game": "Spot the Difference",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "attention",
+      "accuracy": 90,
+      "moves": 0,
+      "hintsUsed": 0,
+      "mistakes": 1,
+      "elapsedTime": 45,
+      "completedAt": "2026-09-15T19:19:02.769Z",
+      "dateLabel": "Today • 7:19 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 90,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "People",
+      "accuracy": 85,
+      "moves": 8,
+      "hintsUsed": 0,
+      "elapsedTime": 32,
+      "completedAt": "2026-09-15T11:30:00.000Z",
+      "dateLabel": "Today • 11:30 AM"
+    }
+  ],
+  "alerts": [
+    {
+      "id": 1789501867020,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency",
+      "message": "Emergency SOS button was pressed by Asha.",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
+      "id": 1789501070236,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency SOS",
+      "message": "Emergency SOS dispatched from smoke test",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
+      "id": 1789501028944,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency SOS",
+      "message": "Smoke test emergency SOS button",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
+      "id": 1789501008115,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency",
+      "message": "Emergency SOS button was pressed by Asha.",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
+      "id": 1789501007950,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency",
+      "message": "Emergency SOS button was pressed by Asha.",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
+      "id": 1,
+      "patient": "Martha Washington",
+      "patientId": "P002",
+      "age": 82,
+      "room": "Rm 112",
+      "type": "Medication",
+      "message": "Morning medication is overdue by 30 minutes.",
+      "time": "15 mins ago",
+      "priority": "HIGH",
+      "icon": "💊",
+      "status": "Pending"
+    },
+    {
+      "id": 2,
+      "patient": "Eleanor Vance",
+      "patientId": "P003",
+      "age": 79,
+      "room": "At Home",
+      "type": "Emergency",
+      "message": "SOS button has been triggered.",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
+      "id": 3,
+      "patient": "Arthur Pendelton",
+      "patientId": "P004",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Cognitive",
+      "message": "Reaction time has decreased across recent activities.",
+      "time": "42 mins ago",
+      "priority": "MEDIUM",
+      "icon": "🧠",
+      "status": "Pending"
+    }
+  ],
+  "analytics": {
+    "trend": [
+      100,
+      92,
+      88,
+      100,
+      95,
+      94,
+      90
+    ],
+    "memory": 93,
+    "attention": 89,
+    "engagement": 87,
+    "completion": 92
+  }
+}
