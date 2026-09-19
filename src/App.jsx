@@ -22,6 +22,7 @@ import Activities from "./pages/patient/Activities";
 import Progress from "./pages/patient/Progress";
 import PatternMatch from "./pages/patient/PatternMatch";
 import DailyRoutine from "./pages/patient/DailyRoutine";
+import WhoIsAtMyDoor from "./pages/patient/WhoIsAtMyDoor";
 import {
   Home,
   Brain,
@@ -335,7 +336,11 @@ export default function AuraApp() {
   <FamilyMemory />
 )}
 {currentView === "patient-reminders" && (
-  <Reminder />
+  <Reminder setCurrentView={setCurrentView} />
+)}
+
+{currentView === "patient-door" && (
+  <WhoIsAtMyDoor />
 )}
 {currentView === "patient-smriti" && (
   <AnveshaChat />
@@ -614,6 +619,7 @@ function PatientLayout({ children, currentView, setCurrentView }) {
     { label: "My Memories", view: "patient-family", icon: Heart },
     { label: "My Mood", view: "patient-mood", icon: Heart },
     { label: "My Day", view: "patient-reminders", icon: Calendar },
+    { label: "Who Is At My Door?", view: "patient-door", icon: UserCheck },
     { label: "Progress", view: "patient-progress", icon: BarChart3 },
     { label: "Talk to Anvesha", view: "patient-smriti", icon: Bot },
   ];

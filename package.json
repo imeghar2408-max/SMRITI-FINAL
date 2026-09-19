@@ -12,6 +12,7 @@
   "dependencies": {
     "@google/genai": "^2.22.0",
     "@tailwindcss/vite": "^4.3.3",
+    "@vladmandic/face-api": "^1.7.15",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
