@@ -178,7 +178,7 @@ function Activities({ setCurrentView }) {
             </h2>
 
             <p className="text-sm text-gray-400 mt-1">
-              More activities can be added here as SMRITI grows.
+              More activities can be added here as ANVESHA grows.
             </p>
           </div>
         </div>

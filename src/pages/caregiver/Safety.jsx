@@ -526,7 +526,7 @@ function Safety({ setCurrentView }) {
               </h2>
 
               <p className="mt-1 text-xs text-slate-400">
-                Configure the signals SMRITI should monitor.
+                Configure the signals ANVESHA should monitor.
               </p>
             </div>
 

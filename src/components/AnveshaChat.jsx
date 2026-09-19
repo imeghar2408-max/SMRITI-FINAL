@@ -24,12 +24,12 @@ const base64ToBlob = (base64Audio, contentType) => {
   return new Blob([byteArray], { type: contentType });
 };
 
-const SmritiChat = () => {
+const AnveshaChat = () => {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
       content:
-        "नमस्ते जी। मैं स्मृति हूँ। मैं आपकी मदद करने के लिए यहाँ हूँ। ❤️",
+        "नमस्ते जी। मैं अन्वेषा हूँ। मैं आपकी मदद करने के लिए यहाँ हूँ। ❤️",
     },
   ]);
 
@@ -136,7 +136,7 @@ const SmritiChat = () => {
       await audio.play();
     } catch (error) {
       if (speechRequestRef.current === requestId) {
-        console.error("Smriti speech error:", error);
+        console.error("Anvesha speech error:", error);
         stopCurrentAudio();
         setCurrentlyPlayingMessage(null);
       }
@@ -180,7 +180,7 @@ const SmritiChat = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Unable to contact Smriti");
+        throw new Error(data.error || "Unable to contact Anvesha");
       }
 
       const assistantMessage = {
@@ -191,7 +191,7 @@ const SmritiChat = () => {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error("Smriti chat error:", error);
+      console.error("Anvesha chat error:", error);
 
       setMessages((prev) => [
         ...prev,
@@ -243,7 +243,7 @@ const SmritiChat = () => {
 
       await sendMessage(transcript, languageCode);
     } catch (error) {
-      console.error("Smriti transcription error:", error);
+      console.error("Anvesha transcription error:", error);
 
       if (isMountedRef.current) {
         setVoiceError("I couldn't understand that. Please try again.");
@@ -307,7 +307,7 @@ const SmritiChat = () => {
       recorder.start();
       setIsRecording(true);
     } catch (error) {
-      console.error("Smriti microphone error:", error);
+      console.error("Anvesha microphone error:", error);
       stream?.getTracks().forEach((track) => track.stop());
 
       if (error.name === "NotAllowedError" || error.name === "SecurityError") {
@@ -334,7 +334,7 @@ const SmritiChat = () => {
       {
         role: "assistant",
         content:
-          "नमस्ते जी। मैं स्मृति हूँ। मैं आपकी मदद करने के लिए यहाँ हूँ। ❤️",
+          "नमस्ते जी। मैं अन्वेषा हूँ। मैं आपकी मदद करने के लिए यहाँ हूँ। ❤️",
       },
     ]);
   };
@@ -352,7 +352,7 @@ const SmritiChat = () => {
 
             <div>
               <h1 className="text-lg font-bold text-gray-900">
-                Talk to Smriti
+                Talk to Anvesha
               </h1>
 
               <p className="text-sm text-gray-500">
@@ -405,8 +405,8 @@ const SmritiChat = () => {
                       onClick={() => speakMessage(message, index)}
                       disabled={currentlyPlayingMessage === index}
                       className="w-10 h-10 shrink-0 rounded-xl bg-teal-50 text-[#0f3e3a] flex items-center justify-center hover:bg-teal-100 disabled:opacity-60 disabled:cursor-not-allowed transition"
-                      title="Listen to Smriti's response"
-                      aria-label="Listen to Smriti's response"
+                      title="Listen to Anvesha's response"
+                      aria-label="Listen to Anvesha's response"
                     >
                       {currentlyPlayingMessage === index ? (
                         <Loader2 size={18} className="animate-spin" />
@@ -435,7 +435,7 @@ const SmritiChat = () => {
 
               <div className="bg-stone-100 px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-2 text-gray-500 text-sm">
                 <Loader2 size={16} className="animate-spin" />
-                <span>Smriti is thinking...</span>
+                <span>Anvesha is thinking...</span>
               </div>
             </div>
           )}
@@ -448,7 +448,7 @@ const SmritiChat = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Talk to Smriti..."
+              placeholder="Talk to Anvesha..."
               rows={1}
               disabled={loading || isRecording || isTranscribing}
               className="flex-1 resize-none bg-transparent outline-none text-sm text-gray-800 placeholder:text-gray-400 disabled:opacity-60"
@@ -495,7 +495,7 @@ const SmritiChat = () => {
           )}
 
           <p className="text-[11px] text-gray-400 text-center mt-2">
-            Smriti provides assistance and is not a replacement for a doctor.
+            Anvesha provides assistance and is not a replacement for a doctor.
           </p>
         </div>
       </div>
@@ -503,4 +503,4 @@ const SmritiChat = () => {
   );
 };
 
-export default SmritiChat;
+export default AnveshaChat;

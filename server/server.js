@@ -25,7 +25,7 @@ const upload = multer({
 
 app.get("/", (req, res) => {
   res.json({
-    message: "SMRITI voice server is running",
+    message: "ANVESHA voice server is running",
   });
 });
 
@@ -117,7 +117,7 @@ app.post("/api/speak", async (req, res) => {
 });
 
 // ==================================================
-// SMRITI CHAT - MINIMAL TEST
+// ANVESHA CHAT - MINIMAL TEST
 // ==================================================
 
 app.post("/api/chat", async (req, res) => {
@@ -130,7 +130,7 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    const systemInstructions = `You are Smriti, a personalized AI companion for this patient.
+    const systemInstructions = `You are Anvesha, a personalized AI companion for this patient.
 
 The following information is the patient's current available context. Use it only to answer relevant patient-specific questions.
 
@@ -219,7 +219,7 @@ app.post("/api/test-chat", async (req, res) => {
     console.error("Sarvam error:", error);
 
     res.status(500).json({
-      error: error.message || "Unable to get response from Smriti",
+      error: error.message || "Unable to get response from Anvesha",
     });
   }
 });
@@ -229,5 +229,5 @@ app.post("/api/test-chat", async (req, res) => {
 // ==================================================
 
 app.listen(PORT, () => {
-  console.log(`SMRITI server running on http://localhost:${PORT}`);
+  console.log(`ANVESHA server running on http://localhost:${PORT}`);
 });

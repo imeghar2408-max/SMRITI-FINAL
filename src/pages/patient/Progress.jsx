@@ -186,7 +186,7 @@ function Progress() {
             </h2>
 
             <p className="text-sm text-gray-600 mt-1">
-              Your activity history helps SMRITI personalize future
+              Your activity history helps ANVESHA personalize future
               activities. It is not a medical assessment.
             </p>
           </div>

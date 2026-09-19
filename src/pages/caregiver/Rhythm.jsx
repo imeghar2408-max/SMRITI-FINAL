@@ -153,7 +153,7 @@ function Rhythm({ setCurrentView }) {
         <div className="mb-6">
 
           <h2 className="text-lg font-semibold text-slate-900">
-            SMRITI Adaptive Engine
+            ANVESHA Adaptive Engine
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
@@ -260,7 +260,7 @@ function Rhythm({ setCurrentView }) {
             <div>
 
               <h2 className="text-lg font-semibold text-slate-900">
-                SMRITI Recommendation
+                ANVESHA Recommendation
               </h2>
 
               <p className="mt-1 text-xs text-slate-400">
@@ -313,7 +313,7 @@ function Rhythm({ setCurrentView }) {
         <div className="mt-5 rounded-xl border border-teal-100 bg-teal-50/60 p-4">
 
           <p className="text-xs font-bold text-[#0f3e3a]">
-            Why SMRITI chose this
+            Why ANVESHA chose this
           </p>
 
           <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -403,7 +403,7 @@ function Rhythm({ setCurrentView }) {
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            SMRITI's current schedule for Asha.
+            ANVESHA's current schedule for Asha.
           </p>
 
         </div>

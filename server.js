@@ -83,7 +83,7 @@ function getMockChatReply(messages, patientContext) {
   const patientName = patientContext?.patient?.name || "आशा जी";
 
   if (userText.includes("namaste") || userText.includes("नमस्ते") || userText.includes("hello") || userText.includes("hi")) {
-    return `नमस्ते ${patientName}! मैं स्मृति हूँ। आपकी सेवा के लिए हमेशा यहाँ हूँ। आज आप कैसा महसूस कर रहे हैं?`;
+    return `नमस्ते ${patientName}! मैं अन्वेषा हूँ। आपकी सेवा के लिए हमेशा यहाँ हूँ। आज आप कैसा महसूस कर रहे हैं?`;
   }
   if (userText.includes("दवाई") || userText.includes("medicine") || userText.includes("dawai")) {
     const meds = patientContext?.reminders?.filter((r) => r.type === "Medicine") || [];
@@ -98,7 +98,7 @@ function getMockChatReply(messages, patientContext) {
   if (userText.includes("परिवार") || userText.includes("family") || userText.includes("priya") || userText.includes("rahul")) {
     return `आपके परिवार में प्रिया (बेटी) और राहुल (बेटा) आपसे बहुत प्यार करते हैं। वे जल्द ही आपसे बात करेंगे।`;
   }
-  return `नमस्ते जी, मैं आपकी बात समझ रही हूँ। मैं स्मृति हूँ, आपके साथ हर कदम पर। आज का दिन आपके लिए मंगलमय हो! ❤️`;
+  return `नमस्ते जी, मैं आपकी बात समझ रही हूँ। मैं अन्वेषा हूँ, आपके साथ हर कदम पर। आज का दिन आपके लिए मंगलमय हो! ❤️`;
 }
 
 // ==================================================
@@ -107,7 +107,7 @@ function getMockChatReply(messages, patientContext) {
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    message: "SMRITI voice server is running",
+    message: "ANVESHA voice server is running",
     sarvamConfigured: !!process.env.SARVAM_API_KEY,
     geminiConfigured: !!process.env.GEMINI_API_KEY,
   });
@@ -217,7 +217,7 @@ app.post("/api/speak", async (req, res) => {
 });
 
 // ==================================================
-// SMRITI CHAT
+// ANVESHA CHAT
 // ==================================================
 app.post("/api/chat", async (req, res) => {
   try {
@@ -239,7 +239,7 @@ app.post("/api/chat", async (req, res) => {
       ...incomingContext,
     };
 
-    const systemInstructions = `You are Smriti, a personalized AI companion for this patient.
+    const systemInstructions = `You are Anvesha, a personalized AI companion for this patient.
 
 The following information is the patient's current available context. Use it only to answer relevant patient-specific questions.
 
@@ -354,12 +354,12 @@ app.post("/api/test-chat", async (req, res) => {
     }
 
     res.json({
-      reply: "नमस्ते! मैं स्मृति हूँ। मैं आपकी सहायता करने के लिए यहाँ हूँ।",
+      reply: "नमस्ते! मैं अन्वेषा हूँ। मैं आपकी सहायता करने के लिए यहाँ हूँ।",
     });
   } catch (error) {
     console.error("Sarvam error:", error);
     res.status(500).json({
-      error: error.message || "Unable to get response from Smriti",
+      error: error.message || "Unable to get response from Anvesha",
     });
   }
 });
@@ -609,7 +609,7 @@ async function start() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`SMRITI server running on http://0.0.0.0:${PORT}`);
+    console.log(`ANVESHA server running on http://0.0.0.0:${PORT}`);
   });
 }
 

@@ -13,7 +13,7 @@ import MemoryGame from "./pages/patient/MemoryGame";
 import GameResult from "./pages/patient/Gameresult";
 import VoiceTest from "./components/VoiceTest";
 import Reminder from "./pages/patient/Reminder";
-import SmritiChat from "./components/SmritiChat";
+import AnveshaChat from "./components/AnveshaChat";
 import patientData from "./data/patientData";
 import { generateAdaptivePlan } from "./ai/adaptiveEngine";
 import PatientDashboard from "./pages/patient/PatientDashboard";
@@ -105,7 +105,7 @@ export default function AuraApp() {
             onClick={() => setCurrentView("landing")}
             className="text-2xl font-black tracking-wider text-[#0f3e3a] cursor-pointer hover:opacity-85 transition flex items-center space-x-2"
           >
-            <span>SMRITI</span>
+            <span>ANVESHA</span>
           </div>
           <span className="text-xs bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full font-medium hidden sm:inline-block">
             Cognitive Care Platform
@@ -181,7 +181,7 @@ export default function AuraApp() {
             </button>
 
             <h2 className="text-2xl font-bold text-[#0f3e3a] mb-2">
-              Welcome to SMRITI
+              Welcome to ANVESHA
             </h2>
 
             <p className="text-sm text-gray-500 mb-6">
@@ -338,7 +338,7 @@ export default function AuraApp() {
   <Reminder />
 )}
 {currentView === "patient-smriti" && (
-  <SmritiChat />
+  <AnveshaChat />
 )}
 
 {currentView === "patient-pattern-match" && (
@@ -419,11 +419,11 @@ function LandingView({ onOpenPatient, onOpenCaregiver }) {
 
         <div className="max-w-2xl mx-auto space-y-4 z-10">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-[#0f3e3a] tracking-tight">
-            Care that remembers.
+            Explore. Remember. Connect. Care.
           </h1>
 
           <p className="text-base sm:text-lg text-gray-600 font-light">
-            AI-powered cognitive assistance for elderly care.
+            AI-powered cognitive assistance for elderly care and memory support.
           </p>
         </div>
 
@@ -438,7 +438,7 @@ function LandingView({ onOpenPatient, onOpenCaregiver }) {
 
         <div>
           <h2 className="text-xl font-bold text-[#0f3e3a] mb-2">
-            About SMRITI
+            About ANVESHA
           </h2>
 
           <p className="text-sm text-gray-600 max-w-xl">
@@ -503,7 +503,7 @@ function LandingView({ onOpenPatient, onOpenCaregiver }) {
           </div>
 
           <p className="text-base md:text-lg text-teal-50 max-w-2xl font-light">
-            SMRITI seamlessly connects an intuitive patient terminal with a
+            ANVESHA seamlessly connects an intuitive patient terminal with a
             powerful, data-rich caregiver dashboard. Continuous monitoring
             translates into actionable insights, ensuring safety without
             sacrificing dignity.
@@ -615,7 +615,7 @@ function PatientLayout({ children, currentView, setCurrentView }) {
     { label: "My Mood", view: "patient-mood", icon: Heart },
     { label: "My Day", view: "patient-reminders", icon: Calendar },
     { label: "Progress", view: "patient-progress", icon: BarChart3 },
-    { label: "Talk to Smriti", view: "patient-smriti", icon: Bot },
+    { label: "Talk to Anvesha", view: "patient-smriti", icon: Bot },
   ];
   return (
     <div className="flex min-h-[calc(100vh-73px)]">

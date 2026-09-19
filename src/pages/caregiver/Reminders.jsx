@@ -364,7 +364,7 @@ function Reminders({ setCurrentView }) {
           <div>
 
             <h3 className="text-sm font-semibold text-[#0f3e3a]">
-              SMRITI Reminder Support
+              ANVESHA Reminder Support
             </h3>
 
             <p className="mt-1 text-xs leading-5 text-slate-600">

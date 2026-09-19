@@ -172,7 +172,7 @@ function GameResult({ setCurrentView }) {
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-bold text-gray-900">
-                    SMRITI Adaptive Recommendation
+                    ANVESHA Adaptive Recommendation
                   </h2>
                   <span className="rounded-full bg-teal-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#0f3e3a]">
                     AI Adaptive Engine
@@ -293,7 +293,7 @@ function GameResult({ setCurrentView }) {
 
         {/* Disclaimer */}
         <p className="text-xs text-gray-400 text-center mt-6 max-w-2xl mx-auto">
-          SMRITI game results describe activity performance for personalization
+          ANVESHA game results describe activity performance for personalization
           and engagement. They are not a medical diagnosis or clinical
           assessment.
         </p>

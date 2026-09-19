@@ -431,7 +431,7 @@ function PatientDashboard({ setCurrentView }) {
           QUICK ACTIONS
       ====================================================== */}
       <div className="grid md:grid-cols-2 gap-5">
-        {/* Talk to Smriti */}
+        {/* Talk to Anvesha */}
         <button
           onClick={() => setCurrentView("patient-smriti")}
           className="group text-left bg-[#edf7f2] border border-emerald-100 rounded-[26px] p-6 hover:shadow-sm transition-all"
@@ -443,7 +443,7 @@ function PatientDashboard({ setCurrentView }) {
 
             <div className="flex-1">
               <h2 className="text-xl font-bold text-gray-900">
-                Talk to Smriti
+                Talk to Anvesha
               </h2>
 
               <p className="text-sm text-gray-500 mt-1">

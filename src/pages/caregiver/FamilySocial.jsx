@@ -433,7 +433,7 @@ function FamilySocial({ setCurrentView }) {
           <div>
 
             <h2 className="text-sm font-semibold text-pink-800">
-              SMRITI Social Suggestion
+              ANVESHA Social Suggestion
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">

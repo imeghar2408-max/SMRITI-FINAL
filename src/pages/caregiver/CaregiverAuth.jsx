@@ -64,7 +64,7 @@ export default function CaregiverAuth({ onSarahLogin, onBack }) {
             </div>
 
             <h1 className="text-3xl font-bold mb-4">
-              SMRITI Caregiver Portal
+              ANVESHA Caregiver Portal
             </h1>
 
             <p className="text-white/75 text-sm leading-6">

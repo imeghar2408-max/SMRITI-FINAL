@@ -483,7 +483,7 @@ function Alerts({ setCurrentView }) {
         </p>
 
         <p>
-          SMRITI Caregiver Portal
+          ANVESHA Caregiver Portal
         </p>
       </div>
 

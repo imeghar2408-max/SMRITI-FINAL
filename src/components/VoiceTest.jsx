@@ -101,7 +101,7 @@ export default function VoiceTest() {
     <div className="max-w-xl mx-auto p-8">
       <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-[#0f3e3a]">
-          SMRITI Voice Test
+          ANVESHA Voice Test
         </h1>
 
         <p className="text-sm text-gray-500 mt-2">

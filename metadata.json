@@ -1,6 +1,6 @@
 {
-  "name": "SMRITI",
-  "description": "AI-powered cognitive assistance and care companion for elderly care and memory support.",
+  "name": "ANVESHA",
+  "description": "Explore. Remember. Connect. Care. — AI-powered cognitive assistance and care companion for elderly care and memory support.",
   "requestFramePermissions": [
     "microphone"
   ],
