@@ -27,11 +27,11 @@
       "age": 78,
       "room": "402",
       "status": "Stable",
-      "memory": 93,
+      "memory": 66,
       "attention": 89,
       "lastActive": "Just now",
-      "recentActivity": "Pattern Match",
-      "gameScore": 95,
+      "recentActivity": "Memory Game",
+      "gameScore": 100,
       "mood": "Calm",
       "alert": "SOS button has been triggered",
       "activityTime": "Just now",
@@ -47,6 +47,18 @@
       "safetyStatus": "Triggered",
       "emergencyContact": "Priya Sharma",
       "activityHistory": [
+        {
+          "name": "Memory Game",
+          "score": 38,
+          "time": "Today • 12:22 pm",
+          "icon": "🧠"
+        },
+        {
+          "name": "Memory Game",
+          "score": 60,
+          "time": "Today • 12:20 pm",
+          "icon": "🧠"
+        },
         {
           "name": "Pattern Match",
           "score": 90,
@@ -93,18 +105,6 @@
           "name": "Memory Game",
           "score": 95,
           "time": "Today • 7:37 pm",
-          "icon": "🧠"
-        },
-        {
-          "name": "Spot the Difference",
-          "score": 90,
-          "time": "Today • 7:19 pm",
-          "icon": "🎯"
-        },
-        {
-          "name": "Memory Recall",
-          "score": 84,
-          "time": "Today • 2:00 PM",
           "icon": "🧠"
         }
       ]
@@ -259,7 +259,7 @@
       "title": "Morning Medicine",
       "time": "8:00 AM",
       "description": "Take your morning medicine after breakfast.",
-      "completed": false
+      "completed": true
     },
     {
       "id": 2,
@@ -275,7 +275,7 @@
       "title": "Afternoon Medicine",
       "time": "2:00 PM",
       "description": "Take your afternoon medicine.",
-      "completed": false
+      "completed": true
     },
     {
       "id": 4,
@@ -332,6 +332,56 @@
     }
   ],
   "activityResults": [
+    {
+      "id": 1789541520970,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "medium",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 38,
+      "score": 100,
+      "performanceLevel": "Gentle Exercise",
+      "moves": 16,
+      "hintsUsed": 0,
+      "mistakes": 10,
+      "elapsedTime": 85,
+      "completedAt": "2026-09-16T06:52:00.970Z",
+      "dateLabel": "Today • 12:22 pm",
+      "adaptivePlan": {
+        "activity": "Family Memory Recall",
+        "difficulty": "easy",
+        "performanceScore": 38,
+        "performanceBand": "needs_support",
+        "reason": "Recent performance suggests higher cognitive load. Returning to familiar memories with gentler difficulty.",
+        "recommendedTime": "5–10 min"
+      }
+    },
+    {
+      "id": 1789541418922,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "gentle",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 60,
+      "score": 100,
+      "performanceLevel": "Steady Recall",
+      "moves": 5,
+      "hintsUsed": 0,
+      "mistakes": 2,
+      "elapsedTime": 23,
+      "completedAt": "2026-09-16T06:50:18.921Z",
+      "dateLabel": "Today • 12:20 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "gentle",
+        "performanceScore": 65,
+        "performanceBand": "moderate",
+        "reason": "Performance is stable. Maintaining challenge while reinforcing cognitive rhythm.",
+        "recommendedTime": "5–10 min"
+      }
+    },
     {
       "id": 1789502670571,
       "gameId": "pattern-match",
@@ -560,6 +610,45 @@
   ],
   "alerts": [
     {
+      "id": 1789530035749,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency",
+      "message": "Emergency SOS button was pressed by Asha.",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
+      "id": 1789530021442,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency",
+      "message": "Emergency SOS button was pressed by Asha.",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
+      "id": 1789506095313,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency",
+      "message": "Emergency SOS button was pressed by Asha.",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
       "id": 1789501867020,
       "patient": "Asha",
       "patientId": "P001",
@@ -666,15 +755,15 @@
   ],
   "analytics": {
     "trend": [
-      100,
-      92,
       88,
       100,
       95,
       94,
-      90
+      90,
+      60,
+      38
     ],
-    "memory": 93,
+    "memory": 66,
     "attention": 89,
     "engagement": 87,
     "completion": 92
