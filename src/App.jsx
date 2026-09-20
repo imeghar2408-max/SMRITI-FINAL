@@ -25,6 +25,7 @@ import DailyRoutine from "./pages/patient/DailyRoutine";
 import WhoIsAtMyDoor from "./pages/patient/WhoIsAtMyDoor";
 import PatientLocation from "./pages/patient/PatientLocation";
 import CaregiverLocation from "./pages/caregiver/CaregiverLocation";
+import heroImage from "./hero.png";
 import {
   Home,
   Brain,
@@ -471,23 +472,36 @@ function LandingView({ onOpenPatient, onOpenCaregiver }) {
     <div className="pb-24">
 
       {/* Hero Section */}
-      <section className="relative h-[80vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden bg-gradient-to-b from-stone-100/60 to-white">
+<section
+  className="relative h-[80vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden"
+  style={{
+    backgroundImage: `
+      linear-gradient(
+        rgba(255,255,255,0.45),
+        rgba(255,255,255,0.65)
+      ),
+      url(${heroImage})
+    `,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+>
+  <div className="max-w-2xl mx-auto space-y-4 z-10">
+    <h1 className="text-4xl sm:text-5xl font-extrabold text-[#0f3e3a] tracking-tight">
+      Explore. Remember. Connect. Care.
+    </h1>
 
-        <div className="max-w-2xl mx-auto space-y-4 z-10">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-[#0f3e3a] tracking-tight">
-            Explore. Remember. Connect. Care.
-          </h1>
+    <p className="text-base sm:text-lg text-gray-600 font-light">
+      AI-powered cognitive assistance for elderly care and memory support.
+    </p>
+  </div>
 
-          <p className="text-base sm:text-lg text-gray-600 font-light">
-            AI-powered cognitive assistance for elderly care and memory support.
-          </p>
-        </div>
-
-        <div className="absolute bottom-10 flex flex-col items-center text-xs text-gray-400 tracking-widest uppercase gap-2">
-          <span>Scroll to explore</span>
-          <span className="animate-bounce">↓</span>
-        </div>
-      </section>
+  <div className="absolute bottom-10 flex flex-col items-center text-xs text-gray-500 tracking-widest uppercase gap-2 z-10">
+    <span>Scroll to explore</span>
+    <span className="animate-bounce">↓</span>
+  </div>
+</section>
 
       {/* About Section */}
       <section className="max-w-5xl mx-auto px-6 py-12 space-y-12">
