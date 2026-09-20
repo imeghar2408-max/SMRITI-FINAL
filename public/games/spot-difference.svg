@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-spot" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e3a47"/>
+      <stop offset="50%" stop-color="#144e5f"/>
+      <stop offset="100%" stop-color="#092832"/>
+    </linearGradient>
+    <linearGradient id="panel-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#f0f9ff"/>
+    </linearGradient>
+    <linearGradient id="lens-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="gold-spot" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#eab308"/>
+    </linearGradient>
+    <filter id="spot-shadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="300" rx="16" fill="url(#bg-spot)"/>
+
+  <!-- Ambient Light Orbs -->
+  <circle cx="90" cy="80" r="80" fill="#38bdf8" opacity="0.12" filter="blur(25px)"/>
+  <circle cx="310" cy="210" r="100" fill="#0284c7" opacity="0.10" filter="blur(30px)"/>
+
+  <!-- Subtle Grid lines -->
+  <g opacity="0.04" stroke="#ffffff" stroke-width="1">
+    <line x1="0" y1="75" x2="400" y2="75"/>
+    <line x1="0" y1="150" x2="400" y2="150"/>
+    <line x1="0" y1="225" x2="400" y2="225"/>
+    <line x1="100" y1="0" x2="100" y2="300"/>
+    <line x1="200" y1="0" x2="200" y2="300"/>
+    <line x1="300" y1="0" x2="300" y2="300"/>
+  </g>
+
+  <!-- Dual Panels: Picture A and Picture B -->
+  <!-- PANEL A (Left) -->
+  <g filter="url(#spot-shadow)">
+    <rect x="42" y="60" width="144" height="170" rx="14" fill="#ffffff" stroke="#bae6fd" stroke-width="2"/>
+    <!-- Sky Header -->
+    <rect x="48" y="66" width="132" height="70" rx="10" fill="url(#panel-sky)"/>
+    <!-- Ground Grass -->
+    <rect x="48" y="136" width="132" height="88" rx="0" fill="#ecfdf5"/>
+    <path d="M48 140 Q80 134 114 140 T180 136 L180 224 L48 224 Z" fill="#d1fae5"/>
+
+    <!-- Picture A Items -->
+    <!-- Sun (Normal) -->
+    <circle cx="150" cy="90" r="14" fill="url(#gold-spot)"/>
+    <g stroke="url(#gold-spot)" stroke-width="2" stroke-linecap="round">
+      <line x1="150" y1="70" x2="150" y2="74"/>
+      <line x1="150" y1="106" x2="150" y2="110"/>
+      <line x1="130" y1="90" x2="134" y2="90"/>
+      <line x1="166" y1="90" x2="170" y2="90"/>
+    </g>
+
+    <!-- Tree -->
+    <rect x="74" y="125" width="8" height="26" rx="2" fill="#78350f"/>
+    <circle cx="78" cy="118" r="18" fill="#15803d"/>
+    <circle cx="86" cy="112" r="14" fill="#22c55e"/>
+
+    <!-- Bird in Sky -->
+    <path d="M96 86 Q100 82 104 86 Q108 82 112 86" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Flower -->
+    <circle cx="134" cy="180" r="8" fill="#f43f5e"/>
+    <circle cx="134" cy="180" r="3" fill="#fef08a"/>
+    <line x1="134" y1="188" x2="134" y2="204" stroke="#15803d" stroke-width="2.5"/>
+
+    <!-- Label A -->
+    <rect x="52" y="70" width="24" height="16" rx="4" fill="#0284c7" fill-opacity="0.15"/>
+    <text x="64" y="82" fill="#0369a1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="9" font-weight="800" text-anchor="middle">A</text>
+  </g>
+
+  <!-- PANEL B (Right - With Differences!) -->
+  <g filter="url(#spot-shadow)">
+    <rect x="214" y="60" width="144" height="170" rx="14" fill="#ffffff" stroke="#bae6fd" stroke-width="2"/>
+    <!-- Sky Header -->
+    <rect x="220" y="66" width="132" height="70" rx="10" fill="url(#panel-sky)"/>
+    <!-- Ground Grass -->
+    <rect x="220" y="136" width="132" height="88" rx="0" fill="#ecfdf5"/>
+    <path d="M220 140 Q252 134 286 140 T352 136 L352 224 L220 224 Z" fill="#d1fae5"/>
+
+    <!-- Picture B Items -->
+    <!-- Sun (With Cloud Covering - Difference 1) -->
+    <circle cx="322" cy="90" r="14" fill="url(#gold-spot)"/>
+    <!-- Cloud over Sun -->
+    <path d="M312 96 C312 90 318 86 324 86 C328 82 334 84 336 88 C340 88 344 92 344 96 C344 100 340 102 336 102 L316 102 C312 102 312 98 312 96 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+
+    <!-- Tree -->
+    <rect x="246" y="125" width="8" height="26" rx="2" fill="#78350f"/>
+    <circle cx="250" cy="118" r="18" fill="#15803d"/>
+    <circle cx="258" cy="112" r="14" fill="#22c55e"/>
+
+    <!-- Butterfly instead of bird (Difference 2) -->
+    <path d="M266 84 C264 78 270 76 272 82 C274 76 280 78 278 84 C276 88 272 90 272 90 C272 90 268 88 266 84 Z" fill="#ec4899"/>
+    <circle cx="272" cy="85" r="1.5" fill="#831843"/>
+
+    <!-- Yellow Sunflower instead of Pink (Difference 3) -->
+    <circle cx="306" cy="180" r="9" fill="#eab308"/>
+    <circle cx="306" cy="180" r="4" fill="#78350f"/>
+    <line x1="306" y1="189" x2="306" y2="204" stroke="#15803d" stroke-width="2.5"/>
+
+    <!-- Difference Spot Ring Highlight around Sunflower -->
+    <circle cx="306" cy="180" r="18" fill="none" stroke="#f43f5e" stroke-width="2" stroke-dasharray="3 3"/>
+
+    <!-- Label B -->
+    <rect x="224" y="70" width="24" height="16" rx="4" fill="#0284c7" fill-opacity="0.15"/>
+    <text x="236" y="82" fill="#0369a1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="9" font-weight="800" text-anchor="middle">B</text>
+  </g>
+
+  <!-- Magnifying Glass Discovery Icon in Center -->
+  <g filter="url(#spot-shadow)" transform="translate(162, 120)">
+    <!-- Glass Rim -->
+    <circle cx="38" cy="38" r="28" fill="url(#lens-grad)" stroke="#ffffff" stroke-width="4"/>
+    <circle cx="38" cy="38" r="24" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+    <!-- Handle -->
+    <line x1="58" y1="58" x2="82" y2="82" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
+    <line x1="60" y1="60" x2="78" y2="78" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+    <!-- Checkmark inside lens -->
+    <path d="M28 38 L35 45 L49 31" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- Sparkles -->
+  <g fill="url(#gold-spot)">
+    <polygon points="200,45 203,51 209,53 203,55 200,61 197,55 191,53 197,51"/>
+    <polygon points="340,46 342,50 346,51 342,52 340,56 338,52 334,51 338,50"/>
+  </g>
+
+  <!-- Bottom Label Bar -->
+  <rect x="110" y="254" width="180" height="26" rx="13" fill="#08232c" fill-opacity="0.85" stroke="#134e5e" stroke-width="1"/>
+  <text x="200" y="271" fill="#e0f2fe" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.5">SPOT THE DIFFERENCE</text>
+</svg>

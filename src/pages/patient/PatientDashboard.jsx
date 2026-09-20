@@ -11,6 +11,7 @@ import {
   Heart,
   Sparkles,
   CheckCircle2,
+  MapPin,
 } from "lucide-react";
 
 function PatientDashboard({ setCurrentView }) {
@@ -430,30 +431,59 @@ function PatientDashboard({ setCurrentView }) {
       {/* =====================================================
           QUICK ACTIONS
       ====================================================== */}
-      <div className="grid md:grid-cols-2 gap-5">
+      <div className="grid md:grid-cols-3 gap-5">
+        {/* Location Sharing */}
+        <button
+          onClick={() => setCurrentView("patient-location")}
+          className="group text-left bg-teal-50/70 border border-teal-100 rounded-[26px] p-6 hover:shadow-sm transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-teal-700 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <MapPin size={24} />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h2 className="text-lg font-bold text-gray-900">
+                  Location Sharing
+                </h2>
+              </div>
+
+              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                Share location with Dr. Sarah Jenkins & family.
+              </p>
+            </div>
+
+            <ArrowRight
+              size={18}
+              className="text-teal-700 group-hover:translate-x-1 transition-transform shrink-0"
+            />
+          </div>
+        </button>
+
         {/* Talk to Anvesha */}
         <button
           onClick={() => setCurrentView("patient-smriti")}
           className="group text-left bg-[#edf7f2] border border-emerald-100 rounded-[26px] p-6 hover:shadow-sm transition-all"
         >
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-full bg-[#0f3e3a] text-white flex items-center justify-center shrink-0">
-              <Mic size={27} />
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-[#0f3e3a] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Mic size={24} />
             </div>
 
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-gray-900">
                 Talk to Anvesha
               </h2>
 
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                 Ask anything. I&apos;m here to help.
               </p>
             </div>
 
             <ArrowRight
-              size={20}
-              className="text-[#0f3e3a] group-hover:translate-x-1 transition-transform"
+              size={18}
+              className="text-[#0f3e3a] group-hover:translate-x-1 transition-transform shrink-0"
             />
           </div>
         </button>
@@ -463,24 +493,24 @@ function PatientDashboard({ setCurrentView }) {
           onClick={handleSos}
           className="group text-left bg-red-50 border border-red-100 rounded-[26px] p-6 hover:shadow-sm transition-all"
         >
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-full bg-red-500 text-white flex items-center justify-center shrink-0">
-              <AlertTriangle size={27} />
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-red-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <AlertTriangle size={24} />
             </div>
 
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-red-700">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-red-700">
                 Emergency SOS
               </h2>
 
-              <p className="text-sm text-red-500/80 mt-1">
-                Tap to alert caregiver & family immediately.
+              <p className="text-xs text-red-500/80 mt-1 line-clamp-2">
+                Alert caregiver & family immediately.
               </p>
             </div>
 
             <ArrowRight
-              size={20}
-              className="text-red-500 group-hover:translate-x-1 transition-transform"
+              size={18}
+              className="text-red-500 group-hover:translate-x-1 transition-transform shrink-0"
             />
           </div>
         </button>

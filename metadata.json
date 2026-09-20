@@ -2,7 +2,9 @@
   "name": "ANVESHA",
   "description": "Explore. Remember. Connect. Care. — AI-powered cognitive assistance and care companion for elderly care and memory support.",
   "requestFramePermissions": [
-    "microphone"
+    "microphone",
+    "camera",
+    "geolocation"
   ],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

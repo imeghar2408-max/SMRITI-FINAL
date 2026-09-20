@@ -14,11 +14,16 @@ import {
   Sparkles,
   ImagePlus,
   Upload,
+  Trash2,
+  Loader2,
+  WifiOff,
+  AlertCircle,
 } from "lucide-react";
 
 const initialMemories = [
   {
     id: 1,
+    patientId: "P001",
     title: "Priya",
     subtitle: "Daughter",
     category: "People",
@@ -30,6 +35,7 @@ const initialMemories = [
   },
   {
     id: 2,
+    patientId: "P001",
     title: "Rahul",
     subtitle: "Grandson",
     category: "People",
@@ -41,6 +47,7 @@ const initialMemories = [
   },
   {
     id: 3,
+    patientId: "P001",
     title: "Family Celebration",
     subtitle: "A special family day",
     category: "Events",
@@ -52,6 +59,7 @@ const initialMemories = [
   },
   {
     id: 4,
+    patientId: "P001",
     title: "Morning Garden",
     subtitle: "A familiar place",
     category: "Places",
@@ -63,6 +71,7 @@ const initialMemories = [
   },
   {
     id: 5,
+    patientId: "P001",
     title: "Festival Memory",
     subtitle: "A familiar celebration",
     category: "Culture",
@@ -74,6 +83,7 @@ const initialMemories = [
   },
   {
     id: 6,
+    patientId: "P001",
     title: "Favourite Meal",
     subtitle: "A familiar food memory",
     category: "Culture",
@@ -101,31 +111,28 @@ function speak(text) {
   }
 }
 
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-
-    reader.readAsDataURL(file);
-  });
-}
-
-function ImageSlot({ image, onUpload, large = false }) {
+function ImageSlot({ image, onUpload, large = false, isUploading = false }) {
   return (
     <label
       className={`relative flex cursor-pointer items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 bg-stone-100 transition hover:border-[#0f3e3a] ${
-        large
-          ? "h-48 rounded-2xl"
-          : "h-44 rounded-3xl"
+        large ? "h-48 rounded-2xl" : "h-44 rounded-3xl"
       }`}
     >
-      {image ? (
+      {isUploading ? (
+        <div className="flex flex-col items-center justify-center text-center text-[#0f3e3a] p-4">
+          <Loader2 size={32} className="animate-spin mb-2 text-[#0f3e3a]" />
+          <p className="text-xs font-bold text-[#0f3e3a]">Saving photo...</p>
+          <p className="text-[11px] text-gray-400 mt-0.5">Uploading to vault</p>
+        </div>
+      ) : image ? (
         <img
           src={image}
           alt="Memory"
           className="h-full w-full object-cover"
+          onError={(e) => {
+            // Gracefully handle broken image links
+            e.currentTarget.style.display = "none";
+          }}
         />
       ) : (
         <div className="flex flex-col items-center justify-center text-center text-gray-400">
@@ -139,17 +146,23 @@ function ImageSlot({ image, onUpload, large = false }) {
         </div>
       )}
 
-      <div className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-md">
-        <Upload size={16} className="text-[#0f3e3a]" />
-      </div>
+      {!isUploading && (
+        <div className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-md">
+          <Upload size={16} className="text-[#0f3e3a]" />
+        </div>
+      )}
 
       <input
         type="file"
         accept="image/*"
+        disabled={isUploading}
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) onUpload(file);
+          if (file) {
+            onUpload(file);
+            e.target.value = "";
+          }
         }}
       />
     </label>
@@ -160,23 +173,64 @@ export default function FamilyMemory() {
   const [memories, setMemories] = useState(initialMemories);
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedMemory, setSelectedMemory] = useState(null);
+  const [uploadingId, setUploadingId] = useState(null);
+  const [feedbackMessage, setFeedbackMessage] = useState(null);
+  const [pendingUploads, setPendingUploads] = useState([]);
 
-  useEffect(() => {
-    fetch("/api/patient/memories")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
+  // Fetch patient memories from backend on mount
+  const fetchPatientMemories = async () => {
+    try {
+      const res = await fetch("/api/memories/P001");
+      if (res.ok) {
+        const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           setMemories(data);
+          return;
         }
-      })
-      .catch((err) => console.warn("Failed to load memories from backend:", err));
+      }
+      // Fallback if needed
+      const fallbackRes = await fetch("/api/patient/memories");
+      if (fallbackRes.ok) {
+        const fallbackData = await fallbackRes.json();
+        if (Array.isArray(fallbackData) && fallbackData.length > 0) {
+          setMemories(fallbackData);
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to load memories from backend:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatientMemories();
   }, []);
+
+  // Offline retry handler
+  useEffect(() => {
+    const handleOnline = async () => {
+      if (pendingUploads.length > 0) {
+        setFeedbackMessage({
+          type: "pending",
+          text: "Connection restored! Uploading pending photos...",
+        });
+        const toRetry = [...pendingUploads];
+        setPendingUploads([]);
+        for (const item of toRetry) {
+          await updateMemoryImage(item.id, item.file);
+        }
+      }
+    };
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, [pendingUploads]);
 
   const [showAddMemory, setShowAddMemory] = useState(false);
   const [newMemoryTitle, setNewMemoryTitle] = useState("");
   const [newMemorySubtitle, setNewMemorySubtitle] = useState("");
   const [newMemoryCategory, setNewMemoryCategory] = useState("People");
   const [newMemoryImage, setNewMemoryImage] = useState("");
+  const [newMemoryFile, setNewMemoryFile] = useState(null);
+  const [isSubmittingNew, setIsSubmittingNew] = useState(false);
 
   const [recallMemory, setRecallMemory] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState("");
@@ -196,66 +250,151 @@ export default function FamilyMemory() {
     (memory) => memory.favorite
   );
 
-  const memoryOfTheDay = memories[0];
+  const memoryOfTheDay = memories[0] || initialMemories[0];
 
-  const toggleFavorite = (id) => {
+  const toggleFavorite = async (id) => {
+    const currentMemory = memories.find((m) => String(m.id) === String(id));
+    const newFavorite = currentMemory ? !currentMemory.favorite : true;
+
     setMemories((current) =>
       current.map((memory) =>
-        memory.id === id
-          ? { ...memory, favorite: !memory.favorite }
+        String(memory.id) === String(id)
+          ? { ...memory, favorite: newFavorite }
           : memory
       )
     );
+
+    try {
+      await fetch(`/api/patient/memories/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ favorite: newFavorite }),
+      });
+    } catch (err) {
+      console.warn("Could not save favorite state:", err);
+    }
   };
 
   const updateMemoryImage = async (id, file) => {
-  try {
-    const imageData = await readFileAsDataUrl(file);
+    if (!file) return;
 
-    // Update image on the screen immediately
-    setMemories((current) =>
-      current.map((memory) =>
-        memory.id === id
-          ? { ...memory, image: imageData }
-          : memory
-      )
-    );
-
-    // Update opened memory immediately
-    setSelectedMemory((current) =>
-      current && current.id === id
-        ? { ...current, image: imageData }
-        : current
-    );
-
-    // Save the image permanently in the backend
-    const response = await fetch(`/api/patient/memories/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        image: imageData,
-      }),
-    });
-
-    if (!response.ok) {
-      console.warn("Memory image could not be saved to backend.");
+    if (!file.type || !file.type.startsWith("image/")) {
+      setFeedbackMessage({
+        type: "error",
+        text: "Please select a valid image file (JPEG, PNG, WebP, GIF).",
+      });
+      return;
     }
-  } catch (error) {
-    console.error("Unable to upload image:", error);
-    alert("Unable to upload this image.");
-  }
-};
 
-  const handleNewMemoryImage = async (file) => {
+    if (file.size > 10 * 1024 * 1024) {
+      setFeedbackMessage({
+        type: "error",
+        text: "Image is too large. Maximum allowed size is 10MB.",
+      });
+      return;
+    }
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setFeedbackMessage({
+        type: "pending",
+        text: "Upload pending — will sync when connection returns.",
+      });
+      setPendingUploads((prev) => [...prev, { id, file }]);
+      return;
+    }
+
+    setUploadingId(id);
+    setFeedbackMessage(null);
+
     try {
-      const imageData = await readFileAsDataUrl(file);
-      setNewMemoryImage(imageData);
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("patientId", "P001");
+      formData.append("memoryId", id);
+
+      const response = await fetch("/api/memories", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error || `Server error (${response.status})`);
+      }
+
+      const savedData = await response.json();
+      const updatedMemory = savedData.memory || savedData;
+
+      // Update state strictly upon backend confirmation
+      setMemories((current) =>
+        current.map((memory) =>
+          String(memory.id) === String(id)
+            ? { ...memory, ...updatedMemory, image: updatedMemory.image || updatedMemory.storedPath }
+            : memory
+        )
+      );
+
+      setSelectedMemory((current) =>
+        current && String(current.id) === String(id)
+          ? { ...current, ...updatedMemory, image: updatedMemory.image || updatedMemory.storedPath }
+          : current
+      );
+
+      setRecallMemory((current) =>
+        current && String(current.id) === String(id)
+          ? { ...current, ...updatedMemory, image: updatedMemory.image || updatedMemory.storedPath }
+          : current
+      );
+
+      setFeedbackMessage({
+        type: "success",
+        text: "Photo saved permanently to your memory vault!",
+      });
+      setTimeout(() => setFeedbackMessage(null), 4000);
     } catch (error) {
       console.error("Unable to upload image:", error);
-      alert("Unable to upload this image.");
+      if (
+        (typeof navigator !== "undefined" && !navigator.onLine) ||
+        error.message.includes("Failed to fetch")
+      ) {
+        setFeedbackMessage({
+          type: "pending",
+          text: "Upload pending — will sync when connection returns.",
+        });
+        setPendingUploads((prev) => [...prev, { id, file }]);
+      } else {
+        setFeedbackMessage({
+          type: "error",
+          text: error.message || "Unable to upload this image. Please try again.",
+        });
+      }
+    } finally {
+      setUploadingId(null);
     }
+  };
+
+  const handleNewMemoryImage = (file) => {
+    if (!file) return;
+
+    if (!file.type || !file.type.startsWith("image/")) {
+      setFeedbackMessage({
+        type: "error",
+        text: "Please select a valid image file.",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setFeedbackMessage({
+        type: "error",
+        text: "Image file is too large (max 10MB).",
+      });
+      return;
+    }
+
+    setNewMemoryFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setNewMemoryImage(previewUrl);
   };
 
   const addMemory = async (event) => {
@@ -263,34 +402,119 @@ export default function FamilyMemory() {
 
     if (!newMemoryTitle.trim()) return;
 
-    const newMemory = {
-      id: Date.now(),
-      title: newMemoryTitle,
-      subtitle: newMemorySubtitle || "Personal memory",
-      category: newMemoryCategory,
-      image: newMemoryImage,
-      description: `A personal memory about ${newMemoryTitle}.`,
-      year: "Personal",
-      favorite: false,
-    };
-
-    setMemories((current) => [newMemory, ...current]);
+    setIsSubmittingNew(true);
+    setFeedbackMessage(null);
 
     try {
-      await fetch("/api/patient/memories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newMemory),
+      if (newMemoryFile) {
+        const formData = new FormData();
+        formData.append("image", newMemoryFile);
+        formData.append("patientId", "P001");
+        formData.append("title", newMemoryTitle.trim());
+        formData.append("subtitle", newMemorySubtitle.trim() || "Personal memory");
+        formData.append("category", newMemoryCategory);
+        formData.append("description", `A personal memory about ${newMemoryTitle.trim()}.`);
+        formData.append("year", "Personal");
+        formData.append("favorite", "false");
+
+        const response = await fetch("/api/memories", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errJson = await response.json().catch(() => ({}));
+          throw new Error(errJson.error || "Failed to save memory with image");
+        }
+
+        const data = await response.json();
+        const created = data.memory || data;
+        setMemories((current) => [created, ...current]);
+      } else {
+        const newMemory = {
+          patientId: "P001",
+          title: newMemoryTitle.trim(),
+          subtitle: newMemorySubtitle.trim() || "Personal memory",
+          category: newMemoryCategory,
+          image: "",
+          description: `A personal memory about ${newMemoryTitle.trim()}.`,
+          year: "Personal",
+          favorite: false,
+        };
+
+        const response = await fetch("/api/patient/memories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newMemory),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save memory");
+        }
+
+        const created = await response.json();
+        setMemories((current) => [created, ...current]);
+      }
+
+      setNewMemoryTitle("");
+      setNewMemorySubtitle("");
+      setNewMemoryCategory("People");
+      setNewMemoryImage("");
+      setNewMemoryFile(null);
+      setShowAddMemory(false);
+
+      setFeedbackMessage({
+        type: "success",
+        text: "New memory saved permanently to your vault!",
       });
+      setTimeout(() => setFeedbackMessage(null), 4000);
     } catch (err) {
       console.warn("Could not persist memory to backend:", err);
+      setFeedbackMessage({
+        type: "error",
+        text: err.message || "Could not save memory. Please check connection.",
+      });
+    } finally {
+      setIsSubmittingNew(false);
+    }
+  };
+
+  const handleDeleteMemory = async (memoryId) => {
+    if (!window.confirm("Are you sure you want to delete this memory?")) {
+      return;
     }
 
-    setNewMemoryTitle("");
-    setNewMemorySubtitle("");
-    setNewMemoryCategory("People");
-    setNewMemoryImage("");
-    setShowAddMemory(false);
+    try {
+      const res = await fetch(`/api/memories/${memoryId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Failed to delete memory");
+      }
+
+      setMemories((current) =>
+        current.filter((m) => String(m.id) !== String(memoryId))
+      );
+
+      if (selectedMemory && String(selectedMemory.id) === String(memoryId)) {
+        setSelectedMemory(null);
+      }
+
+      if (recallMemory && String(recallMemory.id) === String(memoryId)) {
+        setRecallMemory(null);
+      }
+
+      setFeedbackMessage({
+        type: "success",
+        text: "Memory removed from your vault.",
+      });
+      setTimeout(() => setFeedbackMessage(null), 3000);
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Could not delete memory: " + err.message);
+    }
   };
 
   const startRecallGame = () => {
@@ -416,6 +640,37 @@ export default function FamilyMemory() {
         </button>
       </div>
 
+      {/* FEEDBACK STATUS BANNER */}
+      {feedbackMessage && (
+        <div
+          className={`flex items-center gap-3 rounded-2xl p-4 text-xs font-bold transition shadow-sm ${
+            feedbackMessage.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              : feedbackMessage.type === "pending"
+              ? "bg-amber-50 text-amber-800 border border-amber-200"
+              : "bg-red-50 text-red-800 border border-red-200"
+          }`}
+        >
+          {feedbackMessage.type === "success" && (
+            <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+          )}
+          {feedbackMessage.type === "pending" && (
+            <WifiOff size={18} className="text-amber-600 shrink-0" />
+          )}
+          {feedbackMessage.type === "error" && (
+            <AlertCircle size={18} className="text-red-600 shrink-0" />
+          )}
+          <span className="flex-1">{feedbackMessage.text}</span>
+          <button
+            type="button"
+            onClick={() => setFeedbackMessage(null)}
+            className="text-gray-400 hover:text-gray-700 p-1 rounded-lg"
+          >
+            <X size={15} />
+          </button>
+        </div>
+      )}
+
       {/* MEMORY OF THE DAY */}
       <section className="overflow-hidden rounded-3xl border border-teal-100 bg-gradient-to-r from-teal-50 to-white p-6">
         <div className="grid gap-6 md:grid-cols-[1fr_220px] md:items-center">
@@ -462,6 +717,7 @@ export default function FamilyMemory() {
           <ImageSlot
             image={memoryOfTheDay.image}
             large
+            isUploading={uploadingId === memoryOfTheDay.id}
             onUpload={(file) =>
               updateMemoryImage(memoryOfTheDay.id, file)
             }
@@ -512,6 +768,7 @@ export default function FamilyMemory() {
             >
               <ImageSlot
                 image={memory.image}
+                isUploading={uploadingId === memory.id}
                 onUpload={(file) =>
                   updateMemoryImage(memory.id, file)
                 }
@@ -704,6 +961,7 @@ export default function FamilyMemory() {
               <ImageSlot
                 image={recallMemory.image}
                 large
+                isUploading={uploadingId === recallMemory.id}
                 onUpload={(file) =>
                   updateMemoryImage(recallMemory.id, file)
                 }
@@ -791,6 +1049,7 @@ export default function FamilyMemory() {
             <ImageSlot
               image={selectedMemory.image}
               large
+              isUploading={uploadingId === selectedMemory.id}
               onUpload={(file) =>
                 updateMemoryImage(selectedMemory.id, file)
               }
@@ -831,17 +1090,28 @@ export default function FamilyMemory() {
                 {selectedMemory.description}
               </p>
 
-              <button
-                onClick={() =>
-                  speak(
-                    `${selectedMemory.title}. ${selectedMemory.description}`
-                  )
-                }
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] py-3 text-sm font-bold text-white"
-              >
-                <Volume2 size={17} />
-                Listen to Memory
-              </button>
+              <div className="mt-5 space-y-2">
+                <button
+                  onClick={() =>
+                    speak(
+                      `${selectedMemory.title}. ${selectedMemory.description}`
+                    )
+                  }
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] py-3 text-sm font-bold text-white transition hover:bg-[#0c312e]"
+                >
+                  <Volume2 size={17} />
+                  Listen to Memory
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDeleteMemory(selectedMemory.id)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50/70 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-100"
+                >
+                  <Trash2 size={15} />
+                  Delete Memory
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -874,6 +1144,7 @@ export default function FamilyMemory() {
               <ImageSlot
                 image={newMemoryImage}
                 large
+                isUploading={isSubmittingNew}
                 onUpload={handleNewMemoryImage}
               />
 
@@ -913,9 +1184,17 @@ export default function FamilyMemory() {
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-[#0f3e3a] py-3.5 text-sm font-bold text-white"
+                disabled={isSubmittingNew}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] py-3.5 text-sm font-bold text-white transition hover:bg-[#0c312e] disabled:opacity-50"
               >
-                Save Memory
+                {isSubmittingNew ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Saving Memory...
+                  </>
+                ) : (
+                  "Save Memory"
+                )}
               </button>
             </div>
           </form>

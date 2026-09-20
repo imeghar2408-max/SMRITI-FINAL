@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f3e3a"/>
+      <stop offset="50%" stop-color="#16514c"/>
+      <stop offset="100%" stop-color="#092926"/>
+    </linearGradient>
+    <linearGradient id="card-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f4f7f6"/>
+    </linearGradient>
+    <linearGradient id="card-active" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d1fae5"/>
+      <stop offset="100%" stop-color="#a7f3d0"/>
+    </linearGradient>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="shadow-1" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <filter id="tile-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f3e3a" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="400" height="300" rx="16" fill="url(#bg-grad-1)"/>
+
+  <!-- Ambient Light Orbs -->
+  <circle cx="80" cy="70" r="90" fill="#34d399" opacity="0.12" filter="blur(20px)"/>
+  <circle cx="330" cy="220" r="110" fill="#2dd4bf" opacity="0.10" filter="blur(30px)"/>
+
+  <!-- Decorative subtle grid -->
+  <g opacity="0.05" stroke="#ffffff" stroke-width="1">
+    <line x1="40" y1="0" x2="40" y2="300"/>
+    <line x1="120" y1="0" x2="120" y2="300"/>
+    <line x1="200" y1="0" x2="200" y2="300"/>
+    <line x1="280" y1="0" x2="280" y2="300"/>
+    <line x1="360" y1="0" x2="360" y2="300"/>
+    <line x1="0" y1="60" x2="400" y2="60"/>
+    <line x1="0" y1="150" x2="400" y2="150"/>
+    <line x1="0" y1="240" x2="400" y2="240"/>
+  </g>
+
+  <!-- Central Game Tiles Showcase -->
+  <!-- Back Row Tiles (Face Down) -->
+  <g filter="url(#tile-shadow)">
+    <rect x="55" y="55" width="76" height="96" rx="12" fill="#1b5a54" stroke="#2d7770" stroke-width="2"/>
+    <rect x="63" y="63" width="60" height="80" rx="8" fill="none" stroke="#34d399" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+    <circle cx="93" cy="103" r="14" fill="#0f3e3a" opacity="0.6"/>
+    <path d="M93 93 L97 101 L105 103 L99 109 L101 117 L93 112 L85 117 L87 109 L81 103 L89 101 Z" fill="#34d399" opacity="0.5"/>
+  </g>
+
+  <g filter="url(#tile-shadow)">
+    <rect x="269" y="55" width="76" height="96" rx="12" fill="#1b5a54" stroke="#2d7770" stroke-width="2"/>
+    <rect x="277" y="63" width="60" height="80" rx="8" fill="none" stroke="#34d399" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+    <circle cx="307" cy="103" r="14" fill="#0f3e3a" opacity="0.6"/>
+    <path d="M307 93 L311 101 L319 103 L313 109 L315 117 L307 112 L299 117 L301 109 L295 103 L303 101 Z" fill="#34d399" opacity="0.5"/>
+  </g>
+
+  <!-- Front Row: Matching Pair 1 (Active Match) -->
+  <g filter="url(#shadow-1)">
+    <!-- Tile 1 (Left Matched) -->
+    <rect x="105" y="115" width="88" height="112" rx="14" fill="url(#card-active)" stroke="#10b981" stroke-width="2.5"/>
+    <rect x="113" y="123" width="72" height="96" rx="10" fill="#ffffff" opacity="0.9"/>
+    <!-- Lotus / Flower Symbol -->
+    <circle cx="149" cy="171" r="24" fill="#ecfdf5"/>
+    <path d="M149 152 C140 162 136 172 149 184 C162 172 158 162 149 152 Z" fill="#059669"/>
+    <path d="M137 172 C143 166 153 166 160 174 C151 180 143 178 137 172 Z" fill="#10b981" opacity="0.8"/>
+    <path d="M161 172 C155 166 145 166 138 174 C147 180 155 178 161 172 Z" fill="#34d399" opacity="0.8"/>
+    <circle cx="149" cy="172" r="4" fill="url(#gold-grad)"/>
+
+    <!-- Match Glow badge -->
+    <circle cx="178" cy="128" r="9" fill="#10b981"/>
+    <path d="M174 128 L177 131 L183 125" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- Tile 2 (Right Matched Pair) -->
+  <g filter="url(#shadow-1)">
+    <rect x="207" y="115" width="88" height="112" rx="14" fill="url(#card-active)" stroke="#10b981" stroke-width="2.5"/>
+    <rect x="215" y="123" width="72" height="96" rx="10" fill="#ffffff" opacity="0.9"/>
+    <!-- Same Lotus / Flower Symbol -->
+    <circle cx="251" cy="171" r="24" fill="#ecfdf5"/>
+    <path d="M251 152 C242 162 238 172 251 184 C264 172 260 162 251 152 Z" fill="#059669"/>
+    <path d="M239 172 C245 166 255 166 262 174 C253 180 245 178 239 172 Z" fill="#10b981" opacity="0.8"/>
+    <path d="M263 172 C257 166 247 166 240 174 C249 180 257 178 263 172 Z" fill="#34d399" opacity="0.8"/>
+    <circle cx="251" cy="172" r="4" fill="url(#gold-grad)"/>
+
+    <!-- Match Glow badge -->
+    <circle cx="280" cy="128" r="9" fill="#10b981"/>
+    <path d="M276 128 L279 131 L285 125" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- Sparkles between match -->
+  <g fill="url(#gold-grad)">
+    <polygon points="200,102 203,110 211,113 203,116 200,124 197,116 189,113 197,110"/>
+    <polygon points="196,238 198,243 203,245 198,247 196,252 194,247 189,245 194,243" transform="scale(0.8) translate(50, -10)"/>
+    <polygon points="102,106 103,109 106,110 103,111 102,114 101,111 98,110 101,109" transform="scale(0.9) translate(10, 10)"/>
+  </g>
+
+  <!-- Connecting energy pulse -->
+  <path d="M178 171 Q200 163 222 171" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4" fill="none"/>
+
+  <!-- Bottom Label Bar -->
+  <rect x="130" y="254" width="140" height="26" rx="13" fill="#0c2e2b" fill-opacity="0.85" stroke="#236059" stroke-width="1"/>
+  <text x="200" y="271" fill="#ecfdf5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.5">MEMORY MATCH</text>
+</svg>

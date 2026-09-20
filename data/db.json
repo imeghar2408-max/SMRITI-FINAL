@@ -18,7 +18,17 @@
     "familyRelation": "Daughter",
     "safetyStatus": "Triggered",
     "emergencyContact": "Priya Sharma",
-    "mood": "Calm"
+    "mood": "Calm",
+    "currentLocation": {
+      "latitude": 28.737364772103007,
+      "longitude": 77.11296545567596,
+      "accuracy": 92,
+      "address": "Current Device Location",
+      "sharingEnabled": true,
+      "timestamp": "2026-09-20T10:57:25.442Z",
+      "updatedAt": "2026-09-20T10:57:26.217Z"
+    },
+    "lastActive": "Just now"
   },
   "patients": [
     {
@@ -107,7 +117,16 @@
           "time": "Today • 12:20 pm",
           "icon": "🧠"
         }
-      ]
+      ],
+      "currentLocation": {
+        "latitude": 28.737364772103007,
+        "longitude": 77.11296545567596,
+        "accuracy": 92,
+        "address": "Current Device Location",
+        "sharingEnabled": true,
+        "timestamp": "2026-09-20T10:57:25.442Z",
+        "updatedAt": "2026-09-20T10:57:26.217Z"
+      }
     },
     {
       "id": "P002",
@@ -860,7 +879,7 @@
       "time": "Just now",
       "priority": "EMERGENCY",
       "icon": "🚨",
-      "status": "Pending"
+      "status": "Resolved"
     },
     {
       "id": 1789530021442,
@@ -873,7 +892,7 @@
       "time": "Just now",
       "priority": "EMERGENCY",
       "icon": "🚨",
-      "status": "Pending"
+      "status": "Resolved"
     },
     {
       "id": 1789506095313,
@@ -1007,5 +1026,111 @@
     "attention": 97,
     "engagement": 87,
     "completion": 92
-  }
+  },
+  "locationHistory": [
+    {
+      "patientId": "P001",
+      "latitude": 28.737364772103007,
+      "longitude": 77.11296545567596,
+      "accuracy": 92,
+      "timestamp": "2026-09-20T10:57:25.442Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737364772103007,
+      "longitude": 77.11296545567596,
+      "accuracy": 92,
+      "timestamp": "2026-09-20T10:57:25.442Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737335957839772,
+      "longitude": 77.11295727423463,
+      "accuracy": 92,
+      "timestamp": "2026-09-20T10:53:02.291Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 26.148,
+      "longitude": 91.738,
+      "accuracy": 12,
+      "timestamp": "2026-09-20T10:46:43.870Z"
+    }
+  ],
+  "memories": [
+    {
+      "id": 1,
+      "patientId": "P001",
+      "title": "Priya",
+      "subtitle": "Daughter",
+      "category": "People",
+      "image": "/uploads/memories/memory-P001-1789902352535-974744250.jpg",
+      "description": "Priya is your daughter. She enjoys spending time with you and visiting on weekends.",
+      "year": "Family",
+      "favorite": true,
+      "originalFilename": "test-photo.jpg",
+      "filename": "memory-P001-1789902352535-974744250.jpg",
+      "storedPath": "/uploads/memories/memory-P001-1789902352535-974744250.jpg",
+      "mimetype": "image/jpeg",
+      "size": 24,
+      "uploadTimestamp": "2026-09-20T11:05:52.539Z",
+      "timestamp": "2026-09-20T11:05:52.539Z",
+      "updatedAt": "2026-09-20T11:05:52.539Z"
+    },
+    {
+      "id": 2,
+      "patientId": "P001",
+      "title": "Rahul",
+      "subtitle": "Grandson",
+      "category": "People",
+      "image": "",
+      "description": "Rahul is your grandson. You often enjoy talking and playing games together.",
+      "year": "Family",
+      "favorite": false
+    },
+    {
+      "id": 3,
+      "patientId": "P001",
+      "title": "Family Celebration",
+      "subtitle": "A special family day",
+      "category": "Events",
+      "image": "",
+      "description": "A happy family gathering filled with conversations, food and shared memories.",
+      "year": "2024",
+      "favorite": true
+    },
+    {
+      "id": 4,
+      "patientId": "P001",
+      "title": "Morning Garden",
+      "subtitle": "A familiar place",
+      "category": "Places",
+      "image": "",
+      "description": "A peaceful garden where you enjoyed spending quiet mornings.",
+      "year": "Childhood",
+      "favorite": false
+    },
+    {
+      "id": 5,
+      "patientId": "P001",
+      "title": "Festival Memory",
+      "subtitle": "A familiar celebration",
+      "category": "Culture",
+      "image": "",
+      "description": "A familiar festival memory involving family, traditional food and celebration.",
+      "year": "Family Tradition",
+      "favorite": false
+    },
+    {
+      "id": 6,
+      "patientId": "P001",
+      "title": "Favourite Meal",
+      "subtitle": "A familiar food memory",
+      "category": "Culture",
+      "image": "",
+      "description": "A favourite traditional meal often prepared during family gatherings.",
+      "year": "Family Tradition",
+      "favorite": false
+    }
+  ]
 }

@@ -55,6 +55,13 @@ export default function WhoIsAtMyDoor() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(knownPeople));
   }, [knownPeople]);
 
+  // Connect stream to video element when camera is opened
+  useEffect(() => {
+    if (cameraOpen && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [cameraOpen]);
+
   // Stop camera when page is closed
   useEffect(() => {
     return () => {
@@ -70,21 +77,19 @@ export default function WhoIsAtMyDoor() {
 
     setCameraOpen(false);
   };
-  useEffect(() => {
-  if (cameraOpen && videoRef.current && streamRef.current) {
-    videoRef.current.srcObject = streamRef.current;
-
-    videoRef.current.play().catch((error) => {
-      console.warn("Could not start camera preview:", error);
-    });
-  }
-}, [cameraOpen]);
 
   const startCamera = async () => {
     try {
       setResult(null);
       setSelectedImage(null);
       setMessage("Opening camera...");
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setMessage(
+          "Camera access is not supported in this browser. Please upload a photo instead."
+        );
+        return;
+      }
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -94,16 +99,24 @@ export default function WhoIsAtMyDoor() {
       });
 
       streamRef.current = stream;
-
-      
-
       setCameraOpen(true);
       setMessage("Camera is ready. Take a photo of the visitor.");
     } catch (error) {
-      console.error(error);
-      setMessage(
-        "Camera access was not allowed. You can upload a photo instead."
-      );
+      console.error("Camera access error:", error);
+      if (
+        error.name === "NotAllowedError" ||
+        error.name === "PermissionDeniedError" ||
+        error.message?.includes("Permission denied")
+      ) {
+        setMessage(
+          "Camera permission was denied. Please allow camera permissions in your browser or iframe, or upload a photo instead."
+        );
+      } else {
+        setMessage(
+          "Camera could not be accessed. You can upload a photo instead."
+        );
+      }
+      setCameraOpen(false);
     }
   };
 
@@ -160,9 +173,54 @@ export default function WhoIsAtMyDoor() {
 
     return detections;
   };
+
+  // Sync registered family/contacts who have photos in memories
+  useEffect(() => {
+    if (!modelsLoaded) return;
+
+    const syncMemories = async () => {
+      try {
+        const res = await fetch("/api/patient/memories");
+        if (!res.ok) return;
+        const memories = await res.json();
+        const withImages = (Array.isArray(memories) ? memories : []).filter(
+          (m) => m.image && m.image.trim().length > 0
+        );
+
+        for (const item of withImages) {
+          const alreadyKnown = knownPeople.some(
+            (p) => p.name?.toLowerCase() === item.title?.toLowerCase()
+          );
+          if (!alreadyKnown) {
+            try {
+              const detections = await getFaceDescriptor(item.image);
+              if (detections && detections.length === 1) {
+                const descriptorArray = Array.from(detections[0].descriptor);
+                setKnownPeople((prev) => [
+                  ...prev,
+                  {
+                    id: item.id,
+                    name: item.title,
+                    relation: item.subtitle || "Family",
+                    descriptor: descriptorArray,
+                  },
+                ]);
+              }
+            } catch (err) {
+              console.warn("Could not process memory photo for:", item.title, err);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not sync memories:", err);
+      }
+    };
+
+    syncMemories();
+  }, [modelsLoaded]);
  const speakMessage = (text, language) => {
   if (!("speechSynthesis" in window)) {
-    alert("Voice feature is not supported on this device.");
+    console.warn("Voice feature is not supported on this device.");
     return;
   }
 
@@ -464,37 +522,41 @@ export default function WhoIsAtMyDoor() {
                   </p>
                 </div>
               </div>
+
+              {/* Voice Announcement */}
+              <div className="flex flex-wrap gap-3 mt-5 pt-4 border-t border-slate-200/60">
+                <button
+                  type="button"
+                  onClick={() =>
+                    speakMessage(
+                      result?.name
+                        ? `${result.name} is at the door. Please verify the visitor before opening the door.`
+                        : "This person is not recognized. Please contact your caregiver before opening the door.",
+                      "en-IN"
+                    )
+                  }
+                  className="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition flex items-center gap-2 shadow-xs"
+                >
+                  🔊 English
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    speakMessage(
+                      result?.name
+                        ? `${result.name} darwaze par hain. Darwaza kholne se pehle visitor ko verify karein.`
+                        : "Yeh vyakti pehchana nahi gaya hai. Darwaza kholne se pehle apne caregiver se sampark karein.",
+                      "hi-IN"
+                    )
+                  }
+                  className="px-4 py-2.5 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2 shadow-xs"
+                >
+                  🔊 हिंदी
+                </button>
+              </div>
             </div>
           )}
-          <div className="flex flex-wrap gap-3 mt-4">
-  <button
-    onClick={() =>
-      speakMessage(
-        result.name
-          ? `${result.name} is at the door. Please verify the visitor before opening the door.`
-          : "This person is not recognized. Please contact your caregiver before opening the door.",
-        "en-IN"
-      )
-    }
-    className="px-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
-  >
-    🔊 English
-  </button>
-
-  <button
-    onClick={() =>
-      speakMessage(
-        result.name
-          ? `${result.name} darwaze par hain. Darwaza kholne se pehle visitor ko verify karein.`
-          : "Yeh vyakti pehchana nahi gaya hai. Darwaza kholne se pehle apne caregiver se sampark karein.",
-        "hi-IN"
-      )
-    }
-    className="px-4 py-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700"
-  >
-    🔊 हिंदी
-  </button>
-</div>
 
           {/* Safety Note */}
           <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-2xl">

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import multer from "multer";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
@@ -22,9 +23,17 @@ import {
   createCaregiverAlert,
   resolveCaregiverAlert,
   getCaregiverAnalytics,
+  getPatientSyncStatus,
+  updatePatientSyncPing,
+  getPatientActivities,
   getMemories,
+  getMemoriesByPatientId,
+  saveMemoryWithImage,
+  deleteMemory,
   updateMemory,
   addMemory,
+  getPatientLocation,
+  updatePatientLocation,
   readDb,
 } from "./server/db.js";
 
@@ -36,9 +45,94 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
+// Set up server-side uploads directory for persistent memory images
+const UPLOADS_MEMORIES_DIR = path.join(process.cwd(), "uploads", "memories");
+if (!fs.existsSync(UPLOADS_MEMORIES_DIR)) {
+  fs.mkdirSync(UPLOADS_MEMORIES_DIR, { recursive: true });
+}
+
+// Serve uploaded memory images safely
+app.use(
+  "/uploads/memories",
+  express.static(UPLOADS_MEMORIES_DIR, {
+    maxAge: "1d",
+    index: false,
+    dotfiles: "ignore",
+  })
+);
+
+// Multer memory storage for audio transcription
 const upload = multer({
   storage: multer.memoryStorage(),
 });
+
+// Multer disk storage for memory images
+const memoryDiskStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, UPLOADS_MEMORIES_DIR);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const safeExt = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(ext)
+      ? ext
+      : ".jpg";
+    const patientId =
+      req.body && req.body.patientId
+        ? String(req.body.patientId).replace(/[^a-zA-Z0-9_-]/g, "")
+        : "P001";
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `memory-${patientId}-${uniqueSuffix}${safeExt}`);
+  },
+});
+
+const memoryUpload = multer({
+  storage: memoryDiskStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+      const err = new Error(
+        "Invalid file type. Only image files (JPEG, PNG, WebP, GIF) are allowed."
+      );
+      err.code = "INVALID_FILE_TYPE";
+      return cb(err, false);
+    }
+    cb(null, true);
+  },
+});
+
+// Middleware for memory upload handling both 'image' and 'file' field names with graceful error handling
+const uploadMemoryMiddleware = (req, res, next) => {
+  const uploadHandler = memoryUpload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "file", maxCount: 1 },
+  ]);
+
+  uploadHandler(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res
+          .status(400)
+          .json({ error: "Image file is too large. Maximum allowed size is 10MB." });
+      }
+      return res.status(400).json({ error: `Upload error: ${err.message}` });
+    } else if (err) {
+      return res
+        .status(400)
+        .json({ error: err.message || "Failed to process image upload." });
+    }
+
+    if (req.files) {
+      if (req.files.image && req.files.image[0]) {
+        req.file = req.files.image[0];
+      } else if (req.files.file && req.files.file[0]) {
+        req.file = req.files.file[0];
+      }
+    }
+    next();
+  });
+};
 
 // Lazy initialization of Sarvam AI
 let sarvamClient = null;
@@ -533,26 +627,141 @@ app.patch("/api/caregiver/alerts/:id/resolve", (req, res) => {
 
 app.get("/api/caregiver/analytics", (req, res) => {
   try {
-    res.json(getCaregiverAnalytics());
+    const patientId = req.query.patientId || "P001";
+    res.json(getCaregiverAnalytics(patientId));
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch caregiver analytics" });
+  }
+});
+
+app.get("/api/caregiver/patients/:id/sync-status", (req, res) => {
+  try {
+    const syncStatus = getPatientSyncStatus(req.params.id);
+    res.json(syncStatus);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch patient sync status" });
+  }
+});
+
+app.get("/api/caregiver/patients/:id/activities", (req, res) => {
+  try {
+    const activities = getPatientActivities(req.params.id);
+    res.json(activities);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch patient activities" });
+  }
+});
+
+app.post("/api/patient/sync-ping", (req, res) => {
+  try {
+    const { patientId = "P001", isOnline = true, pendingCount = 0 } = req.body || {};
+    const status = updatePatientSyncPing({ patientId, isOnline, pendingCount });
+    res.json({ success: true, syncStatus: status });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update sync ping" });
   }
 });
 
 // ==================================================
 // REST APIs: MEMORIES (PATIENT & CAREGIVER VAULT)
 // ==================================================
+
+// GET /api/memories/:patientId - Return all saved memories for a specific patient
+app.get("/api/memories/:patientId", (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const memories = getMemoriesByPatientId(patientId);
+    res.json(memories);
+  } catch (err) {
+    console.error("Failed to fetch memories for patient:", err);
+    res.status(500).json({ error: "Failed to fetch memories" });
+  }
+});
+
+// POST /api/memories - Upload a memory image, save metadata, and return saved memory object
+app.post("/api/memories", uploadMemoryMiddleware, (req, res) => {
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ error: "No image file was provided in the upload request." });
+    }
+
+    const patientId = req.body.patientId || "P001";
+    const memoryId = req.body.memoryId || req.body.id;
+    const originalFilename = req.file.originalname;
+    const storedFilename = req.file.filename;
+    const storedPath = `/uploads/memories/${storedFilename}`;
+    const mimetype = req.file.mimetype;
+    const uploadTimestamp = new Date().toISOString();
+
+    const savedMemory = saveMemoryWithImage({
+      memoryId,
+      patientId,
+      originalFilename,
+      storedFilename,
+      storedPath,
+      mimetype,
+      size: req.file.size,
+      uploadTimestamp,
+      title: req.body.title,
+      subtitle: req.body.subtitle,
+      category: req.body.category,
+      description: req.body.description,
+      year: req.body.year,
+      favorite: req.body.favorite,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Memory image uploaded and saved successfully",
+      imageUrl: storedPath,
+      memory: savedMemory,
+      ...savedMemory,
+    });
+  } catch (err) {
+    console.error("Failed to save memory image:", err);
+    res.status(500).json({ error: "Server failed to save memory image" });
+  }
+});
+
+// DELETE /api/memories/:memoryId - Delete memory metadata AND corresponding image file
+app.delete("/api/memories/:memoryId", (req, res) => {
+  try {
+    const { memoryId } = req.params;
+    const result = deleteMemory(memoryId);
+    if (!result.found) {
+      return res.status(404).json({ error: "Memory not found" });
+    }
+    res.json({
+      success: true,
+      message: "Memory and associated image deleted successfully",
+      deletedMemoryId: memoryId,
+    });
+  } catch (err) {
+    console.error("Failed to delete memory:", err);
+    res.status(500).json({ error: "Failed to delete memory" });
+  }
+});
+
+// Legacy / compatibility routes:
 app.get("/api/patient/memories", (req, res) => {
   try {
-    res.json(getMemories());
+    const patientId = req.query.patientId || "P001";
+    res.json(getMemoriesByPatientId(patientId));
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch memories" });
   }
 });
+
 app.patch("/api/patient/memories/:id", (req, res) => {
   try {
     const updated = updateMemory(req.params.id, {
-      image: req.body.image || "",
+      ...(req.body.image ? { image: req.body.image } : {}),
+      ...(req.body.title ? { title: req.body.title } : {}),
+      ...(req.body.subtitle ? { subtitle: req.body.subtitle } : {}),
+      ...(req.body.category ? { category: req.body.category } : {}),
+      ...(typeof req.body.favorite !== "undefined" ? { favorite: req.body.favorite } : {}),
     });
 
     if (!updated) {
@@ -564,7 +773,6 @@ app.patch("/api/patient/memories/:id", (req, res) => {
     res.json(updated);
   } catch (err) {
     console.error("Failed to update memory image:", err);
-
     res.status(500).json({
       error: "Failed to update memory image",
     });
@@ -577,6 +785,74 @@ app.post("/api/patient/memories", (req, res) => {
     res.status(201).json(created);
   } catch (err) {
     res.status(500).json({ error: "Failed to add memory" });
+  }
+});
+
+// ==================================================
+// REST APIs: PATIENT LOCATION & CAREGIVER MONITORING
+// ==================================================
+app.get("/api/patient/location", (req, res) => {
+  try {
+    const patientId = req.query.patientId || "P001";
+    const loc = getPatientLocation(patientId);
+    res.json(loc);
+  } catch (err) {
+    console.error("Fetch patient location error:", err);
+    res.status(500).json({ error: "Failed to fetch patient location" });
+  }
+});
+
+app.post("/api/patient/location", (req, res) => {
+  try {
+    const { latitude, longitude, accuracy, timestamp, sharingEnabled, address, patientId } = req.body || {};
+
+    if (latitude !== undefined && latitude !== null && (typeof latitude !== "number" || isNaN(latitude) || latitude < -90 || latitude > 90)) {
+      return res.status(400).json({ error: "Latitude must be a valid number between -90 and 90" });
+    }
+    if (longitude !== undefined && longitude !== null && (typeof longitude !== "number" || isNaN(longitude) || longitude < -180 || longitude > 180)) {
+      return res.status(400).json({ error: "Longitude must be a valid number between -180 and 180" });
+    }
+    if (accuracy !== undefined && accuracy !== null && (typeof accuracy !== "number" || isNaN(accuracy) || accuracy < 0)) {
+      return res.status(400).json({ error: "Accuracy must be a non-negative number" });
+    }
+
+    const updated = updatePatientLocation({
+      patientId: patientId || "P001",
+      latitude: latitude !== undefined && latitude !== null ? Number(latitude) : undefined,
+      longitude: longitude !== undefined && longitude !== null ? Number(longitude) : undefined,
+      accuracy: accuracy !== undefined && accuracy !== null ? Number(accuracy) : undefined,
+      timestamp,
+      sharingEnabled: typeof sharingEnabled === "boolean" ? sharingEnabled : undefined,
+      address,
+    });
+
+    res.json({
+      success: true,
+      location: updated,
+    });
+  } catch (err) {
+    console.error("Update patient location error:", err);
+    res.status(500).json({ error: err.message || "Failed to update location" });
+  }
+});
+
+app.get("/api/caregiver/patients/:id/location", (req, res) => {
+  try {
+    const loc = getPatientLocation(req.params.id);
+    res.json(loc);
+  } catch (err) {
+    console.error("Fetch caregiver patient location error:", err);
+    res.status(500).json({ error: "Failed to fetch patient location for caregiver" });
+  }
+});
+
+app.get("/api/patient/:id/location", (req, res) => {
+  try {
+    const loc = getPatientLocation(req.params.id);
+    res.json(loc);
+  } catch (err) {
+    console.error("Fetch patient location error:", err);
+    res.status(500).json({ error: "Failed to fetch patient location" });
   }
 });
 

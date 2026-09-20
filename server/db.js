@@ -339,25 +339,33 @@ export function recordActivityResult(result) {
     dateLabel: `Today • ${now.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" })}`,
   };
 
+  const patientId = result.patientId || "P001";
+  formattedResult.patientId = patientId;
+
   const history = db.activityResults || [];
   const adaptivePlan = generateAdaptivePlan(formattedResult, history);
   formattedResult.adaptivePlan = adaptivePlan;
 
   db.activityResults = [formattedResult, ...history];
 
-  // Update Asha's caregiver record in db.patients[0]
+  const syncTimestamp = now.toISOString();
+
+  // Update target patient's record in db.patients
   if (db.patients && db.patients.length > 0) {
-    const asha = db.patients[0];
-    asha.lastActive = "Just now";
-    asha.activityTime = "Just now";
-    asha.recentActivity = formattedResult.game;
-    asha.gameScore = formattedResult.score || formattedResult.accuracy;
+    const targetPatient = db.patients.find((p) => p.id === patientId) || db.patients[0];
+    targetPatient.lastActive = "Just now";
+    targetPatient.activityTime = "Just now";
+    targetPatient.recentActivity = formattedResult.game;
+    targetPatient.gameScore = formattedResult.score || formattedResult.accuracy;
+    targetPatient.lastSyncedAt = syncTimestamp;
+    targetPatient.isOnline = true;
+    targetPatient.pendingSyncCount = 0;
 
     // Recalculate memory, attention, or cognitive index based on activity
     if (formattedResult.category === "attention" || formattedResult.gameId === "spot-the-difference" || formattedResult.gameId === "pattern-match") {
-      asha.attention = Math.round((asha.attention * 0.65) + (formattedResult.accuracy * 0.35));
+      targetPatient.attention = Math.round(((targetPatient.attention || 76) * 0.65) + (formattedResult.accuracy * 0.35));
     } else {
-      asha.memory = Math.round((asha.memory * 0.65) + (formattedResult.accuracy * 0.35));
+      targetPatient.memory = Math.round(((targetPatient.memory || 82) * 0.65) + (formattedResult.accuracy * 0.35));
     }
 
     let icon = "🧠";
@@ -365,15 +373,25 @@ export function recordActivityResult(result) {
     else if (formattedResult.gameId === "pattern-match") icon = "🧩";
     else if (formattedResult.gameId === "daily-routine") icon = "📅";
 
-    asha.activityHistory = [
+    targetPatient.activityHistory = [
       {
         name: formattedResult.game,
-        score: formattedResult.accuracy,
+        score: formattedResult.score || formattedResult.accuracy,
         time: formattedResult.dateLabel,
+        timestamp: formattedResult.completedAt,
         icon,
       },
-      ...(asha.activityHistory || []).slice(0, 9),
+      ...(targetPatient.activityHistory || []).slice(0, 9),
     ];
+  }
+
+  if (db.patient && (!result.patientId || result.patientId === db.patient.id)) {
+    db.patient.lastActive = "Just now";
+    db.patient.activityTime = "Just now";
+    db.patient.recentActivity = formattedResult.game;
+    db.patient.gameScore = formattedResult.score || formattedResult.accuracy;
+    db.patient.lastSyncedAt = syncTimestamp;
+    db.patient.isOnline = true;
   }
 
   // Update analytics trend
@@ -434,14 +452,116 @@ export function getProgress() {
   };
 }
 
+export function getPatientSyncStatus(patientId = "P001") {
+  const db = readDb();
+  let patient = (db.patients || []).find((p) => p.id === patientId) || db.patient;
+  if (!patient) {
+    patient = db.patient || { id: "P001", name: "Asha" };
+  }
+
+  const lastSyncedAt = patient.lastSyncedAt || patient.currentLocation?.updatedAt || patient.currentLocation?.timestamp || null;
+  const pendingCount = Number(patient.pendingSyncCount || 0);
+
+  let state = "offline"; // "synced" | "pending" | "offline"
+  let label = "Offline";
+  let color = "gray"; // "green" | "yellow" | "gray"
+
+  const now = Date.now();
+  const syncTime = lastSyncedAt ? new Date(lastSyncedAt).getTime() : 0;
+  const ageMs = now - syncTime;
+  const isRecent = syncTime > 0 && ageMs <= 180000; // within 3 minutes
+
+  if (pendingCount > 0) {
+    state = "pending";
+    label = "Pending sync";
+    color = "yellow";
+  } else if (isRecent && patient.isOnline !== false) {
+    state = "synced";
+    label = "Synced";
+    color = "green";
+  } else if (lastSyncedAt) {
+    state = "offline";
+    const formatted = new Date(lastSyncedAt).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    label = `Last synced ${formatted}`;
+    color = "gray";
+  } else {
+    state = "offline";
+    label = "Not yet synced";
+    color = "gray";
+  }
+
+  return {
+    patientId: patient.id || patientId,
+    name: patient.name || "Asha",
+    state,
+    label,
+    color,
+    lastSyncedAt,
+    isRecent,
+    pendingCount,
+    isOnline: Boolean(isRecent && patient.isOnline !== false),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export function updatePatientSyncPing({ patientId = "P001", isOnline = true, pendingCount = 0 }) {
+  const db = readDb();
+  const targetPatientIndex = (db.patients || []).findIndex((p) => p.id === patientId);
+  const nowIso = new Date().toISOString();
+
+  if (db.patient && db.patient.id === patientId) {
+    db.patient.isOnline = isOnline;
+    db.patient.pendingSyncCount = pendingCount;
+    if (isOnline) db.patient.lastSyncedAt = nowIso;
+  }
+
+  if (targetPatientIndex !== -1) {
+    db.patients[targetPatientIndex].isOnline = isOnline;
+    db.patients[targetPatientIndex].pendingSyncCount = pendingCount;
+    if (isOnline) db.patients[targetPatientIndex].lastSyncedAt = nowIso;
+  }
+
+  writeDb(db);
+  return getPatientSyncStatus(patientId);
+}
+
 export function getCaregiverPatients() {
   const db = readDb();
-  return db.patients || [];
+  return (db.patients || []).map((p) => ({
+    ...p,
+    syncStatus: getPatientSyncStatus(p.id),
+  }));
 }
 
 export function getCaregiverPatientById(id) {
   const db = readDb();
-  return (db.patients || []).find((p) => p.id === id) || null;
+  const p = (db.patients || []).find((patient) => patient.id === id) || (db.patient?.id === id ? db.patient : null);
+  if (!p) return null;
+  return {
+    ...p,
+    syncStatus: getPatientSyncStatus(p.id),
+  };
+}
+
+export function getPatientActivities(patientId = "P001") {
+  const db = readDb();
+  const targetPatient = (db.patients || []).find((p) => p.id === patientId) || db.patient;
+  const allActivities = db.activityResults || [];
+  const patientActivities = allActivities.filter((a) => !a.patientId || a.patientId === patientId);
+
+  return {
+    patientId,
+    patientName: targetPatient?.name || "Patient",
+    activities: patientActivities,
+    recentActivity: targetPatient?.recentActivity || (patientActivities[0]?.game ?? "Memory Game"),
+    gameScore: targetPatient?.gameScore || (patientActivities[0]?.score ?? 84),
+    activityHistory: targetPatient?.activityHistory || [],
+    totalSessions: patientActivities.length,
+    syncStatus: getPatientSyncStatus(patientId),
+  };
 }
 
 export function getCaregiverAlerts() {
@@ -504,23 +624,38 @@ export function resolveCaregiverAlert(id) {
   return { success: true };
 }
 
-export function getCaregiverAnalytics() {
+export function getCaregiverAnalytics(patientId = "P001") {
   const db = readDb();
-  const patient = db.patients?.[0] || db.patient;
-  const activities = db.activityResults || [];
+  const patient = (db.patients || []).find((p) => p.id === patientId) || db.patients?.[0] || db.patient;
+  const activities = (db.activityResults || []).filter((a) => !a.patientId || a.patientId === patient?.id);
 
-  const memorySessions = activities.filter((a) => a.gameId === "memory-match").length || 7;
-  const spotSessions = activities.filter((a) => a.gameId === "spot-the-difference").length || 5;
-  const patternSessions = activities.filter((a) => a.gameId === "pattern-match").length || 4;
-  const routineSessions = activities.filter((a) => a.gameId === "daily-routine").length || 3;
+  const memorySessions = activities.filter((a) => a.gameId === "memory-match" || a.game?.includes("Memory")).length || 7;
+  const spotSessions = activities.filter((a) => a.gameId === "spot-the-difference" || a.game?.includes("Spot")).length || 5;
+  const patternSessions = activities.filter((a) => a.gameId === "pattern-match" || a.game?.includes("Pattern")).length || 4;
+  const routineSessions = activities.filter((a) => a.gameId === "daily-routine" || a.game?.includes("Routine")).length || 3;
+
+  // Real trend calculated from actual recorded session accuracy/scores if present
+  let trend = [70, 72, 75, 78, 80, 79, 82];
+  if (activities.length >= 2) {
+    trend = activities.slice(0, 7).reverse().map((a) => Number(a.score || a.accuracy || 75));
+  } else if (db.analytics?.trend) {
+    trend = db.analytics.trend;
+  }
+
+  const completion = db.analytics?.completion || 92;
+  const totalSessions = activities.length > 0 ? activities.length : 18;
 
   return {
     patient: {
       ...patient,
-      trend: db.analytics?.trend || [70, 75, 78, 80, 82],
-      completion: db.analytics?.completion || 92,
-      sessions: activities.length + 12,
+      trend,
+      completion,
+      sessions: totalSessions,
+      syncStatus: getPatientSyncStatus(patient?.id || patientId),
     },
+    trend,
+    totalSessions,
+    recentActivities: activities.slice(0, 10),
     activities: [
       { name: "Memory Recall", score: patient?.memory || 82, sessions: memorySessions },
       { name: "Pattern Recognition", score: patient?.attention || 76, sessions: patternSessions + spotSessions },
@@ -529,100 +664,397 @@ export function getCaregiverAnalytics() {
   };
 }
 
-export function getMemories() {
+export const defaultMemories = [
+  {
+    id: 1,
+    patientId: "P001",
+    title: "Priya",
+    subtitle: "Daughter",
+    category: "People",
+    image: "",
+    description: "Priya is your daughter. She enjoys spending time with you and visiting on weekends.",
+    year: "Family",
+    favorite: true,
+  },
+  {
+    id: 2,
+    patientId: "P001",
+    title: "Rahul",
+    subtitle: "Grandson",
+    category: "People",
+    image: "",
+    description: "Rahul is your grandson. You often enjoy talking and playing games together.",
+    year: "Family",
+    favorite: false,
+  },
+  {
+    id: 3,
+    patientId: "P001",
+    title: "Family Celebration",
+    subtitle: "A special family day",
+    category: "Events",
+    image: "",
+    description: "A happy family gathering filled with conversations, food and shared memories.",
+    year: "2024",
+    favorite: true,
+  },
+  {
+    id: 4,
+    patientId: "P001",
+    title: "Morning Garden",
+    subtitle: "A familiar place",
+    category: "Places",
+    image: "",
+    description: "A peaceful garden where you enjoyed spending quiet mornings.",
+    year: "Childhood",
+    favorite: false,
+  },
+  {
+    id: 5,
+    patientId: "P001",
+    title: "Festival Memory",
+    subtitle: "A familiar celebration",
+    category: "Culture",
+    image: "",
+    description: "A familiar festival memory involving family, traditional food and celebration.",
+    year: "Family Tradition",
+    favorite: false,
+  },
+  {
+    id: 6,
+    patientId: "P001",
+    title: "Favourite Meal",
+    subtitle: "A familiar food memory",
+    category: "Culture",
+    image: "",
+    description: "A favourite traditional meal often prepared during family gatherings.",
+    year: "Family Tradition",
+    favorite: false,
+  },
+];
+
+export function getMemoriesByPatientId(patientId = "P001") {
   const db = readDb();
-  return db.memories || [
-    {
-      id: 1,
-      title: "Priya",
-      subtitle: "Daughter",
-      category: "People",
-      image: "",
-      description: "Priya is your daughter. She enjoys spending time with you and visiting on weekends.",
-      year: "Family",
-      favorite: true,
-    },
-    {
-      id: 2,
-      title: "Rahul",
-      subtitle: "Grandson",
-      category: "People",
-      image: "",
-      description: "Rahul is your grandson. You often enjoy talking and playing games together.",
-      year: "Family",
-      favorite: false,
-    },
-    {
-      id: 3,
-      title: "Family Celebration",
-      subtitle: "A special family day",
-      category: "Events",
-      image: "",
-      description: "A happy family gathering filled with conversations, food and shared memories.",
-      year: "2024",
-      favorite: true,
-    },
-    {
-      id: 4,
-      title: "Morning Garden",
-      subtitle: "A familiar place",
-      category: "Places",
-      image: "",
-      description: "A peaceful garden where you enjoyed spending quiet mornings.",
-      year: "Childhood",
-      favorite: false,
-    },
-    {
-      id: 5,
-      title: "Festival Memory",
-      subtitle: "A familiar celebration",
-      category: "Culture",
-      image: "",
-      description: "A familiar festival memory involving family, traditional food and celebration.",
-      year: "Family Tradition",
-      favorite: false,
-    },
-  ];
+  if (!db.memories || !Array.isArray(db.memories) || db.memories.length === 0) {
+    db.memories = defaultMemories.map((m) => ({ ...m, patientId: "P001" }));
+    writeDb(db);
+  }
+  const targetId = patientId || "P001";
+  return db.memories.filter((m) => (m.patientId || "P001") === targetId);
 }
+
+export function getMemories(patientId = "P001") {
+  return getMemoriesByPatientId(patientId);
+}
+
+export function saveMemoryWithImage({
+  memoryId,
+  patientId = "P001",
+  originalFilename = "",
+  storedFilename = "",
+  storedPath = "",
+  mimetype = "",
+  size = 0,
+  uploadTimestamp = new Date().toISOString(),
+  title,
+  subtitle,
+  category,
+  description,
+  year,
+  favorite,
+}) {
+  const db = readDb();
+  if (!db.memories || !Array.isArray(db.memories) || db.memories.length === 0) {
+    db.memories = defaultMemories.map((m) => ({ ...m, patientId: "P001" }));
+  }
+
+  const existingIndex = memoryId
+    ? db.memories.findIndex((m) => String(m.id) === String(memoryId))
+    : -1;
+
+  if (existingIndex !== -1) {
+    const existing = db.memories[existingIndex];
+    // If there was a previous uploaded file on disk, remove it if it differs
+    if (existing.filename && existing.filename !== storedFilename) {
+      try {
+        const oldPath = path.join(process.cwd(), "uploads", "memories", existing.filename);
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      } catch (err) {
+        console.warn("Could not remove previous memory image file:", err);
+      }
+    }
+
+    const updated = {
+      ...existing,
+      patientId: existing.patientId || patientId || "P001",
+      image: storedPath,
+      originalFilename,
+      filename: storedFilename,
+      storedPath,
+      mimetype,
+      size,
+      uploadTimestamp,
+      timestamp: uploadTimestamp,
+      updatedAt: uploadTimestamp,
+      ...(title ? { title } : {}),
+      ...(subtitle ? { subtitle } : {}),
+      ...(category ? { category } : {}),
+      ...(description ? { description } : {}),
+      ...(year ? { year } : {}),
+      ...(typeof favorite !== "undefined" ? { favorite: Boolean(favorite) } : {}),
+    };
+
+    db.memories[existingIndex] = updated;
+    writeDb(db);
+    return updated;
+  } else {
+    // Create brand new memory
+    const newId = memoryId ? (isNaN(Number(memoryId)) ? memoryId : Number(memoryId)) : Date.now();
+    const newMemory = {
+      id: newId,
+      patientId: patientId || "P001",
+      title: title || "Personal Memory",
+      subtitle: subtitle || "Family moment",
+      category: category || "People",
+      image: storedPath,
+      originalFilename,
+      filename: storedFilename,
+      storedPath,
+      mimetype,
+      size,
+      uploadTimestamp,
+      timestamp: uploadTimestamp,
+      description: description || `A personal memory about ${title || "this moment"}.`,
+      year: year || "Recent",
+      favorite: Boolean(favorite),
+    };
+
+    db.memories.unshift(newMemory);
+
+    const targetPatientId = patientId || "P001";
+    if (db.patient && db.patient.id === targetPatientId) {
+      db.patient.lastSyncedAt = uploadTimestamp;
+      db.patient.lastActive = "Just now";
+    }
+    const targetPatient = (db.patients || []).find((p) => p.id === targetPatientId);
+    if (targetPatient) {
+      targetPatient.lastSyncedAt = uploadTimestamp;
+      targetPatient.lastActive = "Just now";
+    }
+
+    writeDb(db);
+    return newMemory;
+  }
+}
+
+export function deleteMemory(memoryId) {
+  const db = readDb();
+  if (!db.memories || !Array.isArray(db.memories)) {
+    return { found: false };
+  }
+
+  const memory = db.memories.find((m) => String(m.id) === String(memoryId));
+  if (!memory) {
+    return { found: false };
+  }
+
+  // Delete image file from uploads folder if stored
+  const filename = memory.filename || (memory.storedPath ? path.basename(memory.storedPath) : "");
+  if (filename) {
+    try {
+      const filePath = path.join(process.cwd(), "uploads", "memories", filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (err) {
+      console.warn("Could not delete image file on disk:", err);
+    }
+  }
+
+  db.memories = db.memories.filter((m) => String(m.id) !== String(memoryId));
+  writeDb(db);
+  return { found: true, memory };
+}
+
 export function updateMemory(id, updates) {
   const db = readDb();
-  const numId = Number(id);
+  const numId = isNaN(Number(id)) ? id : Number(id);
 
-  const memories = db.memories || [];
+  if (!db.memories || !Array.isArray(db.memories) || db.memories.length === 0) {
+    db.memories = defaultMemories.map((m) => ({ ...m, patientId: "P001" }));
+  }
 
-  const index = memories.findIndex(
-    (memory) => memory.id === numId
+  const index = db.memories.findIndex(
+    (memory) => String(memory.id) === String(numId)
   );
 
   if (index === -1) {
     return null;
   }
 
-  memories[index] = {
-    ...memories[index],
+  db.memories[index] = {
+    ...db.memories[index],
     ...updates,
+    updatedAt: new Date().toISOString(),
   };
 
-  db.memories = memories;
-
   writeDb(db);
-
-  return memories[index];
+  return db.memories[index];
 }
 
 export function addMemory(mem) {
   const db = readDb();
+  if (!db.memories || !Array.isArray(db.memories)) {
+    db.memories = defaultMemories.map((m) => ({ ...m, patientId: "P001" }));
+  }
+
   const newMem = {
-    id: Date.now(),
+    id: mem.id || Date.now(),
+    patientId: mem.patientId || "P001",
     title: mem.title || "New Memory",
     subtitle: mem.subtitle || "Family Memory",
     category: mem.category || "Family",
     image: mem.image || "",
+    originalFilename: mem.originalFilename || "",
+    filename: mem.filename || "",
+    storedPath: mem.storedPath || mem.image || "",
+    mimetype: mem.mimetype || "",
+    uploadTimestamp: mem.uploadTimestamp || new Date().toISOString(),
     description: mem.description || "",
     year: mem.year || "2025",
     favorite: !!mem.favorite,
   };
-  db.memories = [newMem, ...(db.memories || getMemories())];
+  db.memories = [newMem, ...db.memories];
   writeDb(db);
   return newMem;
 }
+
+// ==================================================
+// PATIENT LOCATION PERSISTENCE & MONITORING
+// ==================================================
+export function getPatientLocation(patientId = "P001") {
+  const db = readDb();
+  let patient = (db.patients || []).find((p) => p.id === patientId) || db.patient;
+  if (!patient) {
+    patient = db.patient || { id: "P001", name: "Asha" };
+  }
+
+  const loc = patient?.currentLocation;
+  if (!loc || typeof loc.latitude !== "number" || typeof loc.longitude !== "number") {
+    return {
+      patientId: patient?.id || patientId,
+      name: patient?.name || "Asha",
+      latitude: null,
+      longitude: null,
+      accuracy: null,
+      address: null,
+      sharingEnabled: false,
+      timestamp: null,
+      updatedAt: null,
+      status: "UNAVAILABLE",
+    };
+  }
+
+  // Determine status: LIVE vs LAST KNOWN vs UNAVAILABLE
+  let status = "LAST KNOWN";
+  const now = Date.now();
+  const updateTime = loc.timestamp ? new Date(loc.timestamp).getTime() : 0;
+  const ageMs = now - updateTime;
+
+  if (loc.sharingEnabled === false) {
+    status = (typeof loc.latitude === "number" && typeof loc.longitude === "number")
+      ? "LAST KNOWN"
+      : "UNAVAILABLE";
+  } else if (ageMs <= 180000) {
+    // Received within last 3 minutes and sharing is active
+    status = "LIVE";
+  } else {
+    // Stale or older
+    status = "LAST KNOWN";
+  }
+
+  return {
+    patientId: patient.id || patientId,
+    name: patient.name || "Asha",
+    latitude: loc.latitude,
+    longitude: loc.longitude,
+    accuracy: loc.accuracy != null ? Number(loc.accuracy) : null,
+    address: loc.address || "Current Device Location",
+    sharingEnabled: Boolean(loc.sharingEnabled),
+    timestamp: loc.timestamp || new Date().toISOString(),
+    updatedAt: loc.updatedAt || loc.timestamp || new Date().toISOString(),
+    status,
+  };
+}
+
+export function updatePatientLocation(data) {
+  const db = readDb();
+  const patientId = data.patientId || "P001";
+
+  const { latitude, longitude, accuracy, timestamp, sharingEnabled, address } = data;
+
+  // Validation
+  const hasCoordinates = typeof latitude === "number" && typeof longitude === "number";
+  if (hasCoordinates) {
+    if (isNaN(latitude) || latitude < -90 || latitude > 90) {
+      throw new Error("Invalid latitude. Must be a number between -90 and 90.");
+    }
+    if (isNaN(longitude) || longitude < -180 || longitude > 180) {
+      throw new Error("Invalid longitude. Must be a number between -180 and 180.");
+    }
+  }
+
+  let targetPatientIndex = (db.patients || []).findIndex((p) => p.id === patientId);
+  const existingLoc =
+    (targetPatientIndex !== -1 && db.patients[targetPatientIndex].currentLocation) ||
+    db.patient?.currentLocation ||
+    {};
+
+  const finalSharing = typeof sharingEnabled === "boolean" ? sharingEnabled : (existingLoc.sharingEnabled ?? true);
+
+  const updatedLocation = {
+    latitude: hasCoordinates ? Number(latitude) : (typeof existingLoc.latitude === "number" ? existingLoc.latitude : null),
+    longitude: hasCoordinates ? Number(longitude) : (typeof existingLoc.longitude === "number" ? existingLoc.longitude : null),
+    accuracy: typeof accuracy === "number" && !isNaN(accuracy) && accuracy >= 0 ? Number(accuracy) : (existingLoc.accuracy ?? null),
+    address: address || existingLoc.address || "Device Current Location",
+    sharingEnabled: finalSharing,
+    timestamp: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (db.patient) {
+    db.patient.currentLocation = updatedLocation;
+    db.patient.lastActive = "Just now";
+    db.patient.lastSyncedAt = updatedLocation.updatedAt;
+    db.patient.isOnline = true;
+    db.patient.pendingSyncCount = 0;
+  }
+
+  if (targetPatientIndex !== -1) {
+    db.patients[targetPatientIndex].currentLocation = updatedLocation;
+    db.patients[targetPatientIndex].lastActive = "Just now";
+    db.patients[targetPatientIndex].lastSyncedAt = updatedLocation.updatedAt;
+    db.patients[targetPatientIndex].isOnline = true;
+    db.patients[targetPatientIndex].pendingSyncCount = 0;
+  }
+
+  if (!db.locationHistory) {
+    db.locationHistory = [];
+  }
+  if (hasCoordinates) {
+    db.locationHistory.unshift({
+      patientId,
+      latitude: updatedLocation.latitude,
+      longitude: updatedLocation.longitude,
+      accuracy: updatedLocation.accuracy,
+      timestamp: updatedLocation.timestamp,
+    });
+    db.locationHistory = db.locationHistory.slice(0, 50);
+  }
+
+  writeDb(db);
+  return getPatientLocation(patientId);
+}
+

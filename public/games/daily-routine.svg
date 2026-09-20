@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-rou" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#451a03"/>
+      <stop offset="50%" stop-color="#292524"/>
+      <stop offset="100%" stop-color="#0f3e3a"/>
+    </linearGradient>
+    <linearGradient id="step-sun" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="100%" stop-color="#fef3c7"/>
+    </linearGradient>
+    <linearGradient id="gold-rou" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="rou-shadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="300" rx="16" fill="url(#bg-rou)"/>
+
+  <!-- Warm Sun Glow -->
+  <circle cx="200" cy="50" r="110" fill="#f59e0b" opacity="0.14" filter="blur(35px)"/>
+  <circle cx="80" cy="220" r="90" fill="#10b981" opacity="0.10" filter="blur(30px)"/>
+
+  <!-- Header Rhythm Clock -->
+  <g transform="translate(200, 48)" filter="url(#rou-shadow)">
+    <circle cx="0" cy="0" r="22" fill="#ffffff" stroke="#fde68a" stroke-width="2"/>
+    <circle cx="0" cy="0" r="1.5" fill="#78350f"/>
+    <!-- Hands showing 9:00 AM -->
+    <line x1="0" y1="0" x2="0" y2="-12" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="8" y2="0" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Sequence Step Connector Track -->
+  <line x1="90" y1="145" x2="310" y2="145" stroke="#fef3c7" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+  <line x1="90" y1="145" x2="310" y2="145" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 6" stroke-linecap="round"/>
+
+  <!-- 3 Step Sequence Cards -->
+  <!-- Step 1: Morning Tea (Wake up) -->
+  <g filter="url(#rou-shadow)" transform="translate(85, 145)">
+    <rect x="-42" y="-55" width="84" height="110" rx="14" fill="url(#step-sun)" stroke="#fcd34d" stroke-width="2"/>
+    <!-- Step Badge -->
+    <circle cx="-26" cy="-38" r="10" fill="#d97706"/>
+    <text x="-26" y="-34" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="10" font-weight="800" text-anchor="middle">1</text>
+    
+    <!-- Morning Tea Cup Illustration -->
+    <ellipse cx="0" cy="18" rx="20" ry="5" fill="#e2e8f0"/>
+    <path d="M-14 -6 L14 -6 L11 16 L-11 16 Z" fill="#ffffff" stroke="#b45309" stroke-width="2"/>
+    <!-- Cup handle -->
+    <path d="M12 -2 C18 -2 18 10 11 11" fill="none" stroke="#b45309" stroke-width="2"/>
+    <!-- Steam -->
+    <path d="M-4 -12 Q-1 -18 -4 -22" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M4 -14 Q7 -20 4 -24" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/>
+    
+    <!-- Text -->
+    <text x="0" y="38" fill="#78350f" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="9" font-weight="700" text-anchor="middle">Morning Tea</text>
+  </g>
+
+  <!-- Step 2: Medication Routine (Active/Current Step) -->
+  <g filter="url(#rou-shadow)" transform="translate(200, 145)">
+    <rect x="-44" y="-58" width="88" height="116" rx="14" fill="#ffffff" stroke="#10b981" stroke-width="2.5"/>
+    <!-- Active Glow Pulse -->
+    <rect x="-48" y="-62" width="96" height="124" rx="18" fill="none" stroke="#34d399" stroke-width="1" opacity="0.6"/>
+    <!-- Step Badge -->
+    <circle cx="-28" cy="-40" r="11" fill="#059669"/>
+    <text x="-28" y="-36" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="10" font-weight="800" text-anchor="middle">2</text>
+    
+    <!-- Pillbox / Water Glass Illustration -->
+    <!-- Water Glass -->
+    <path d="M-18 -8 L-7 -8 L-9 16 L-16 16 Z" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.8"/>
+    <!-- Capsule -->
+    <g transform="translate(10, 4) rotate(40)">
+      <rect x="-14" y="-6" width="14" height="12" rx="6" fill="#ef4444"/>
+      <rect x="0" y="-6" width="14" height="12" rx="6" fill="#fbbf24"/>
+      <line x1="0" y1="-6" x2="0" y2="6" stroke="#ffffff" stroke-width="1.5"/>
+    </g>
+
+    <!-- Checkmark Badge -->
+    <circle cx="28" cy="-40" r="9" fill="#10b981"/>
+    <path d="M24 -40 L27 -37 L33 -43" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Text -->
+    <text x="0" y="40" fill="#065f46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="9.5" font-weight="800" text-anchor="middle">Medicine</text>
+  </g>
+
+  <!-- Step 3: Garden Walk -->
+  <g filter="url(#rou-shadow)" transform="translate(315, 145)">
+    <rect x="-42" y="-55" width="84" height="110" rx="14" fill="url(#step-sun)" stroke="#fcd34d" stroke-width="2"/>
+    <!-- Step Badge -->
+    <circle cx="-26" cy="-38" r="10" fill="#d97706"/>
+    <text x="-26" y="-34" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="10" font-weight="800" text-anchor="middle">3</text>
+    
+    <!-- Garden Nature / Walk Shoes Illustration -->
+    <path d="M-14 16 Q0 0 14 16" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+    <!-- Tree / Flowers -->
+    <rect x="-2" y="-2" width="4" height="12" fill="#78350f"/>
+    <circle cx="0" cy="-8" r="12" fill="#16a34a"/>
+    <circle cx="-6" cy="-6" r="4" fill="#f43f5e"/>
+    <circle cx="6" cy="-6" r="4" fill="#fbbf24"/>
+
+    <!-- Text -->
+    <text x="0" y="38" fill="#78350f" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="9" font-weight="700" text-anchor="middle">Garden Walk</text>
+  </g>
+
+  <!-- Sparkles -->
+  <g fill="url(#gold-rou)">
+    <polygon points="120,40 122,44 126,45 122,46 120,50 118,46 114,45 118,44"/>
+    <polygon points="280,42 282,46 286,47 282,48 280,52 278,48 274,47 278,46"/>
+  </g>
+
+  <!-- Bottom Label Bar -->
+  <rect x="130" y="254" width="140" height="26" rx="13" fill="#1f1406" fill-opacity="0.85" stroke="#542e06" stroke-width="1"/>
+  <text x="200" y="271" fill="#fef3c7" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.5">DAILY ROUTINE</text>
+</svg>

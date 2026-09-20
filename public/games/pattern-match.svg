@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-pat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a1b4e"/>
+      <stop offset="50%" stop-color="#1f244a"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="seq-path" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="glow-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+    <linearGradient id="tile-card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+    <filter id="pat-shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="300" rx="16" fill="url(#bg-pat)"/>
+
+  <!-- Ambient Light Orbs -->
+  <circle cx="100" cy="90" r="90" fill="#a855f7" opacity="0.15" filter="blur(30px)"/>
+  <circle cx="300" cy="200" r="100" fill="#ec4899" opacity="0.12" filter="blur(30px)"/>
+
+  <!-- Connecting Pathway Track -->
+  <path d="M40 145 C110 145, 140 120, 200 120 C260 120, 290 145, 360 145" fill="none" stroke="url(#seq-path)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M40 145 C110 145, 140 120, 200 120 C260 120, 290 145, 360 145" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="5 7" opacity="0.5"/>
+
+  <!-- Sequence Item 1: Circle -->
+  <g filter="url(#pat-shadow)" transform="translate(50, 110)">
+    <rect x="-24" y="-24" width="48" height="48" rx="12" fill="url(#tile-card)" stroke="#e2e8f0" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="14" fill="#3b82f6"/>
+  </g>
+
+  <!-- Sequence Item 2: Square -->
+  <g filter="url(#pat-shadow)" transform="translate(125, 96)">
+    <rect x="-24" y="-24" width="48" height="48" rx="12" fill="url(#tile-card)" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="-12" y="-12" width="24" height="24" rx="4" fill="#10b981"/>
+  </g>
+
+  <!-- Sequence Item 3: Triangle -->
+  <g filter="url(#pat-shadow)" transform="translate(200, 96)">
+    <rect x="-24" y="-24" width="48" height="48" rx="12" fill="url(#tile-card)" stroke="#e2e8f0" stroke-width="1.5"/>
+    <polygon points="0,-14 14,12 -14,12" fill="#f59e0b"/>
+  </g>
+
+  <!-- Sequence Item 4: Diamond -->
+  <g filter="url(#pat-shadow)" transform="translate(275, 110)">
+    <rect x="-24" y="-24" width="48" height="48" rx="12" fill="url(#tile-card)" stroke="#e2e8f0" stroke-width="1.5"/>
+    <polygon points="0,-14 14,0 0,14 -14,0" fill="#ec4899"/>
+  </g>
+
+  <!-- Next in Sequence Target Slot (Highlighted "?") -->
+  <g filter="url(#pat-shadow)" transform="translate(345, 145)">
+    <rect x="-28" y="-28" width="56" height="56" rx="16" fill="#1e1b4b" stroke="#c084fc" stroke-width="2.5" stroke-dasharray="4 3"/>
+    <rect x="-24" y="-24" width="48" height="48" rx="12" fill="#a855f7" fill-opacity="0.2"/>
+    <text x="0" y="9" fill="#f472b6" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto" font-size="26" font-weight="900" text-anchor="middle">?</text>
+    <!-- Pulse ring -->
+    <circle cx="0" cy="0" r="30" fill="none" stroke="#f472b6" stroke-width="1.5" opacity="0.6"/>
+  </g>
+
+  <!-- Candidate Options Pill at Bottom -->
+  <g transform="translate(100, 195)" filter="url(#pat-shadow)">
+    <rect x="0" y="0" width="200" height="46" rx="23" fill="#ffffff" fill-opacity="0.95" stroke="#e2e8f0" stroke-width="1"/>
+    
+    <!-- Option A: Circle (Selected check) -->
+    <g transform="translate(38, 23)">
+      <circle cx="0" cy="0" r="12" fill="#3b82f6" stroke="#2563eb" stroke-width="2"/>
+      <circle cx="8" cy="-8" r="6" fill="#10b981"/>
+      <path d="M6 -8 L7.5 -6.5 L10.5 -9.5" stroke="#ffffff" stroke-width="1.2" fill="none"/>
+    </g>
+
+    <line x1="72" y1="12" x2="72" y2="34" stroke="#e2e8f0" stroke-width="1"/>
+
+    <!-- Option B: Star -->
+    <g transform="translate(100, 23)">
+      <polygon points="0,-10 3,-3 10,-3 5,2 7,9 0,5 -7,9 -5,2 -10,-3 -3,-3" fill="#fbbf24"/>
+    </g>
+
+    <line x1="128" y1="12" x2="128" y2="34" stroke="#e2e8f0" stroke-width="1"/>
+
+    <!-- Option C: Hexagon -->
+    <g transform="translate(162, 23)">
+      <polygon points="0,-10 9,-5 9,5 0,10 -9,5 -9,-5" fill="#8b5cf6"/>
+    </g>
+  </g>
+
+  <!-- Sparkles -->
+  <g fill="url(#glow-violet)">
+    <polygon points="200,42 202,47 207,48 202,50 200,55 198,50 193,48 198,47"/>
+    <polygon points="310,60 312,64 316,65 312,66 310,70 308,66 304,65 308,64"/>
+  </g>
+
+  <!-- Bottom Label Bar -->
+  <rect x="130" y="254" width="140" height="26" rx="13" fill="#130d24" fill-opacity="0.85" stroke="#3b1d6e" stroke-width="1"/>
+  <text x="200" y="271" fill="#f3e8ff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.5">PATTERN MATCH</text>
+</svg>

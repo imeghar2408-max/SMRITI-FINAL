@@ -23,6 +23,8 @@ import Progress from "./pages/patient/Progress";
 import PatternMatch from "./pages/patient/PatternMatch";
 import DailyRoutine from "./pages/patient/DailyRoutine";
 import WhoIsAtMyDoor from "./pages/patient/WhoIsAtMyDoor";
+import PatientLocation from "./pages/patient/PatientLocation";
+import CaregiverLocation from "./pages/caregiver/CaregiverLocation";
 import {
   Home,
   Brain,
@@ -52,6 +54,7 @@ import {
   ChevronRight,
   X,
   Bot,
+  MapPin,
 } from "lucide-react";
 import Alerts from "./pages/caregiver/Alerts";
 
@@ -65,7 +68,23 @@ export default function AuraApp() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [loginRole, setLoginRole] = useState("patient");
 
- const [loggedInCaregiver, setLoggedInCaregiver] = useState(null);
+  const [loggedInCaregiver, setLoggedInCaregiver] = useState(null);
+  const [patientSync, setPatientSync] = useState(null);
+
+  useEffect(() => {
+    const fetchSync = () => {
+      fetch("/api/caregiver/patients/P001/sync-status")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data) setPatientSync(data);
+        })
+        .catch(() => {});
+    };
+
+    fetchSync();
+    const interval = setInterval(fetchSync, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Interactive Memory Game State
   const initialCards = [
@@ -131,6 +150,30 @@ export default function AuraApp() {
 
           {currentView.startsWith("caregiver") && currentView !== "caregiver-login" && (
             <div className="flex items-center space-x-2">
+              {patientSync && (
+                <span
+                  title={patientSync.lastSyncedAt ? `Last synced: ${new Date(patientSync.lastSyncedAt).toLocaleTimeString()}` : "Sync telemetry"}
+                  className={`hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+                    patientSync.state === "synced"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : patientSync.state === "pending"
+                      ? "bg-amber-50 text-amber-800 border-amber-200"
+                      : "bg-slate-100 text-slate-700 border-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      patientSync.state === "synced"
+                        ? "bg-emerald-500 animate-pulse"
+                        : patientSync.state === "pending"
+                        ? "bg-amber-500"
+                        : "bg-slate-400"
+                    }`}
+                  />
+                  <span>Asha: {patientSync.label}</span>
+                </span>
+              )}
+
               <span className="hidden md:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-teal-900 text-white text-xs font-bold shadow-xs">
                 <span>🩺</span>
                 <span>Caregiver: {loggedInCaregiver?.name || "Dr. Sarah Jenkins"}</span>
@@ -320,6 +363,9 @@ export default function AuraApp() {
             {currentView === "patient-dashboard" && (
   <PatientDashboard setCurrentView={setCurrentView} />
 )}
+            {currentView === "patient-location" && (
+  <PatientLocation setCurrentView={setCurrentView} />
+)}
            {currentView === "patient-activities" && (
   <Activities setCurrentView={setCurrentView} />
 )}
@@ -369,8 +415,13 @@ export default function AuraApp() {
       currentView={currentView}
       setCurrentView={setCurrentView}
       caregiver={loggedInCaregiver}
+      patientSync={patientSync}
     >
-            {currentView === "caregiver-patients" && <Patients />}
+            {currentView === "caregiver-patients" && <Patients setCurrentView={setCurrentView} />}
+
+            {currentView === "caregiver-location" && (
+              <CaregiverLocation setCurrentView={setCurrentView} />
+            )}
 
             {currentView === "caregiver-analytics" && <Analytics />}
 
@@ -540,6 +591,104 @@ function LandingView({ onOpenPatient, onOpenCaregiver }) {
           </div>
         </div>
 
+        {/* Cognitive Games Showcase */}
+        <div className="space-y-6 pt-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
+            <div>
+              <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-[#0f3e3a] mb-1.5">
+                <Brain size={16} className="text-teal-700" />
+                <span>Cognitive Exercises</span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                Cognitive Games & Memory Activities
+              </h2>
+              <p className="text-sm text-gray-600 max-w-2xl mt-1">
+                Four therapeutic, evidence-grounded exercises engineered to stimulate recall, visual attention, and executive function with gentle dignity.
+              </p>
+            </div>
+            <span className="self-start md:self-auto text-xs font-semibold text-[#0f3e3a] bg-teal-50 border border-teal-200/70 px-3.5 py-1.5 rounded-full">
+              4 Cognitive Modules
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                title: "Memory Match",
+                category: "Memory",
+                focus: "Visual Recall & Recognition",
+                description: "Flip paired cards to find matching botanical and cultural symbols at a comfortable, unhurried pace.",
+                difficulty: "Adaptive • 3 Levels",
+                duration: "5–10 min",
+                image: "/games/memory-match.svg",
+              },
+              {
+                title: "Spot the Difference",
+                category: "Attention",
+                focus: "Visual Scanning & Focus",
+                description: "Inspect side-by-side illustrated nature scenes to uncover subtle differences and stimulate spatial awareness.",
+                difficulty: "Relaxed • Self-Paced",
+                duration: "5–10 min",
+                image: "/games/spot-difference.svg",
+              },
+              {
+                title: "Pattern Match",
+                category: "Logic",
+                focus: "Executive Sequence Flow",
+                description: "Follow logical shape, color, and geometric sequences to gently exercise problem-solving pathways.",
+                difficulty: "Progressive Flow",
+                duration: "5 min",
+                image: "/games/pattern-match.svg",
+              },
+              {
+                title: "Daily Routine",
+                category: "Orientation",
+                focus: "Temporal Ordering & Habit",
+                description: "Organize familiar daily life activities in sequence to reinforce memory loops and personal autonomy.",
+                difficulty: "Guided Steps",
+                duration: "5–8 min",
+                image: "/games/daily-routine.svg",
+              },
+            ].map((game) => (
+              <div
+                key={game.title}
+                className="group bg-white rounded-3xl border border-gray-200/90 p-4 shadow-sm hover:shadow-md transition duration-200 hover:-translate-y-1 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-stone-100 border border-slate-100 shadow-2xs">
+                    <img
+                      src={game.image}
+                      alt={game.title}
+                      referrerPolicy="no-referrer"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <span className="absolute top-2.5 right-2.5 rounded-full bg-white/95 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-bold text-[#0f3e3a] shadow-xs border border-gray-100">
+                      {game.category}
+                    </span>
+                  </div>
+
+                  <div className="mt-3.5 space-y-1">
+                    <h3 className="font-bold text-base text-gray-900 group-hover:text-[#0f3e3a] transition-colors">
+                      {game.title}
+                    </h3>
+                    <p className="text-xs font-semibold text-teal-700">
+                      {game.focus}
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed pt-1">
+                      {game.description}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400 font-medium">
+                  <span>{game.difficulty}</span>
+                  <span className="text-[#0f3e3a] font-semibold">{game.duration}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Entry Portals */}
         <div className="grid md:grid-cols-2 gap-6 pt-4">
 
@@ -615,6 +764,7 @@ function PatientLayout({ children, currentView, setCurrentView }) {
 
   const navItems = [
     { label: "Home", view: "patient-dashboard", icon: Home },
+    { label: "Location Sharing", view: "patient-location", icon: MapPin },
     { label: "Activities", view: "patient-activities", icon: Brain },
     { label: "My Memories", view: "patient-family", icon: Heart },
     { label: "My Mood", view: "patient-mood", icon: Heart },
@@ -901,10 +1051,11 @@ function PatientFamilyMemoriesView() {
 /* ==========================================================================
    3. CAREGIVER DASHBOARD LAYOUT & VIEWS
    ========================================================================== */
-function CaregiverLayout({ children, currentView, setCurrentView, caregiver }) {
+function CaregiverLayout({ children, currentView, setCurrentView, caregiver, patientSync }) {
   const menuItems = [
     { label: "Overview", view: "caregiver-overview", icon: Home },
     { label: "Patients", view: "caregiver-patients", icon: UserCheck },
+    { label: "Location", view: "caregiver-location", icon: MapPin },
     { label: "Analytics", view: "caregiver-analytics", icon: Activity },
     { label: "Rhythm", view: "caregiver-rhythm", icon: Brain },
     { label: "Vault", view: "caregiver-vault", icon: Calendar },
@@ -918,13 +1069,43 @@ function CaregiverLayout({ children, currentView, setCurrentView, caregiver }) {
     <div className="flex min-h-[calc(100vh-73px)]">
       {/* Sidebar */}
       <aside className="w-64 bg-stone-50 border-r border-gray-200 p-6 flex flex-col justify-between">
-        <div className="space-y-6">
+        <div className="space-y-5">
           <div>
             <h2 className="font-bold text-gray-900 text-lg">
               Caregiver Dashboard
             </h2>
             <p className="text-xs text-gray-400">Active Monitoring</p>
           </div>
+
+          {/* Persistent Patient Sync Indicator */}
+          {patientSync && (
+            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500">
+                <span>Patient Telemetry</span>
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    patientSync.state === "synced"
+                      ? "bg-emerald-500 animate-pulse"
+                      : patientSync.state === "pending"
+                      ? "bg-amber-500"
+                      : "bg-slate-400"
+                  }`}
+                />
+              </div>
+              <p className="mt-1 text-xs font-bold text-slate-800">
+                Asha: {patientSync.label}
+              </p>
+              <p className="mt-0.5 text-[10px] text-slate-400">
+                {patientSync.state === "synced"
+                  ? "Real-time bi-directional sync"
+                  : patientSync.state === "pending"
+                  ? `${patientSync.pendingCount || 1} pending upload items`
+                  : patientSync.lastSyncedAt
+                  ? `Last sync: ${new Date(patientSync.lastSyncedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
+                  : "Showing cached records"}
+              </p>
+            </div>
+          )}
 
           <nav className="space-y-1.5">
             {menuItems.map((item) => {
@@ -1077,6 +1258,7 @@ function CaregiverOverviewView({ setCurrentView }) {
             <tr>
               <th className="p-4">PATIENT</th>
               <th>STATUS</th>
+              <th>SYNC</th>
               <th>MEMORY</th>
               <th>ATTENTION</th>
               <th>RECENT ACTIVITY</th>
@@ -1115,6 +1297,32 @@ function CaregiverOverviewView({ setCurrentView }) {
                     >
                       {isUrgent ? "EMERGENCY" : p.status || "Stable"}
                     </span>
+                  </td>
+                  <td>
+                    {p.syncStatus ? (
+                      <span
+                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          p.syncStatus.state === "synced"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : p.syncStatus.state === "pending"
+                            ? "bg-amber-50 text-amber-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            p.syncStatus.state === "synced"
+                              ? "bg-emerald-500"
+                              : p.syncStatus.state === "pending"
+                              ? "bg-amber-500"
+                              : "bg-slate-400"
+                          }`}
+                        />
+                        {p.syncStatus.label}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
                   </td>
                   <td className="font-semibold text-gray-800">{p.memory}%</td>
                   <td className="font-semibold text-gray-800">{p.attention}%</td>

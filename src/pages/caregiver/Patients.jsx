@@ -1,4 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import {
+  MapPin,
+  RefreshCw,
+  Clock,
+  ShieldAlert,
+  CheckCircle2,
+  Navigation,
+} from "lucide-react";
+import LocationMap from "../../components/LocationMap";
 
 const initialPatients = [
   {
@@ -195,16 +204,76 @@ function Patients({ setCurrentView }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All Patients");
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [patientLocation, setPatientLocation] = useState(null);
+  const [refreshingLocation, setRefreshingLocation] = useState(false);
+  const [patientActivities, setPatientActivities] = useState(null);
+  const [patientSyncStatus, setPatientSyncStatus] = useState(null);
+  const [refreshingActivities, setRefreshingActivities] = useState(false);
+
+  const fetchPatientLocation = useCallback(async (patientId = "P001", isManual = false) => {
+    if (isManual) setRefreshingLocation(true);
+    try {
+      const res = await fetch(`/api/caregiver/patients/${patientId}/location`);
+      if (res.ok) {
+        const data = await res.json();
+        setPatientLocation(data);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch patient location:", err);
+    } finally {
+      if (isManual) setRefreshingLocation(false);
+    }
+  }, []);
+
+  const fetchPatientData = useCallback(async (patientId, isManual = false) => {
+    if (isManual) setRefreshingActivities(true);
+    try {
+      const [actRes, syncRes] = await Promise.all([
+        fetch(`/api/caregiver/patients/${patientId}/activities`),
+        fetch(`/api/caregiver/patients/${patientId}/sync-status`),
+      ]);
+      if (actRes.ok) {
+        const actData = await actRes.json();
+        setPatientActivities(actData);
+      }
+      if (syncRes.ok) {
+        const sData = await syncRes.json();
+        setPatientSyncStatus(sData);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch patient activities and sync status:", err);
+    } finally {
+      if (isManual) setRefreshingActivities(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetch("/api/caregiver/patients")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setPatients(data);
-        }
-      })
-      .catch((err) => console.warn("Failed to fetch caregiver patients:", err));
+    if (selectedPatient) {
+      fetchPatientLocation(selectedPatient.id, false);
+      fetchPatientData(selectedPatient.id, false);
+      const interval = setInterval(() => {
+        fetchPatientLocation(selectedPatient.id, false);
+        fetchPatientData(selectedPatient.id, false);
+      }, 12000);
+      return () => clearInterval(interval);
+    }
+  }, [selectedPatient, fetchPatientLocation, fetchPatientData]);
+
+  useEffect(() => {
+    const loadPatients = () => {
+      fetch("/api/caregiver/patients")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setPatients(data);
+          }
+        })
+        .catch((err) => console.warn("Failed to fetch caregiver patients:", err));
+    };
+
+    loadPatients();
+    const interval = setInterval(loadPatients, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -299,6 +368,34 @@ function Patients({ setCurrentView }) {
   if (selectedPatient) {
     const patient = selectedPatient;
 
+    const now = Date.now();
+    const updateTime = patientLocation?.timestamp
+      ? new Date(patientLocation.timestamp).getTime()
+      : 0;
+    const ageMs = now - updateTime;
+    const isRecent = ageMs <= 180000; // within 3 minutes
+
+    const isLive =
+      patientLocation?.sharingEnabled &&
+      patientLocation?.status === "LIVE" &&
+      isRecent;
+
+    const locStatus =
+      !patientLocation ||
+      (typeof patientLocation.latitude !== "number" &&
+        typeof patientLocation.longitude !== "number")
+        ? "UNAVAILABLE"
+        : isLive
+        ? "LIVE"
+        : "LAST KNOWN";
+
+    const formattedLocTime = patientLocation?.timestamp
+      ? new Date(patientLocation.timestamp).toLocaleString([], {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "Not available";
+
     return (
       <div className="min-h-screen bg-slate-50 p-6">
 
@@ -341,6 +438,30 @@ function Patients({ setCurrentView }) {
                     {patient.status}
                   </span>
 
+                  {/* Synchronization Status Indicator */}
+                  {patientSyncStatus && (
+                    <span
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${
+                        patientSyncStatus.state === "synced"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : patientSyncStatus.state === "pending"
+                          ? "bg-amber-50 text-amber-800 border-amber-200"
+                          : "bg-slate-100 text-slate-700 border-slate-300"
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          patientSyncStatus.state === "synced"
+                            ? "bg-emerald-500"
+                            : patientSyncStatus.state === "pending"
+                            ? "bg-amber-500"
+                            : "bg-slate-400"
+                        }`}
+                      />
+                      {patientSyncStatus.label}
+                    </span>
+                  )}
+
                 </div>
 
                 <p className="mt-1 text-sm text-slate-500">
@@ -356,16 +477,29 @@ function Patients({ setCurrentView }) {
 
             </div>
 
-            <div className="text-left md:text-right">
+            <div className="flex items-center gap-3 text-left md:text-right">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-slate-400">
+                  Last Active
+                </p>
 
-              <p className="text-xs uppercase tracking-wider text-slate-400">
-                Last Active
-              </p>
+                <p className="mt-1 text-sm font-semibold text-slate-700">
+                  {patient.lastActive}
+                </p>
+              </div>
 
-              <p className="mt-1 text-sm font-semibold text-slate-700">
-                {patient.lastActive}
-              </p>
-
+              <button
+                type="button"
+                onClick={() => {
+                  fetchPatientLocation(patient.id, true);
+                  fetchPatientData(patient.id, true);
+                }}
+                disabled={refreshingLocation || refreshingActivities}
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 transition shadow-2xs"
+              >
+                <RefreshCw size={12} className={refreshingLocation || refreshingActivities ? "animate-spin text-teal-700" : ""} />
+                <span>{refreshingLocation || refreshingActivities ? "Syncing..." : "Sync All"}</span>
+              </button>
             </div>
 
           </div>
@@ -379,12 +513,21 @@ function Patients({ setCurrentView }) {
             ANVESHA Patient Workspace
           </h2>
 
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
 
             <QuickAction
               label="Overview"
               icon="🏠"
               onClick={() => setCurrentView("caregiver-overview")}
+            />
+
+            <QuickAction
+              label="Location"
+              icon="📍"
+              onClick={() => {
+                const el = document.getElementById("patient-location-monitoring");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
             />
 
             <QuickAction
@@ -462,6 +605,106 @@ function Patients({ setCurrentView }) {
 
           </div>
 
+        </div>
+
+        {/* Real-Time Patient Location Monitoring */}
+        <div id="patient-location-monitoring" className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <MapPin size={20} className="text-teal-700" />
+                  <span>Real-Time Location Monitoring</span>
+                </h2>
+                <span
+                  className={`text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 ${
+                    locStatus === "LIVE"
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse"
+                      : locStatus === "LAST KNOWN"
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
+                  }`}
+                >
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      locStatus === "LIVE"
+                        ? "bg-emerald-600"
+                        : locStatus === "LAST KNOWN"
+                        ? "bg-amber-500"
+                        : "bg-slate-400"
+                    }`}
+                  />
+                  {locStatus === "LIVE"
+                    ? "● LIVE"
+                    : locStatus === "LAST KNOWN"
+                    ? "LAST KNOWN"
+                    : "UNAVAILABLE"}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-slate-500">
+                Geospatial tracking and perimeter monitoring for {patient.name}.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => fetchPatientLocation(patient.id, true)}
+                disabled={refreshingLocation}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3.5 py-2 text-xs font-bold text-slate-700 transition shadow-2xs"
+              >
+                <RefreshCw size={13} className={refreshingLocation ? "animate-spin text-teal-700" : ""} />
+                <span>{refreshingLocation ? "Refreshing..." : "Refresh Location"}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Location details summary */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-xs">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-[10px] text-slate-400 uppercase font-bold">Location</span>
+              <p className="font-bold text-slate-800 mt-0.5 truncate">{patientLocation?.address || patient.location || "Device Location"}</p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-[10px] text-slate-400 uppercase font-bold">Last Updated</span>
+              <p className="font-bold text-slate-800 mt-0.5 truncate">{formattedLocTime}</p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-[10px] text-slate-400 uppercase font-bold">GPS Accuracy</span>
+              <p className="font-bold text-slate-800 mt-0.5">
+                {patientLocation?.accuracy ? `±${Math.round(patientLocation.accuracy)}m` : "Standard"}
+              </p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-[10px] text-slate-400 uppercase font-bold">Coordinates</span>
+              <p className="font-bold text-slate-800 mt-0.5 font-mono text-[11px]">
+                {patientLocation?.latitude && patientLocation?.longitude ? `${patientLocation.latitude.toFixed(4)}°, ${patientLocation.longitude.toFixed(4)}°` : "Awaiting GPS..."}
+              </p>
+            </div>
+          </div>
+
+          {/* Interactive Map */}
+          {patientLocation && typeof patientLocation.latitude === "number" && typeof patientLocation.longitude === "number" ? (
+            <LocationMap
+              latitude={patientLocation.latitude}
+              longitude={patientLocation.longitude}
+              accuracy={patientLocation.accuracy}
+              patientName={patient.name}
+              status={locStatus}
+              updatedAt={patientLocation.timestamp}
+              address={patientLocation.address}
+              height="360px"
+              zoom={15}
+            />
+          ) : (
+            <div className="h-64 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center text-center p-6 text-slate-400">
+              <MapPin size={32} className="text-slate-300 mb-2" />
+              <p className="font-bold text-slate-600 text-sm">No Location Telemetry Available</p>
+              <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                Patient device has not reported GPS coordinates yet.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Cognitive Overview */}
@@ -589,80 +832,120 @@ function Patients({ setCurrentView }) {
         {/* Activity History */}
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-          <div className="mb-6">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
-            <h2 className="text-lg font-semibold text-slate-900">
-              Activity History
-            </h2>
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Activity History
+              </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Recent cognitive activities and engagement
-            </p>
+              <p className="mt-1 text-sm text-slate-500">
+                Recent cognitive activities and engagement
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {patientSyncStatus && (
+                <span
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${
+                    patientSyncStatus.state === "synced"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : patientSyncStatus.state === "pending"
+                      ? "bg-amber-50 text-amber-800 border-amber-200"
+                      : "bg-slate-100 text-slate-700 border-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      patientSyncStatus.state === "synced"
+                        ? "bg-emerald-500"
+                        : patientSyncStatus.state === "pending"
+                        ? "bg-amber-500"
+                        : "bg-slate-400"
+                    }`}
+                  />
+                  {patientSyncStatus.state === "synced"
+                    ? "Live Sync"
+                    : `Last synced: ${patientSyncStatus.lastSyncedAt ? new Date(patientSyncStatus.lastSyncedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "Offline"}`}
+                </span>
+              )}
+
+              <button
+                type="button"
+                onClick={() => fetchPatientData(patient.id, true)}
+                disabled={refreshingActivities}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 transition"
+              >
+                <RefreshCw size={11} className={refreshingActivities ? "animate-spin text-teal-700" : ""} />
+                <span>{refreshingActivities ? "Loading..." : "Refresh"}</span>
+              </button>
+            </div>
 
           </div>
 
-          {patient.activityHistory.length > 0 ? (
+          {(() => {
+            const activitiesToDisplay =
+              Array.isArray(patientActivities?.activityHistory) && patientActivities.activityHistory.length > 0
+                ? patientActivities.activityHistory
+                : patient.activityHistory || [];
 
-            <div className="space-y-4">
+            return activitiesToDisplay.length > 0 ? (
+              <div className="space-y-4">
+                {activitiesToDisplay.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4 transition hover:bg-slate-100/70"
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-sm">
+                      {activity.icon || "🧠"}
+                    </div>
 
-              {patient.activityHistory.map((activity, index) => (
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-800">
+                        {activity.name}
+                      </p>
 
-                <div
-                  key={index}
-                  className="flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4"
-                >
+                      <p className="mt-1 text-xs text-slate-400">
+                        {activity.time}
+                        {activity.difficulty && (
+                          <span className="ml-2 font-medium text-slate-500 capitalize">
+                            • {activity.difficulty}
+                          </span>
+                        )}
+                        {activity.performanceLevel && (
+                          <span className="ml-1 text-teal-700 font-medium">
+                            • {activity.performanceLevel}
+                          </span>
+                        )}
+                      </p>
+                    </div>
 
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-sm">
-                    {activity.icon}
+                    <div className="text-right">
+                      <p className="text-xs text-slate-400">
+                        Result
+                      </p>
+
+                      <p className="mt-1 text-sm font-bold text-slate-800">
+                        {typeof activity.score === "number"
+                          ? `${activity.score}%`
+                          : activity.score}
+                      </p>
+                    </div>
                   </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl bg-slate-50 p-6 text-center">
+                <p className="text-sm font-semibold text-slate-700">
+                  No activity recorded yet
+                </p>
 
-                  <div className="min-w-0 flex-1">
-
-                    <p className="text-sm font-semibold text-slate-800">
-                      {activity.name}
-                    </p>
-
-                    <p className="mt-1 text-xs text-slate-400">
-                      {activity.time}
-                    </p>
-
-                  </div>
-
-                  <div className="text-right">
-
-                    <p className="text-xs text-slate-400">
-                      Result
-                    </p>
-
-                    <p className="mt-1 text-sm font-bold text-slate-800">
-                      {typeof activity.score === "number"
-                        ? `${activity.score}%`
-                        : activity.score}
-                    </p>
-
-                  </div>
-
-                </div>
-
-              ))}
-
-            </div>
-
-          ) : (
-
-            <div className="rounded-xl bg-slate-50 p-6 text-center">
-
-              <p className="text-sm font-semibold text-slate-700">
-                No activity recorded yet
-              </p>
-
-              <p className="mt-1 text-xs text-slate-400">
-                Activity history will appear after the patient starts using ANVESHA.
-              </p>
-
-            </div>
-
-          )}
+                <p className="mt-1 text-xs text-slate-400">
+                  Activity history will appear after the patient starts using ANVESHA.
+                </p>
+              </div>
+            );
+          })()}
 
         </div>
 
@@ -969,6 +1252,29 @@ function Patients({ setCurrentView }) {
                       <p className="mt-1 text-sm text-slate-500">
                         {patient.age} years • Room {patient.room}
                       </p>
+
+                      {patient.syncStatus && (
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              patient.syncStatus.state === "synced"
+                                ? "bg-emerald-500"
+                                : patient.syncStatus.state === "pending"
+                                ? "bg-amber-500"
+                                : "bg-slate-400"
+                            }`}
+                          />
+                          <span className={`text-[11px] font-semibold ${
+                            patient.syncStatus.state === "synced"
+                              ? "text-emerald-700"
+                              : patient.syncStatus.state === "pending"
+                              ? "text-amber-700"
+                              : "text-slate-500"
+                          }`}>
+                            {patient.syncStatus.label}
+                          </span>
+                        </div>
+                      )}
 
                     </div>
 
