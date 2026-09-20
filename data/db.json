@@ -20,16 +20,16 @@
     "emergencyContact": "Priya Sharma",
     "mood": "Calm",
     "currentLocation": {
-      "latitude": 28.737329318748095,
-      "longitude": 77.11295524565482,
-      "accuracy": 95,
+      "latitude": 28.737317572731797,
+      "longitude": 77.11294886994527,
+      "accuracy": 92,
       "address": "Current Device Location",
       "sharingEnabled": true,
-      "timestamp": "2026-09-20T11:41:39.461Z",
-      "updatedAt": "2026-09-20T11:41:39.499Z"
+      "timestamp": "2026-09-20T12:07:29.743Z",
+      "updatedAt": "2026-09-20T12:07:29.801Z"
     },
     "lastActive": "Just now",
-    "lastSyncedAt": "2026-09-20T11:41:39.499Z",
+    "lastSyncedAt": "2026-09-20T12:07:29.801Z",
     "isOnline": true,
     "pendingSyncCount": 0
   },
@@ -122,15 +122,15 @@
         }
       ],
       "currentLocation": {
-        "latitude": 28.737329318748095,
-        "longitude": 77.11295524565482,
-        "accuracy": 95,
+        "latitude": 28.737317572731797,
+        "longitude": 77.11294886994527,
+        "accuracy": 92,
         "address": "Current Device Location",
         "sharingEnabled": true,
-        "timestamp": "2026-09-20T11:41:39.461Z",
-        "updatedAt": "2026-09-20T11:41:39.499Z"
+        "timestamp": "2026-09-20T12:07:29.743Z",
+        "updatedAt": "2026-09-20T12:07:29.801Z"
       },
-      "lastSyncedAt": "2026-09-20T11:41:39.499Z",
+      "lastSyncedAt": "2026-09-20T12:07:29.801Z",
       "isOnline": true,
       "pendingSyncCount": 0
     },
@@ -1036,6 +1036,20 @@
   "locationHistory": [
     {
       "patientId": "P001",
+      "latitude": 28.737317572731797,
+      "longitude": 77.11294886994527,
+      "accuracy": 92,
+      "timestamp": "2026-09-20T12:07:29.743Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737317572731797,
+      "longitude": 77.11294886994527,
+      "accuracy": 92,
+      "timestamp": "2026-09-20T12:07:29.743Z"
+    },
+    {
+      "patientId": "P001",
       "latitude": 28.737329318748095,
       "longitude": 77.11295524565482,
       "accuracy": 95,
@@ -1084,18 +1098,18 @@
       "title": "Priya",
       "subtitle": "Daughter",
       "category": "People",
-      "image": "/uploads/memories/memory-P001-1789904023604-391114655.jpeg",
+      "image": "/uploads/memories/memory-P001-1789908011450-900662953.jpeg",
       "description": "Priya is your daughter. She enjoys spending time with you and visiting on weekends.",
       "year": "Family",
       "favorite": true,
-      "originalFilename": "WhatsApp Image 2026-09-02 at 7.35.36 PM.jpeg",
-      "filename": "memory-P001-1789904023604-391114655.jpeg",
-      "storedPath": "/uploads/memories/memory-P001-1789904023604-391114655.jpeg",
+      "originalFilename": "images.jpeg",
+      "filename": "memory-P001-1789908011450-900662953.jpeg",
+      "storedPath": "/uploads/memories/memory-P001-1789908011450-900662953.jpeg",
       "mimetype": "image/jpeg",
-      "size": 514218,
-      "uploadTimestamp": "2026-09-20T11:33:43.624Z",
-      "timestamp": "2026-09-20T11:33:43.624Z",
-      "updatedAt": "2026-09-20T11:33:43.624Z"
+      "size": 19416,
+      "uploadTimestamp": "2026-09-20T12:40:11.467Z",
+      "timestamp": "2026-09-20T12:40:11.467Z",
+      "updatedAt": "2026-09-20T12:40:11.467Z"
     },
     {
       "id": 2,
@@ -1103,10 +1117,18 @@
       "title": "Rahul",
       "subtitle": "Grandson",
       "category": "People",
-      "image": "",
+      "image": "/uploads/memories/memory-P001-1789906017999-828574790.jpg",
       "description": "Rahul is your grandson. You often enjoy talking and playing games together.",
       "year": "Family",
-      "favorite": false
+      "favorite": false,
+      "originalFilename": "a8b524e84cdca7bf24711fbbfe3f1532.jpg",
+      "filename": "memory-P001-1789906017999-828574790.jpg",
+      "storedPath": "/uploads/memories/memory-P001-1789906017999-828574790.jpg",
+      "mimetype": "image/jpeg",
+      "size": 244526,
+      "uploadTimestamp": "2026-09-20T12:06:58.020Z",
+      "timestamp": "2026-09-20T12:06:58.020Z",
+      "updatedAt": "2026-09-20T12:06:58.020Z"
     },
     {
       "id": 3,
