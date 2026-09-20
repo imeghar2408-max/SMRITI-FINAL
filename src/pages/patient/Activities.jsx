@@ -58,6 +58,7 @@ function Activities({ setCurrentView }) {
       description: "Flip the cards and find the matching pairs.",
       difficulty: "Easy",
       duration: "5–10 min",
+      image: "/games/memory-match.svg",
       icon: Brain,
       iconBg: "bg-emerald-50",
       iconColor: "text-[#0f3e3a]",
@@ -70,6 +71,7 @@ function Activities({ setCurrentView }) {
       description: "Look carefully and find the changes between two pictures.",
       difficulty: "Easy",
       duration: "5–10 min",
+      image: "/games/spot-difference.svg",
       icon: Eye,
       iconBg: "bg-blue-50",
       iconColor: "text-blue-600",
@@ -82,6 +84,7 @@ function Activities({ setCurrentView }) {
       description: "Choose the shape or color that comes next in the sequence.",
       difficulty: "Easy",
       duration: "5 min",
+      image: "/games/pattern-match.svg",
       icon: Layers3,
       iconBg: "bg-violet-50",
       iconColor: "text-violet-600",
@@ -94,6 +97,7 @@ function Activities({ setCurrentView }) {
       description: "Put everyday activities in the correct order.",
       difficulty: "Easy",
       duration: "5–8 min",
+      image: "/games/daily-routine.svg",
       icon: CalendarClock,
       iconBg: "bg-amber-50",
       iconColor: "text-amber-600",
@@ -190,50 +194,62 @@ function Activities({ setCurrentView }) {
             return (
               <div
                 key={activity.id}
-                className="bg-white rounded-[28px] border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all"
+                className="group bg-white rounded-[28px] border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col justify-between"
               >
-                {/* Illustration area */}
-                <div className="h-40 bg-[#f7faf8] flex items-center justify-center border-b border-gray-100">
-                  <div
-                    className={`w-20 h-20 rounded-3xl ${activity.iconBg} ${activity.iconColor} flex items-center justify-center`}
-                  >
-                    <Icon size={38} strokeWidth={1.8} />
+                <div>
+                  {/* Illustration area */}
+                  <div className="relative h-48 bg-stone-100 overflow-hidden border-b border-gray-100">
+                    <img
+                      src={activity.image}
+                      alt={activity.title}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-3.5 right-3.5">
+                      <div
+                        className={`w-10 h-10 rounded-2xl ${activity.iconBg} ${activity.iconColor} bg-white/95 backdrop-blur-xs flex items-center justify-center shadow-xs border border-white/80`}
+                      >
+                        <Icon size={20} strokeWidth={2} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card content */}
+                  <div className="p-6">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#0f3e3a] transition-colors">
+                          {activity.title}
+                        </h3>
+
+                        {activity.recommended && (
+                          <span className="inline-flex mt-2 px-2.5 py-1 rounded-full bg-emerald-50 text-[#0f3e3a] text-[11px] font-bold">
+                            Recommended for you
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 shrink-0">
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">
+                          {activity.difficulty}
+                        </span>
+
+                        <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-[11px] font-bold">
+                          {activity.duration}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-gray-500 mt-3 leading-relaxed min-h-[42px]">
+                      {activity.description}
+                    </p>
                   </div>
                 </div>
 
-                {/* Card content */}
-                <div className="p-6">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {activity.title}
-                      </h3>
-
-                      {activity.recommended && (
-                        <span className="inline-flex mt-2 px-2.5 py-1 rounded-full bg-emerald-50 text-[#0f3e3a] text-[11px] font-bold">
-                          Recommended for you
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2 shrink-0">
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">
-                        {activity.difficulty}
-                      </span>
-
-                      <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-[11px] font-bold">
-                        {activity.duration}
-                      </span>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-gray-500 mt-3 leading-relaxed min-h-[42px]">
-                    {activity.description}
-                  </p>
-
+                <div className="px-6 pb-6">
                   <button
                     onClick={() => setCurrentView(activity.view)}
-                    className="w-full mt-5 py-3.5 rounded-2xl bg-[#0f3e3a] text-white font-semibold flex items-center justify-center gap-2 hover:bg-[#0c312e] transition"
+                    className="w-full py-3.5 rounded-2xl bg-[#0f3e3a] text-white font-semibold flex items-center justify-center gap-2 hover:bg-[#0c312e] transition"
                   >
                     <span>START ACTIVITY</span>
                     <ArrowRight size={17} />
