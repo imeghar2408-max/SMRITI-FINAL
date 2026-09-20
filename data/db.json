@@ -27,8 +27,8 @@
       "age": 78,
       "room": "402",
       "status": "Stable",
-      "memory": 66,
-      "attention": 89,
+      "memory": 73,
+      "attention": 97,
       "lastActive": "Just now",
       "recentActivity": "Memory Game",
       "gameScore": 100,
@@ -49,6 +49,54 @@
       "activityHistory": [
         {
           "name": "Memory Game",
+          "score": 75,
+          "time": "Today • 3:12 pm",
+          "icon": "🧠"
+        },
+        {
+          "name": "Memory Game",
+          "score": 60,
+          "time": "Today • 1:17 pm",
+          "icon": "🧠"
+        },
+        {
+          "name": "Daily Routine",
+          "score": 100,
+          "time": "Today • 12:13 pm",
+          "icon": "📅"
+        },
+        {
+          "name": "Pattern Match",
+          "score": 100,
+          "time": "Today • 12:13 pm",
+          "icon": "🧩"
+        },
+        {
+          "name": "Spot the Difference",
+          "score": 100,
+          "time": "Today • 12:12 pm",
+          "icon": "🎯"
+        },
+        {
+          "name": "Spot the Difference",
+          "score": 100,
+          "time": "Today • 11:33 am",
+          "icon": "🎯"
+        },
+        {
+          "name": "Memory Game",
+          "score": 60,
+          "time": "Today • 11:32 am",
+          "icon": "🧠"
+        },
+        {
+          "name": "Memory Game",
+          "score": 75,
+          "time": "Today • 11:31 am",
+          "icon": "🧠"
+        },
+        {
+          "name": "Memory Game",
           "score": 38,
           "time": "Today • 12:22 pm",
           "icon": "🧠"
@@ -57,54 +105,6 @@
           "name": "Memory Game",
           "score": 60,
           "time": "Today • 12:20 pm",
-          "icon": "🧠"
-        },
-        {
-          "name": "Pattern Match",
-          "score": 90,
-          "time": "Today • 8:04 pm",
-          "icon": "🧩"
-        },
-        {
-          "name": "Memory Game",
-          "score": 94,
-          "time": "Today • 7:57 pm",
-          "icon": "🧠"
-        },
-        {
-          "name": "Daily Routine",
-          "score": 95,
-          "time": "Today • 7:56 pm",
-          "icon": "📅"
-        },
-        {
-          "name": "Pattern Match",
-          "score": 100,
-          "time": "Today • 7:56 pm",
-          "icon": "🧩"
-        },
-        {
-          "name": "Spot the Difference",
-          "score": 88,
-          "time": "Today • 7:56 pm",
-          "icon": "🎯"
-        },
-        {
-          "name": "Memory Game",
-          "score": 92,
-          "time": "Today • 7:56 pm",
-          "icon": "🧠"
-        },
-        {
-          "name": "Memory Game",
-          "score": 100,
-          "time": "Today • 7:37 pm",
-          "icon": "🧠"
-        },
-        {
-          "name": "Memory Game",
-          "score": 95,
-          "time": "Today • 7:37 pm",
           "icon": "🧠"
         }
       ]
@@ -283,10 +283,50 @@
       "title": "Doctor Appointment",
       "time": "4:00 PM",
       "description": "General wellness consultation at 4 PM.",
-      "completed": false
+      "completed": true
     }
   ],
   "moodLogs": [
+    {
+      "id": 1789897390323,
+      "mood": "happy",
+      "label": "Calm",
+      "emoji": "😌",
+      "timestamp": "2026-09-20T09:43:10.323Z",
+      "dateLabel": "Today",
+      "reasons": [],
+      "note": ""
+    },
+    {
+      "id": 1789886876555,
+      "mood": "happy",
+      "label": "Calm",
+      "emoji": "😌",
+      "timestamp": "2026-09-20T06:47:56.555Z",
+      "dateLabel": "Today",
+      "reasons": [],
+      "note": ""
+    },
+    {
+      "id": 1789884177337,
+      "mood": "happy",
+      "label": "Calm",
+      "emoji": "😌",
+      "timestamp": "2026-09-20T06:02:57.337Z",
+      "dateLabel": "Today",
+      "reasons": [],
+      "note": ""
+    },
+    {
+      "id": 1789842157601,
+      "mood": "happy",
+      "label": "Calm",
+      "emoji": "😌",
+      "timestamp": "2026-09-19T18:22:37.601Z",
+      "dateLabel": "Today",
+      "reasons": [],
+      "note": ""
+    },
     {
       "id": 1789501877448,
       "mood": "sad",
@@ -332,6 +372,206 @@
     }
   ],
   "activityResults": [
+    {
+      "id": 1789897363166,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "gentle",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 75,
+      "score": 100,
+      "performanceLevel": "Strong Focus",
+      "moves": 4,
+      "hintsUsed": 0,
+      "mistakes": 1,
+      "elapsedTime": 8,
+      "completedAt": "2026-09-20T09:42:43.166Z",
+      "dateLabel": "Today • 3:12 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "easy",
+        "performanceScore": 80,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789890435327,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "gentle",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 60,
+      "score": 100,
+      "performanceLevel": "Steady Recall",
+      "moves": 5,
+      "hintsUsed": 0,
+      "mistakes": 2,
+      "elapsedTime": 9,
+      "completedAt": "2026-09-20T07:47:15.327Z",
+      "dateLabel": "Today • 1:17 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "gentle",
+        "performanceScore": 65,
+        "performanceBand": "moderate",
+        "reason": "Performance is stable. Maintaining challenge while reinforcing cognitive rhythm.",
+        "recommendedTime": "5–10 min"
+      }
+    },
+    {
+      "id": 1789886616107,
+      "gameId": "daily-routine",
+      "game": "Daily Routine",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "sequencing",
+      "accuracy": 100,
+      "score": 100,
+      "performanceLevel": "Natural Rhythm & Sequence Recall",
+      "moves": 1,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 14,
+      "completedAt": "2026-09-20T06:43:36.107Z",
+      "dateLabel": "Today • 12:13 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 100,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789886595323,
+      "gameId": "pattern-match",
+      "game": "Pattern Match",
+      "difficulty": "medium",
+      "theme": "Family",
+      "category": "attention",
+      "accuracy": 100,
+      "score": 95,
+      "performanceLevel": "Keen Logic & Sequence Recognition",
+      "moves": 3,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 18,
+      "completedAt": "2026-09-20T06:43:15.323Z",
+      "dateLabel": "Today • 12:13 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "hard",
+        "performanceScore": 100,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789886569781,
+      "gameId": "spot-the-difference",
+      "game": "Spot the Difference",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "attention",
+      "accuracy": 100,
+      "score": 100,
+      "performanceLevel": "Sharp Visual Attention",
+      "moves": 0,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 5,
+      "completedAt": "2026-09-20T06:42:49.781Z",
+      "dateLabel": "Today • 12:12 pm",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 100,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789884213555,
+      "gameId": "spot-the-difference",
+      "game": "Spot the Difference",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "attention",
+      "accuracy": 100,
+      "score": 100,
+      "performanceLevel": "Sharp Visual Attention",
+      "moves": 0,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 8,
+      "completedAt": "2026-09-20T06:03:33.555Z",
+      "dateLabel": "Today • 11:33 am",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 100,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1789884152869,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "gentle",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 60,
+      "score": 100,
+      "performanceLevel": "Steady Recall",
+      "moves": 5,
+      "hintsUsed": 0,
+      "mistakes": 2,
+      "elapsedTime": 8,
+      "completedAt": "2026-09-20T06:02:32.869Z",
+      "dateLabel": "Today • 11:32 am",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "gentle",
+        "performanceScore": 65,
+        "performanceBand": "moderate",
+        "reason": "Performance is stable. Maintaining challenge while reinforcing cognitive rhythm.",
+        "recommendedTime": "5–10 min"
+      }
+    },
+    {
+      "id": 1789884092376,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "gentle",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 75,
+      "score": 100,
+      "performanceLevel": "Strong Focus",
+      "moves": 4,
+      "hintsUsed": 0,
+      "mistakes": 1,
+      "elapsedTime": 7,
+      "completedAt": "2026-09-20T06:01:32.376Z",
+      "dateLabel": "Today • 11:31 am",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "easy",
+        "performanceScore": 80,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
     {
       "id": 1789541520970,
       "gameId": "memory-match",
@@ -755,16 +995,16 @@
   ],
   "analytics": {
     "trend": [
-      88,
-      100,
-      95,
-      94,
-      90,
       60,
-      38
+      100,
+      100,
+      100,
+      100,
+      60,
+      75
     ],
-    "memory": 66,
-    "attention": 89,
+    "memory": 73,
+    "attention": 97,
     "engagement": 87,
     "completion": 92
   }

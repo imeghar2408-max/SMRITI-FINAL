@@ -49,7 +49,7 @@ const initialReminders = [
   },
 ];
 
-export default function Reminders() {
+export default function Reminders({ setCurrentView }) {
   const [reminders, setReminders] = useState(initialReminders);
   const [showAdd, setShowAdd] = useState(false);
 
@@ -81,23 +81,24 @@ export default function Reminders() {
   }, []);
 
   const toggleCompleted = async (id) => {
-    setReminders((current) =>
-      current.map((reminder) =>
-        reminder.id === id
-          ? { ...reminder, completed: !reminder.completed }
-          : reminder
-      )
-    );
+  console.log("REMINDER CLICKED", id);
 
-    try {
-      await fetch(`/api/patient/reminders/${id}/toggle`, {
-        method: "PATCH",
-      });
-    } catch (err) {
-      console.warn("Failed to toggle reminder on server:", err);
-    }
-  };
+  setReminders((current) =>
+    current.map((reminder) =>
+      reminder.id === id
+        ? { ...reminder, completed: !reminder.completed }
+        : reminder
+    )
+  );
 
+  try {
+    await fetch(`/api/patient/reminders/${id}/toggle`, {
+      method: "PATCH",
+    });
+  } catch (err) {
+    console.warn("Failed to toggle reminder on server:", err);
+  }
+};
   const addReminder = async (event) => {
     event.preventDefault();
 
@@ -256,16 +257,21 @@ export default function Reminders() {
                 </div>
 
                 <button
-                  onClick={() => toggleCompleted(reminder.id)}
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition ${
-                    reminder.completed
-                      ? "border-emerald-200 bg-emerald-100 text-emerald-700"
-                      : "border-gray-200 text-gray-400 hover:border-[#0f3e3a] hover:text-[#0f3e3a]"
-                  }`}
-                  aria-label="Mark reminder complete"
-                >
-                  <CheckCircle2 size={21} />
-                </button>
+  type="button"
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCompleted(reminder.id);
+  }}
+  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition ${
+    reminder.completed
+      ? "border-emerald-200 bg-emerald-100 text-emerald-700"
+      : "border-gray-200 text-gray-400 hover:border-[#0f3e3a] hover:text-[#0f3e3a]"
+  }`}
+  aria-label="Mark reminder complete"
+>
+  <CheckCircle2 size={21} />
+</button>
               </div>
             </div>
           );

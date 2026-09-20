@@ -209,27 +209,44 @@ export default function FamilyMemory() {
   };
 
   const updateMemoryImage = async (id, file) => {
-    try {
-      const imageData = await readFileAsDataUrl(file);
+  try {
+    const imageData = await readFileAsDataUrl(file);
 
-      setMemories((current) =>
-        current.map((memory) =>
-          memory.id === id
-            ? { ...memory, image: imageData }
-            : memory
-        )
-      );
+    // Update image on the screen immediately
+    setMemories((current) =>
+      current.map((memory) =>
+        memory.id === id
+          ? { ...memory, image: imageData }
+          : memory
+      )
+    );
 
-      setSelectedMemory((current) =>
-        current && current.id === id
-          ? { ...current, image: imageData }
-          : current
-      );
-    } catch (error) {
-      console.error("Unable to upload image:", error);
-      alert("Unable to upload this image.");
+    // Update opened memory immediately
+    setSelectedMemory((current) =>
+      current && current.id === id
+        ? { ...current, image: imageData }
+        : current
+    );
+
+    // Save the image permanently in the backend
+    const response = await fetch(`/api/patient/memories/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        image: imageData,
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn("Memory image could not be saved to backend.");
     }
-  };
+  } catch (error) {
+    console.error("Unable to upload image:", error);
+    alert("Unable to upload this image.");
+  }
+};
 
   const handleNewMemoryImage = async (file) => {
     try {
@@ -763,11 +780,13 @@ export default function FamilyMemory() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
           <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl">
             <button
-              onClick={() => setSelectedMemory(null)}
-              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow hover:bg-gray-100"
-            >
-              <X size={18} />
-            </button>
+  type="button"
+  onClick={() => setSelectedMemory(null)}
+  className="absolute right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-2xl font-bold text-gray-700 shadow-md hover:bg-gray-200"
+  aria-label="Close memory"
+>
+  ×
+</button>
 
             <ImageSlot
               image={selectedMemory.image}

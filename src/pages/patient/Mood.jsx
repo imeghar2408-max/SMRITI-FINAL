@@ -162,21 +162,21 @@ export default function Mood() {
     };
 
     setHistory((current) => [newEntry, ...current]);
-
     try {
-      await fetch("/api/patient/mood", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mood: selectedMood,
-          reason: selectedReason || "Not specified",
-          note: note.trim(),
-        }),
-      });
-    } catch (err) {
-      console.warn("Failed to save mood to server:", err);
-    }
+  await fetch("/api/patient/mood", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      mood: selectedMood,
+      reason: selectedReason || "Not specified",
+      note: note.trim(),
+    }),
+  });
+} catch (err) {
+  console.warn("Failed to save mood to server:", err);
+}
 
+    
     setSelectedMood("");
     setSelectedReason("");
     setNote("");

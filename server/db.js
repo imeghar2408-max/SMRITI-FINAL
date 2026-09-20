@@ -584,6 +584,31 @@ export function getMemories() {
     },
   ];
 }
+export function updateMemory(id, updates) {
+  const db = readDb();
+  const numId = Number(id);
+
+  const memories = db.memories || [];
+
+  const index = memories.findIndex(
+    (memory) => memory.id === numId
+  );
+
+  if (index === -1) {
+    return null;
+  }
+
+  memories[index] = {
+    ...memories[index],
+    ...updates,
+  };
+
+  db.memories = memories;
+
+  writeDb(db);
+
+  return memories[index];
+}
 
 export function addMemory(mem) {
   const db = readDb();

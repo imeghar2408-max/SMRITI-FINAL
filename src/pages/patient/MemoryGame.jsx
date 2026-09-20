@@ -181,22 +181,22 @@ export default function MemoryGame({ setCurrentView }) {
     setIsSaving(true);
     setSaveStatus("saving");
     try {
-      const res = await fetch("/api/patient/activities/record", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(finalResult),
-      });
-      if (res.ok) {
-        setSaveStatus("saved");
-      } else {
-        setSaveStatus("offline");
-      }
-    } catch (err) {
-      console.warn("Could not save activity to server, stored offline:", err);
-      setSaveStatus("offline");
-    } finally {
-      setIsSaving(false);
-    }
+  const res = await fetch("/api/patient/activities/record", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(finalResult),
+  });
+
+  if (res.ok) {
+    setSaveStatus("saved");
+  } else {
+    setSaveStatus("offline");
+  }
+} catch (err) {
+  console.warn("Could not save activity to server, stored offline:", err);
+  setSaveStatus("offline");
+}
+    
   };
 
   const handleStartGame = (selectedDiff = difficulty) => {

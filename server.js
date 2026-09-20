@@ -23,6 +23,7 @@ import {
   resolveCaregiverAlert,
   getCaregiverAnalytics,
   getMemories,
+  updateMemory,
   addMemory,
   readDb,
 } from "./server/db.js";
@@ -546,6 +547,27 @@ app.get("/api/patient/memories", (req, res) => {
     res.json(getMemories());
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch memories" });
+  }
+});
+app.patch("/api/patient/memories/:id", (req, res) => {
+  try {
+    const updated = updateMemory(req.params.id, {
+      image: req.body.image || "",
+    });
+
+    if (!updated) {
+      return res.status(404).json({
+        error: "Memory not found",
+      });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Failed to update memory image:", err);
+
+    res.status(500).json({
+      error: "Failed to update memory image",
+    });
   }
 });
 

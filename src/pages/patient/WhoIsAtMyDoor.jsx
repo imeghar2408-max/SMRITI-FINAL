@@ -153,6 +153,44 @@ export default function WhoIsAtMyDoor() {
 
     return detections;
   };
+ const speakMessage = (text, language) => {
+  if (!("speechSynthesis" in window)) {
+    alert("Voice feature is not supported on this device.");
+    return;
+  }
+
+  const speak = () => {
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    utterance.lang = language;
+    utterance.rate = 0.85;
+    utterance.pitch = 1;
+
+    const voices = window.speechSynthesis.getVoices();
+
+    const matchingVoice = voices.find(
+      (voice) =>
+        voice.lang &&
+        voice.lang.toLowerCase().startsWith(language.toLowerCase())
+    );
+
+    if (matchingVoice) {
+      utterance.voice = matchingVoice;
+    }
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const voices = window.speechSynthesis.getVoices();
+
+  if (voices.length === 0) {
+    window.speechSynthesis.onvoiceschanged = speak;
+  } else {
+    speak();
+  }
+};
 
   const checkVisitor = async (imageSource) => {
     if (!modelsLoaded) {
@@ -421,6 +459,35 @@ export default function WhoIsAtMyDoor() {
               </div>
             </div>
           )}
+          <div className="flex flex-wrap gap-3 mt-4">
+  <button
+    onClick={() =>
+      speakMessage(
+        result.name
+          ? `${result.name} is at the door. Please verify the visitor before opening the door.`
+          : "This person is not recognized. Please contact your caregiver before opening the door.",
+        "en-IN"
+      )
+    }
+    className="px-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+  >
+    🔊 English
+  </button>
+
+  <button
+    onClick={() =>
+      speakMessage(
+        result.name
+          ? `${result.name} darwaze par hain. Darwaza kholne se pehle visitor ko verify karein.`
+          : "Yeh vyakti pehchana nahi gaya hai. Darwaza kholne se pehle apne caregiver se sampark karein.",
+        "hi-IN"
+      )
+    }
+    className="px-4 py-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700"
+  >
+    🔊 हिंदी
+  </button>
+</div>
 
           {/* Safety Note */}
           <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
