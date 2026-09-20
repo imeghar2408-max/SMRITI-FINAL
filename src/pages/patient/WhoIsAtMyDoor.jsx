@@ -70,6 +70,15 @@ export default function WhoIsAtMyDoor() {
 
     setCameraOpen(false);
   };
+  useEffect(() => {
+  if (cameraOpen && videoRef.current && streamRef.current) {
+    videoRef.current.srcObject = streamRef.current;
+
+    videoRef.current.play().catch((error) => {
+      console.warn("Could not start camera preview:", error);
+    });
+  }
+}, [cameraOpen]);
 
   const startCamera = async () => {
     try {
@@ -86,9 +95,7 @@ export default function WhoIsAtMyDoor() {
 
       streamRef.current = stream;
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
+      
 
       setCameraOpen(true);
       setMessage("Camera is ready. Take a photo of the visitor.");
