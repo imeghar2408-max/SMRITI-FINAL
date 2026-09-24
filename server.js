@@ -1,11 +1,21 @@
 import express from "express";
+import http from "http";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
 import multer from "multer";
 import dotenv from "dotenv";
+import { WebSocketServer } from "ws";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import {
+  collectPatientTelemetry,
+  generateCaregiverInsightsWithGemini,
+  detectLanguageFromText,
+  SUPPORTED_LOCALES,
+  LANGUAGE_REGISTRY,
+  queryCaregiverInformation,
+} from "./server/aiService.js";
 import {
   getPatientProfile,
   updatePatientProfile,
@@ -36,10 +46,20 @@ import {
   updatePatientLocation,
   readDb,
 } from "./server/db.js";
+import {
+  requestOtp,
+  verifyOtp,
+  registerNewUser,
+  requireRealAuth,
+  optionalAuth,
+  getAuthorizedPatientRecord,
+  getCaregiverLinkedPatients,
+} from "./server/realAuthService.js";
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = 3000;
 
 app.use(cors());
@@ -64,6 +84,7 @@ app.use(
 // Multer memory storage for audio transcription
 const upload = multer({
   storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB audio limit
 });
 
 // Multer disk storage for memory images
@@ -102,7 +123,6 @@ const memoryUpload = multer({
   },
 });
 
-// Middleware for memory upload handling both 'image' and 'file' field names with graceful error handling
 const uploadMemoryMiddleware = (req, res, next) => {
   const uploadHandler = memoryUpload.fields([
     { name: "image", maxCount: 1 },
@@ -138,9 +158,7 @@ const uploadMemoryMiddleware = (req, res, next) => {
 let sarvamClient = null;
 async function getSarvamClient() {
   const apiKey = process.env.SARVAM_API_KEY;
-  if (!apiKey) {
-    return null;
-  }
+  if (!apiKey) return null;
   if (!sarvamClient) {
     try {
       const { SarvamAIClient } = await import("sarvamai");
@@ -155,14 +173,19 @@ async function getSarvamClient() {
   return sarvamClient;
 }
 
-// Lazy initialization of Gemini AI
+// Lazy initialization of Gemini AI with User-Agent header
 let geminiClient = null;
 function getGeminiClient() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
   if (!geminiClient) {
     try {
-      geminiClient = new GoogleGenAI({ apiKey });
+      geminiClient = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: { "User-Agent": "aistudio-build" },
+        },
+      });
     } catch (err) {
       console.warn("Could not initialize Gemini Client:", err.message);
       return null;
@@ -171,29 +194,115 @@ function getGeminiClient() {
   return geminiClient;
 }
 
-// Helper: Fallback offline chat reply
-function getMockChatReply(messages, patientContext) {
+// Helper: Fallback offline chat reply with full NER multilingual support & patient grounding
+function getMockChatReply(messages, patientContext, explicitLocale = "") {
   const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
-  const userText = (lastUserMsg?.content || "").toLowerCase();
-  const patientName = patientContext?.patient?.name || "आशा जी";
+  const rawText = lastUserMsg?.content || "";
+  const userText = rawText.toLowerCase();
+  const patientName = patientContext?.patient?.name || "Asha";
+  const defaultLang = explicitLocale || (patientContext?.patient?.language?.toLowerCase().includes("assam") ? "as-IN" : "hi-IN");
+  const detectedLang = explicitLocale || detectLanguageFromText(rawText, defaultLang);
 
-  if (userText.includes("namaste") || userText.includes("नमस्ते") || userText.includes("hello") || userText.includes("hi")) {
-    return `नमस्ते ${patientName}! मैं अन्वेषा हूँ। आपकी सेवा के लिए हमेशा यहाँ हूँ। आज आप कैसा महसूस कर रहे हैं?`;
-  }
-  if (userText.includes("दवाई") || userText.includes("medicine") || userText.includes("dawai")) {
-    const meds = patientContext?.reminders?.filter((r) => r.type === "Medicine") || [];
-    if (meds.length > 0) {
-      return `आपकी अगली दवाई ${meds[0].title} (${meds[0].time}) पर निर्धारित है। कृपया समय पर लें और पानी पिएं।`;
+  const meds = patientContext?.reminders?.filter((r) => r.type === "Medicine" || r.type === "Medication") || [];
+  const nextMedStr = meds.length > 0 ? `${meds[0].title} (${meds[0].time})` : "scheduled medication";
+
+  // Assamese language branch (as-IN)
+  if (detectedLang === "as-IN") {
+    if (userText.includes("নমস্কাৰ") || userText.includes("namaskar") || userText.includes("hello") || userText.includes("hi")) {
+      return `নমস্কাৰ ${patientName} ডাঙৰীয়া! মই অন্বেষা। আপোনাৰ সহায়ৰ বাবে সদায় সাজু আছো। আজি আপুনি কেনে অনুভৱ কৰিছে? 🌸`;
     }
-    return "आपकी दवाइयों का समय पर ध्यान रखा जा रहा है। क्या आपने सुबह का नाश्ता कर लिया?";
+    if (userText.includes("দৰব") || userText.includes("ঔষধ") || userText.includes("medicine")) {
+      return `আপোনাৰ ঔষধ ${nextMedStr} সময়ত লোৱাৰ অনুৰোধ জনালোঁ। লগতে এগিলাচ সতেজ পানী খাবলৈ নাপাহৰিব।`;
+    }
+    if (userText.includes("পানী") || userText.includes("water")) {
+      return "হয়, দিনটোত পৰ্যাপ্ত পানী খোৱা স্বাস্থ্যৰ বাবে বৰ প্ৰয়োজনীয়। এগিলাচ পানী খাই জিৰণি লওক!";
+    }
+    if (userText.includes("পৰিয়াল") || userText.includes("family") || userText.includes("priya")) {
+      return `আপোনাৰ জীয়ৰী প্ৰিয়া শৰ্মাই আপোনাৰ বিশেষ যত্ন লৈছে। তেওঁ সোনকালে আপোনাৰ লগত যোগাযোগ কৰিব।`;
+    }
+    if (userText.includes("খেলা") || userText.includes("স্মৃতি") || userText.includes("game")) {
+      return "আজিৰ বাবে স্মৰণ শক্তিৰ কাৰ্যসূচী সাজু আছে। আপুনি যেতিয়াই আৰাম অনুভৱ কৰে, আৰম্ভ কৰিব পাৰে।";
+    }
+    return `নমস্কাৰ, মই আপোনাৰ কথা বুজি পাইছো। মই অন্বেষা, আপোনাৰ কাষতেই আছো। আজিৰ দিনটো শুভ আৰু শান্তিপূৰ্ণ হওক! ❤️`;
   }
-  if (userText.includes("पानी") || userText.includes("water")) {
-    return "हाँ जी, दिन भर में पर्याप्त पानी पीना बहुत ज़रूरी है। एक गिलास ताज़ा पानी पी लीजिए!";
+
+  // Bengali language branch (bn-IN)
+  if (detectedLang === "bn-IN") {
+    if (userText.includes("নমস্কার") || userText.includes("hello") || userText.includes("hi")) {
+      return `নমস্কার ${patientName}! আমি অন্বেষা। আপনার সেবায় আমি সর্বদা প্রস্তুত। আজ আপনি কেমন আছেন? 🌸`;
+    }
+    if (userText.includes("ওষুধ") || userText.includes("medicine")) {
+      return `আপনার ওষুধ ${nextMedStr} সময়মতো গ্রহণ করুন এবং পর্যাপ্ত জল পান করুন।`;
+    }
+    if (userText.includes("জল") || userText.includes("পানি") || userText.includes("water")) {
+      return "হ্যাঁ, পর্যাপ্ত জল পান করা অত্যন্ত উপকারী। এক গ্লাস তাজা জল খেয়ে নিন।";
+    }
+    if (userText.includes("পরিবার") || userText.includes("family") || userText.includes("priya")) {
+      return `আপনার পরিবার আপনার পাশে রয়েছে। প্রিয়া শর্মা সর্বদা আপনার সাথে যোগাযোগ রাখছেন।`;
+    }
+    return `নমস্কার, আমি আপনার কথা বুঝতে পেরেছি। আমি অন্বেষা, সবসময় আপনার পাশে আছি। ❤️`;
   }
-  if (userText.includes("परिवार") || userText.includes("family") || userText.includes("priya") || userText.includes("rahul")) {
-    return `आपके परिवार में प्रिया (बेटी) और राहुल (बेटा) आपसे बहुत प्यार करते हैं। वे जल्द ही आपसे बात करेंगे।`;
+
+  // Nepali language branch (ne-NP)
+  if (detectedLang === "ne-NP") {
+    if (userText.includes("नमस्ते") || userText.includes("hello")) {
+      return `नमस्ते ${patientName} जी! म अन्वेषा हुँ। आज तपाईंलाई कस्तो छ? 🌸`;
+    }
+    if (userText.includes("औषधि") || userText.includes("दबाई") || userText.includes("medicine")) {
+      return `तपाईंको औषधि ${nextMedStr} समयमा लिनुहोला। पानी पिउन नबिर्सनुहोला।`;
+    }
+    return `नमस्ते, म तपाईंको सहयोगी अन्वेषा हुँ। आरामसँग दिन बिताउनुहोस्। ❤️`;
   }
-  return `नमस्ते जी, मैं आपकी बात समझ रही हूँ। मैं अन्वेषा हूँ, आपके साथ हर कदम पर। आज का दिन आपके लिए मंगलमय हो! ❤️`;
+
+  // Bodo language branch (brx-IN)
+  if (detectedLang === "brx-IN") {
+    return `खुमुलिया ${patientName}! आं अन्वेषा, नोंथांनि खाथिआवनो दं। नोंथांनि देहा मोजां थाथों। ❤️`;
+  }
+
+  // Manipuri / Meitei branch (mni-IN)
+  if (detectedLang === "mni-IN") {
+    return `ꯈꯨꯔꯨꯝꯖꯔꯤ ${patientName}! ꯑꯩ अन्वेषा ꯅꯤ, ꯅꯍꯥꯛꯄꯨ ꯃꯇꯦꯡ ꯄꯥꯡꯅꯕ ꯁꯦꯃꯗꯨꯅꯥ ꯂꯩꯔꯤ। ❤️`;
+  }
+
+  // Mizo branch (lus-IN)
+  if (detectedLang === "lus-IN") {
+    return `Chibai ${patientName}! Anvesha ka ni e, i kiangah ka awm reng e. Vawiin chu nuam deuhin le. ❤️`;
+  }
+
+  // Hindi language branch (hi-IN)
+  if (detectedLang === "hi-IN" || /[\u0900-\u097F]/.test(rawText)) {
+    if (userText.includes("namaste") || userText.includes("नमस्ते") || userText.includes("hello") || userText.includes("hi")) {
+      return `नमस्ते ${patientName} जी! मैं अन्वेषा हूँ। आपकी सेवा के लिए हमेशा यहाँ हूँ। आज आप कैसा महसूस कर रहे हैं? 🌸`;
+    }
+    if (userText.includes("दवाई") || userText.includes("medicine") || userText.includes("dawai")) {
+      return `आपकी अगली दवाई ${nextMedStr} पर निर्धारित है। कृपया समय पर लें और ताज़ा पानी पिएं।`;
+    }
+    if (userText.includes("पानी") || userText.includes("water")) {
+      return "हाँ जी, दिन भर में पर्याप्त पानी पीना बहुत ज़रूरी है। एक गिलास ताज़ा पानी पी लीजिए!";
+    }
+    if (userText.includes("परिवार") || userText.includes("family") || userText.includes("priya") || userText.includes("rahul")) {
+      return `आपके परिवार में प्रिया (बेटी) आपसे बहुत प्यार करती हैं। वे आपकी देखभाल का पूरा ध्यान रखती हैं।`;
+    }
+    if (userText.includes("खेल") || userText.includes("गतिविधि") || userText.includes("game")) {
+      return "आज के लिए आपकी स्मृति और ध्यान गतिविधि तैयार है। जब भी आप चाहें, शुरू कर सकते हैं।";
+    }
+    return `नमस्ते जी, मैं आपकी बात समझ रही हूँ। मैं अन्वेषा हूँ, आपके साथ हर कदम पर। आज का दिन आपके लिए मंगलमय हो! ❤️`;
+  }
+
+  // English fallback
+  if (userText.includes("hello") || userText.includes("hi")) {
+    return `Hello ${patientName}! I am Anvesha, your cognitive companion. How are you feeling today? 🌸`;
+  }
+  if (userText.includes("medicine") || userText.includes("medication")) {
+    return `Your scheduled medicine is ${nextMedStr}. Please take it on time with fresh water.`;
+  }
+  if (userText.includes("family") || userText.includes("priya")) {
+    return "Your daughter Priya Sharma and family love you dearly and stay connected with your care team.";
+  }
+  if (userText.includes("water") || userText.includes("hydration")) {
+    return "Drinking sufficient water is vital throughout the day. Please enjoy a fresh glass of water.";
+  }
+  return `Hello, I hear you clearly. I am Anvesha, right here beside you. Have a peaceful, gentle day! ❤️`;
 }
 
 // ==================================================
@@ -202,49 +311,98 @@ function getMockChatReply(messages, patientContext) {
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    message: "ANVESHA voice server is running",
-    sarvamConfigured: !!process.env.SARVAM_API_KEY,
+    message: "ANVESHA Multilingual AI & Voice Intelligence Server is running",
     geminiConfigured: !!process.env.GEMINI_API_KEY,
+    sarvamConfigured: !!process.env.SARVAM_API_KEY,
+    supportedLanguagesCount: Object.keys(LANGUAGE_REGISTRY).length,
+    offlineCapable: true,
   });
 });
 
 // ==================================================
-// SPEECH TO TEXT
+// 2. SPEECH TO TEXT (STT) WITH GEMINI TRANSCRIBE & MULTILINGUAL DETECTION
 // ==================================================
 app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
   try {
-    if (!req.file) {
+    const file = req.file;
+    const requestedLanguage = req.body?.language_code || "as-IN";
+
+    if (!file || !file.buffer) {
       return res.status(400).json({
-        error: "Audio file is required",
+        error: "Audio file buffer is required for transcription",
       });
     }
 
-    const client = await getSarvamClient();
-    if (client) {
+    const mimeType = file.mimetype || "audio/webm";
+    const base64Audio = file.buffer.toString("base64");
+
+    // 1. Try Gemini 3.5 Transcribe
+    const gemini = getGeminiClient();
+    if (gemini) {
       try {
-        const response = await client.speechToText.transcribe({
-          file: new Blob([req.file.buffer], {
-            type: req.file.mimetype || "audio/webm",
-          }),
+        const langMeta = LANGUAGE_REGISTRY[requestedLanguage] || LANGUAGE_REGISTRY["as-IN"];
+        const transcribeResponse = await gemini.models.generateContent({
+          model: "gemini-3.5-transcribe",
+          contents: {
+            parts: [
+              {
+                inlineData: {
+                  mimeType,
+                  data: base64Audio,
+                },
+              },
+              {
+                text: `Transcribe this patient audio verbatim. The patient may be speaking in ${langMeta.name} (${langMeta.code}), Hindi, Bengali, or English. Return only the clean transcription text.`,
+              },
+            ],
+          },
+        });
+
+        const transcript = transcribeResponse.text?.trim();
+        if (transcript) {
+          const detectedLang = detectLanguageFromText(transcript, requestedLanguage);
+          return res.json({
+            transcript,
+            language_code: detectedLang,
+            source: "gemini-3.5-transcribe",
+          });
+        }
+      } catch (geminiErr) {
+        console.warn("Gemini transcription failed, trying secondary fallback:", geminiErr.message);
+      }
+    }
+
+    // 2. Try Sarvam AI STT
+    const sarvam = await getSarvamClient();
+    if (sarvam) {
+      try {
+        const response = await sarvam.speechToText.transcribe({
+          file: new Blob([file.buffer], { type: mimeType }),
           model: "saaras:v4",
           mode: "transcribe",
           language_code: "unknown",
         });
 
-        return res.json({
-          transcript: response.transcript,
-          language_code: response.language_code,
-        });
+        if (response?.transcript) {
+          const detectedLang = response.language_code || detectLanguageFromText(response.transcript, requestedLanguage);
+          return res.json({
+            transcript: response.transcript,
+            language_code: detectedLang,
+            source: "sarvam-saaras",
+          });
+        }
       } catch (sarvamErr) {
-        console.warn("Sarvam STT failed, using fallback:", sarvamErr.message);
+        console.warn("Sarvam STT failed:", sarvamErr.message);
       }
     }
 
-    // Fallback if no Sarvam key or transcription error
+    // 3. Graceful offline fallback: Prompt client that audio was received
+    const defaultGreeting = LANGUAGE_REGISTRY[requestedLanguage]?.greeting || "নমস্কাৰ";
     res.json({
-      transcript: "नमस्ते स्मृति जी",
-      language_code: "hi-IN",
-      notice: "Live speech recognition requires SARVAM_API_KEY.",
+      transcript: `${defaultGreeting} অন্বেষা`,
+      language_code: requestedLanguage,
+      source: "offline_heuristic_stt",
+      notice: "Live cloud speech transcription offline. You can also use on-device speech recognition or keyboard typing.",
     });
   } catch (error) {
     console.error("Speech-to-text error:", error);
@@ -255,53 +413,145 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
 });
 
 // ==================================================
-// TEXT TO SPEECH
+// 3. TEXT TO SPEECH (TTS) - REGIONAL INDIAN NATURAL VOICES AUDITED
 // ==================================================
+const REGIONAL_VOICE_CONFIG = {
+  "en-IN": {
+    provider: "sarvam-ai",
+    model: "bulbul:v3",
+    speaker: "priya",
+    pace: 0.92,
+    nativeSupported: true,
+    voiceName: "priya (Indian English)",
+    accent: "Natural Indian English pronunciation",
+  },
+  "hi-IN": {
+    provider: "sarvam-ai",
+    model: "bulbul:v3",
+    speaker: "priya",
+    pace: 0.92,
+    nativeSupported: true,
+    voiceName: "priya (Indian Hindi)",
+    accent: "Natural Indian Hindi pronunciation",
+  },
+  "bn-IN": {
+    provider: "sarvam-ai",
+    model: "bulbul:v3",
+    speaker: "priya",
+    pace: 0.92,
+    nativeSupported: true,
+    voiceName: "priya (Bengali)",
+    accent: "Natural Bengali pronunciation",
+  },
+  "as-IN": {
+    provider: "sarvam-ai",
+    model: "bulbul:v3",
+    speaker: "priya",
+    pace: 0.92,
+    nativeSupported: false, // Closed-beta restricted on Sarvam; no genuine native engine on cloud/browser
+    voiceName: "None (Closed Beta)",
+    fallback: "text_only",
+    accent: "Native Assamese (currently closed beta on cloud engine)",
+  },
+};
+
 app.post("/api/speak", async (req, res) => {
   try {
     const { text, language_code } = req.body;
     const speechText = typeof text === "string" ? text.trim() : "";
+    const targetLang = language_code || "as-IN";
 
     if (!speechText) {
-      return res.status(400).json({
-        error: "Text is required",
-      });
+      return res.status(400).json({ error: "Text is required" });
     }
 
     if (speechText.length > 2500) {
-      return res.status(400).json({
-        error: "Text must be 2500 characters or fewer",
+      return res.status(400).json({ error: "Text must be 2500 characters or fewer" });
+    }
+
+    // 1. Check language-specific voice configuration
+    const voiceCfg = REGIONAL_VOICE_CONFIG[targetLang] || {
+      provider: "sarvam-ai",
+      model: "bulbul:v3",
+      speaker: "priya",
+      pace: 0.92,
+      nativeSupported: false,
+      voiceName: "default",
+      fallback: "text_only",
+      accent: targetLang,
+    };
+
+    // 2. Assamese (as-IN) & unsupported voice handling:
+    // Native Assamese TTS engine is restricted to closed beta on Sarvam.
+    // To prevent 400 BadRequestError logs and avoid substituting Bengali (which distorts phonology),
+    // we directly and cleanly return the text_only fallback without triggering error logs.
+    if (targetLang.startsWith("as") || targetLang === "as-IN" || !voiceCfg.nativeSupported) {
+      console.log(
+        `[TTS Service] Language: ${targetLang} | Voice output: text_only fallback | Reason: Native ${targetLang} voice engine is in closed beta; gracefully displaying text to ensure clear accessibility.`
+      );
+      return res.json({
+        audio: null,
+        provider: "none",
+        model: null,
+        voice: null,
+        fallback: "text_only",
+        language_code: targetLang,
+        text: speechText,
+        message: `Native ${targetLang} voice output is currently in closed beta. Response is presented as readable text.`,
       });
     }
 
-    const client = await getSarvamClient();
-    if (client) {
+    // 3. For supported regional Indian languages (en-IN, hi-IN, bn-IN):
+    // Use Sarvam AI bulbul:v3 with speaker 'priya' for gentle, authentic pronunciation
+    const sarvam = await getSarvamClient();
+    if (sarvam && voiceCfg.nativeSupported) {
       try {
-        const response = await client.textToSpeech.convert({
+        const response = await sarvam.textToSpeech.convert({
           text: speechText,
-          language_code:
-            typeof language_code === "string" && language_code.trim()
-              ? language_code
-              : "hi-IN",
-          model: "bulbul:v3",
-          speaker: "priya",
+          language_code: voiceCfg.language_code || targetLang,
+          model: voiceCfg.model || "bulbul:v3",
+          speaker: voiceCfg.speaker || "priya",
+          pace: voiceCfg.pace || 0.92,
           output_audio_codec: "wav",
         });
 
         const audio = response?.audios?.[0];
         if (audio) {
+          console.log(
+            `[TTS Audit] Language: ${targetLang} | Provider: ${voiceCfg.provider} | Model: ${voiceCfg.model} | Voice: ${voiceCfg.voiceName} | Fallback: none | Result: Success (${audio.length} chars base64 audio)`
+          );
           return res.json({
             audio,
             contentType: "audio/wav",
+            provider: voiceCfg.provider,
+            model: voiceCfg.model,
+            voice: voiceCfg.voiceName,
+            accent: voiceCfg.accent,
+            language_code: targetLang,
+            fallback: "none",
           });
         }
       } catch (sarvamErr) {
-        console.warn("Sarvam TTS failed:", sarvamErr.message);
+        console.warn(
+          `[TTS Audit] Sarvam TTS failed for ${targetLang}: ${sarvamErr.message}. Falling back to browser SpeechSynthesis.`
+        );
       }
     }
 
-    res.status(503).json({
-      error: "Text-to-speech requires SARVAM_API_KEY to be configured in settings.",
+    // 4. Fallback to Browser SpeechSynthesis (offline or when cloud TTS fails)
+    console.log(
+      `[TTS Audit] Language: ${targetLang} | Provider: browser_speech_synthesis | Model: on_device | Voice: regional_${targetLang} | Fallback: browser_speech_synthesis | Result: Delegated to client`
+    );
+
+    res.json({
+      audio: null,
+      fallbackToBrowser: true,
+      fallback: "browser_speech_synthesis",
+      provider: "browser_speech_synthesis",
+      voice: `native_${targetLang}`,
+      text: speechText,
+      language_code: targetLang,
+      message: "Cloud audio synthesis offline. Client browser SpeechSynthesis with regional voice will vocalize.",
     });
   } catch (error) {
     console.error("Text-to-speech error:", error);
@@ -312,110 +562,129 @@ app.post("/api/speak", async (req, res) => {
 });
 
 // ==================================================
-// ANVESHA CHAT
+// 1 & 5. ANVESHA CHAT (LANGUAGE-AWARE PATIENT CONTEXT & GEMINI)
 // ==================================================
 app.post("/api/chat", async (req, res) => {
   try {
-    const { messages, patientContext: incomingContext } = req.body;
+    const { messages, message, patientContext: incomingContext, language_code } = req.body;
 
-    if (!messages || !Array.isArray(messages)) {
+    // Support both `messages` array and single `message` string
+    let messageList = Array.isArray(messages) ? messages : [];
+    if (messageList.length === 0 && typeof message === "string" && message.trim()) {
+      messageList = [{ role: "user", content: message.trim() }];
+    }
+
+    if (messageList.length === 0) {
       return res.status(400).json({
-        error: "Messages are required",
+        error: "Valid messages or message text required",
       });
     }
 
-    // Hydrate patient context with live DB data
+    const lastUserText = [...messageList].reverse().find((m) => m.role === "user")?.content || "";
+
+    // Hydrate patient context with live DB data and telemetry
     const liveDb = readDb();
+    const patientId = incomingContext?.patient?.id || liveDb.patient?.id || "P001";
+    const telemetry = collectPatientTelemetry(patientId);
+
+    // Resolve language preference
+    const userPreferredLang = language_code || incomingContext?.language || telemetry.patient.language || "as-IN";
+    const detectedLang = detectLanguageFromText(lastUserText, userPreferredLang);
+    const langMeta = LANGUAGE_REGISTRY[detectedLang] || LANGUAGE_REGISTRY[userPreferredLang] || LANGUAGE_REGISTRY["as-IN"];
+
     const patientContext = {
-      patient: liveDb.patient || incomingContext?.patient,
+      patient: liveDb.patient || incomingContext?.patient || telemetry.patient,
       reminders: liveDb.reminders || incomingContext?.reminders || [],
       mood: liveDb.moodLogs?.[0] || incomingContext?.mood,
       recentGameResults: (liveDb.activityResults || []).slice(0, 3),
+      metricsSummary: telemetry.metrics,
+      recentActivities: telemetry.recentActivities,
+      memoriesCount: telemetry.memoriesCount,
+      preferredLanguage: langMeta.name,
+      languageLocale: langMeta.code,
       ...incomingContext,
     };
 
-    const systemInstructions = `You are Anvesha, a personalized AI companion for this patient.
+    const systemInstructions = `You are Anvesha, an empathetic, personalized cognitive care companion for this elderly patient.
+Current Patient: ${patientContext.patient?.name || "Asha"} (Age: ${patientContext.patient?.age || 78}, Room: ${patientContext.patient?.room || "402"}).
+Preferred Language: ${langMeta.name} (${langMeta.code}, Script: ${langMeta.script}).
 
-The following information is the patient's current available context. Use it only to answer relevant patient-specific questions.
+GROUNDED PATIENT CONTEXT:
+${JSON.stringify(patientContext, null, 2)}
 
-PATIENT CONTEXT:
-${JSON.stringify(patientContext || {}, null, 2)}
+STRICT SAFETY & ETHICAL RULES:
+1. NON-DIAGNOSTIC: Never diagnose clinical conditions (dementia, stroke, depression) or modify medication dosages.
+2. CONTEXT-GROUNDED: Answer patient queries about daily routine, medications, reminders, and loved ones using the context above.
+3. LANGUAGE PRESERVATION: Reply naturally in ${langMeta.name} (${langMeta.code}) matching the patient's language and script.
+4. TONE: Warm, clear, respectful, gentle, and easily understood by an elderly user. Keep responses concise (2-4 sentences).`;
 
-Rules:
-- Treat the patient context as factual application data.
-- Never invent patient-specific information.
-- Never infer missing medications, timings, appointments, relationships, or medical information.
-- If the requested information is not present in the patient context, say that you do not have that information.
-- Do not expose unnecessary patient information when it is unrelated to the user's question.
-- Do not reveal the entire patient context unless the user asks for it and it is appropriate.
-- Continue following these language rules: reply in Hindi to Hindi, Assamese to Assamese, Bengali to Bengali, English to English, and naturally follow the patient's style for mixed-language messages.
-- Keep responses short, warm, simple, and suitable for an elderly user.
-- Patient context is application data, not medical advice. Do not diagnose or change treatment.`;
-
-    // 1. Try Sarvam AI if key provided
-    const client = await getSarvamClient();
-    if (client) {
-      try {
-        const response = await client.chat.completions({
-          model: "sarvam-105b-conversations",
-          messages: [
-            { role: "system", content: systemInstructions },
-            ...messages,
-          ],
-          reasoning_effort: null,
-          max_tokens: 150,
-        });
-
-        const reply = response?.choices?.[0]?.message?.content;
-        if (reply) {
-          return res.json({ reply });
-        }
-      } catch (sarvamErr) {
-        console.warn("Sarvam chat failed, attempting fallback:", sarvamErr.message);
-      }
-    }
-
-    // 2. Try Gemini API fallback if key available
+    // 1. Try Gemini API
     const gemini = getGeminiClient();
     if (gemini) {
       try {
-        const userPrompt = messages.map((m) => `${m.role}: ${m.content}`).join("\n");
-        const generateWithTimeout = (modelName) =>
-          Promise.race([
-            gemini.models.generateContent({
-              model: modelName,
-              contents: userPrompt,
-              config: {
-                systemInstruction: systemInstructions,
-                maxOutputTokens: 200,
-                temperature: 0.7,
-              },
-            }),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error(`Timeout with ${modelName}`)), 7000)
-            ),
-          ]);
+        const conversationText = messageList.map((m) => `${m.role}: ${m.content}`).join("\n");
+        const response = await gemini.models.generateContent({
+          model: "gemini-3.8-flash",
+          contents: conversationText,
+          config: {
+            systemInstruction: systemInstructions,
+            maxOutputTokens: 250,
+            temperature: 0.3,
+          },
+        });
 
-        let aiResponse;
-        try {
-          aiResponse = await generateWithTimeout("gemini-3.8-flash");
-        } catch (mErr) {
-          console.warn("Primary gemini-3.8-flash attempt failed, trying gemini-3.6-flash:", mErr.message);
-          aiResponse = await generateWithTimeout("gemini-3.6-flash");
-        }
-
-        const reply = aiResponse?.text;
+        const reply = response?.text?.trim();
         if (reply) {
-          return res.json({ reply });
+          return res.json({
+            reply,
+            language_code: langMeta.code,
+            language_name: langMeta.name,
+            source: "gemini-3.8-flash",
+            nonDiagnostic: true,
+          });
         }
       } catch (geminiErr) {
-        console.warn("Gemini chat failed:", geminiErr.message);
+        console.warn("Gemini chat failed, trying Sarvam fallback:", geminiErr.message);
       }
     }
 
-    // 3. Fallback mock reply for seamless local testing
-    const fallbackReply = getMockChatReply(messages, patientContext);
-    return res.json({ reply: fallbackReply });
+    // 2. Try Sarvam AI
+    const sarvam = await getSarvamClient();
+    if (sarvam) {
+      try {
+        const response = await sarvam.chat.completions({
+          model: "sarvam-105b-conversations",
+          messages: [
+            { role: "system", content: systemInstructions },
+            ...messageList,
+          ],
+          max_tokens: 200,
+        });
+
+        const reply = response?.choices?.[0]?.message?.content?.trim();
+        if (reply) {
+          return res.json({
+            reply,
+            language_code: langMeta.code,
+            language_name: langMeta.name,
+            source: "sarvam-105b",
+            nonDiagnostic: true,
+          });
+        }
+      } catch (sarvamErr) {
+        console.warn("Sarvam chat failed:", sarvamErr.message);
+      }
+    }
+
+    // 3. Fallback mock reply with full language & context preservation
+    const fallbackReply = getMockChatReply(messageList, patientContext, langMeta.code);
+    return res.json({
+      reply: fallbackReply,
+      language_code: langMeta.code,
+      language_name: langMeta.name,
+      source: "offline_heuristic_engine",
+      nonDiagnostic: true,
+    });
   } catch (error) {
     console.error("CHAT ERROR:", error);
     res.status(500).json({
@@ -425,37 +694,153 @@ Rules:
 });
 
 // ==================================================
-// TEST CHAT
+// 4. CENTRALIZED MULTILINGUAL LOCALES API
 // ==================================================
-app.post("/api/test-chat", async (req, res) => {
+app.get("/api/ai/locales", (req, res) => {
+  res.json({
+    locales: LANGUAGE_REGISTRY,
+    defaultLocale: "as-IN",
+    count: Object.keys(LANGUAGE_REGISTRY).length,
+  });
+});
+
+app.get("/api/ai/languages", (req, res) => {
+  res.json({
+    languages: Object.values(LANGUAGE_REGISTRY),
+    defaultLocale: "as-IN",
+  });
+});
+
+// ==================================================
+// REST APIs: ANVESHA AI INTELLIGENCE LAYER
+// ==================================================
+app.get("/api/ai/insights", async (req, res) => {
   try {
-    const { message } = req.body;
-    if (!message || !message.trim()) {
-      return res.status(400).json({ error: "Message is required" });
+    const patientId = req.query.patientId || "P001";
+    const telemetry = collectPatientTelemetry(patientId);
+    if (!telemetry.hasData) {
+      return res.json({
+        success: true,
+        patientId,
+        hasData: false,
+        insights: [],
+        message: "No AI insights available yet",
+        telemetrySummary: null,
+        generatedAt: new Date().toISOString(),
+        nonDiagnostic: true,
+      });
+    }
+    const insights = await generateCaregiverInsightsWithGemini(telemetry);
+    res.json({
+      success: true,
+      patientId,
+      hasData: true,
+      insights,
+      telemetrySummary: telemetry.metrics,
+      generatedAt: new Date().toISOString(),
+      nonDiagnostic: true,
+    });
+  } catch (err) {
+    console.error("AI Insights error:", err);
+    res.status(500).json({ error: "Failed to generate AI insights" });
+  }
+});
+
+app.get("/api/ai/patterns", (req, res) => {
+  try {
+    const patientId = req.query.patientId || "P001";
+    const telemetry = collectPatientTelemetry(patientId);
+    res.json(telemetry);
+  } catch (err) {
+    console.error("AI Patterns error:", err);
+    res.status(500).json({ error: "Failed to aggregate patient patterns" });
+  }
+});
+
+// ==================================================
+// 7. CAREGIVER INFORMATIONAL QUERY WITH GOOGLE SEARCH GROUNDING
+// ==================================================
+app.post("/api/ai/caregiver-query", async (req, res) => {
+  try {
+    const { query, patientId = "P001", enableSearchGrounding = true } = req.body;
+    if (!query || typeof query !== "string") {
+      return res.status(400).json({ error: "Caregiver query string is required" });
     }
 
-    const client = await getSarvamClient();
-    if (client) {
-      try {
-        const response = await client.chat.completions({
-          model: "sarvam-105b-conversations",
-          messages: [{ role: "user", content: message }],
-        });
-        const reply = response?.choices?.[0]?.message?.content;
-        if (reply) return res.json({ reply });
-      } catch (sarvamErr) {
-        console.warn("Sarvam test-chat error:", sarvamErr.message);
-      }
+    const result = await queryCaregiverInformation({
+      query: query.trim(),
+      patientId,
+      enableSearchGrounding: Boolean(enableSearchGrounding),
+    });
+
+    res.json({
+      success: true,
+      ...result,
+    });
+  } catch (err) {
+    console.error("Caregiver search grounding query error:", err);
+    res.status(500).json({ error: "Failed to process caregiver informational query" });
+  }
+});
+
+// ==================================================
+// 6. CAREGIVER PATIENT LOCATION SAFETY & GEOFENCE STATUS
+// ==================================================
+app.get("/api/caregiver/patient-location-safety/:patientId?", (req, res) => {
+  try {
+    const patientId = req.params.patientId || "P001";
+    const loc = getPatientLocation(patientId);
+
+    // Observational safe campus boundary (Assam Care Campus)
+    const campusCenter = { lat: 26.1445, lng: 91.7362 }; // Guwahati, Assam
+    let distanceFromCenterMeters = null;
+    let isInsidePerimeter = true;
+    let hasCoords = false;
+
+    if (loc && typeof loc.latitude === "number" && typeof loc.longitude === "number") {
+      hasCoords = true;
+      // Rough Haversine distance in meters
+      const R = 6371000;
+      const dLat = ((loc.latitude - campusCenter.lat) * Math.PI) / 180;
+      const dLon = ((loc.longitude - campusCenter.lng) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((campusCenter.lat * Math.PI) / 180) *
+          Math.cos((loc.latitude * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      distanceFromCenterMeters = Math.round(R * c);
+      isInsidePerimeter = distanceFromCenterMeters <= 1500; // 1.5km safe campus perimeter
     }
 
     res.json({
-      reply: "नमस्ते! मैं अन्वेषा हूँ। मैं आपकी सहायता करने के लिए यहाँ हूँ।",
+      patientId,
+      location: loc,
+      geofence: hasCoords
+        ? {
+            campusName: "Assam Eldercare Safe Perimeter",
+            distanceFromCenterMeters,
+            isInsidePerimeter,
+            status: isInsidePerimeter ? "Within Safe Zone" : "Outside Safe Perimeter",
+            landmarks: [
+              { name: "Care Center Main Clinic", distanceMeters: 45 },
+              { name: "Sensory Garden & Courtyard", distanceMeters: 120 },
+              { name: "Guwahati Medical Facility", distanceMeters: 1400 },
+            ],
+          }
+        : {
+            campusName: "Assam Eldercare Safe Perimeter",
+            distanceFromCenterMeters: null,
+            isInsidePerimeter: null,
+            status: "Location unavailable",
+            landmarks: [],
+          },
+      nonDiagnostic: true,
     });
-  } catch (error) {
-    console.error("Sarvam error:", error);
-    res.status(500).json({
-      error: error.message || "Unable to get response from Anvesha",
-    });
+  } catch (err) {
+    console.error("Location safety error:", err);
+    res.status(500).json({ error: "Failed to evaluate location safety" });
   }
 });
 
@@ -485,7 +870,8 @@ app.put("/api/patient/profile", (req, res) => {
 // ==================================================
 app.get("/api/patient/reminders", (req, res) => {
   try {
-    res.json(getReminders());
+    const patientId = req.query.patientId;
+    res.json(getReminders(patientId));
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch reminders" });
   }
@@ -665,8 +1051,6 @@ app.post("/api/patient/sync-ping", (req, res) => {
 // ==================================================
 // REST APIs: MEMORIES (PATIENT & CAREGIVER VAULT)
 // ==================================================
-
-// GET /api/memories/:patientId - Return all saved memories for a specific patient
 app.get("/api/memories/:patientId", (req, res) => {
   try {
     const { patientId } = req.params;
@@ -678,7 +1062,6 @@ app.get("/api/memories/:patientId", (req, res) => {
   }
 });
 
-// POST /api/memories - Upload a memory image, save metadata, and return saved memory object
 app.post("/api/memories", uploadMemoryMiddleware, (req, res) => {
   try {
     if (!req.file) {
@@ -725,7 +1108,6 @@ app.post("/api/memories", uploadMemoryMiddleware, (req, res) => {
   }
 });
 
-// DELETE /api/memories/:memoryId - Delete memory metadata AND corresponding image file
 app.delete("/api/memories/:memoryId", (req, res) => {
   try {
     const { memoryId } = req.params;
@@ -744,7 +1126,6 @@ app.delete("/api/memories/:memoryId", (req, res) => {
   }
 });
 
-// Legacy / compatibility routes:
 app.get("/api/patient/memories", (req, res) => {
   try {
     const patientId = req.query.patientId || "P001";
@@ -765,17 +1146,13 @@ app.patch("/api/patient/memories/:id", (req, res) => {
     });
 
     if (!updated) {
-      return res.status(404).json({
-        error: "Memory not found",
-      });
+      return res.status(404).json({ error: "Memory not found" });
     }
 
     res.json(updated);
   } catch (err) {
     console.error("Failed to update memory image:", err);
-    res.status(500).json({
-      error: "Failed to update memory image",
-    });
+    res.status(500).json({ error: "Failed to update memory image" });
   }
 });
 
@@ -860,7 +1237,7 @@ app.get("/api/patient/:id/location", (req, res) => {
 // REST APIs: AUTHENTICATION (PATIENT / CAREGIVER)
 // ==================================================
 app.post("/api/auth/login", (req, res) => {
-  const { role, identifier, email, password } = req.body || {};
+  const { role, identifier, email } = req.body || {};
   const userIdentifier = (identifier || email || "").trim().toLowerCase();
 
   if (role === "caregiver") {
@@ -875,7 +1252,6 @@ app.post("/api/auth/login", (req, res) => {
     });
   }
 
-  // Patient authentication (Asha P001 or PIN 1234 or direct patient login)
   const patient = getPatientProfile();
   return res.json({
     success: true,
@@ -886,6 +1262,191 @@ app.post("/api/auth/login", (req, res) => {
       room: patient.room,
     },
   });
+});
+
+// ==================================================
+// REAL AUTHENTICATION: PHONE OTP & AUTHORIZATION ENDPOINTS
+// ==================================================
+// 1. Request OTP (Server-side generated, rate-limited, SHA-256 hashed)
+app.post("/api/real/auth/request-otp", async (req, res) => {
+  try {
+    const { phone } = req.body || {};
+    const result = await requestOtp({ phone });
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message || "Failed to send verification code" });
+  }
+});
+
+// 2. Verify OTP (Validates attempts, invalidates session, returns JWT)
+app.post("/api/real/auth/verify-otp", async (req, res) => {
+  try {
+    const { sessionId, phone, otpCode } = req.body || {};
+    const result = await verifyOtp({ sessionId, phone, otpCode });
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message || "Failed to verify code" });
+  }
+});
+
+// 3. Register New User (After phone OTP verification)
+app.post("/api/real/auth/register", async (req, res) => {
+  try {
+    const { sessionId, phone, name, role } = req.body || {};
+    const result = await registerNewUser({ sessionId, phone, name, role });
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message || "Failed to complete registration" });
+  }
+});
+
+// 4. Current Real User Profile & Session
+app.get("/api/real/auth/me", requireRealAuth, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      user: req.user,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch user session" });
+  }
+});
+
+// 5. Authorized Patient Record: Patients can ONLY access their own record
+app.get("/api/real/patient/dashboard", requireRealAuth, (req, res) => {
+  try {
+    if (req.user.role !== "patient") {
+      return res.status(403).json({ error: "Access denied. Patient role required." });
+    }
+    const patientRecord = getAuthorizedPatientRecord(req.user, req.user.patientId);
+    res.json({
+      success: true,
+      user: req.user,
+      patient: patientRecord,
+    });
+  } catch (err) {
+    res.status(403).json({ error: err.message });
+  }
+});
+
+// 6. Authorized Caregiver Patient Roster: Returns ONLY patients linked via caregiver_patient_links
+app.get("/api/real/caregiver/patients", requireRealAuth, (req, res) => {
+  try {
+    if (req.user.role !== "caregiver") {
+      return res.status(403).json({ error: "Access denied. Caregiver role required." });
+    }
+    const patients = getCaregiverLinkedPatients(req.user.caregiverId);
+    res.json({
+      success: true,
+      caregiverId: req.user.caregiverId,
+      patients,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. Authorized Caregiver Patient Record: Verifies link before granting access
+app.get("/api/real/caregiver/patient/:id", requireRealAuth, (req, res) => {
+  try {
+    const patientRecord = getAuthorizedPatientRecord(req.user, req.params.id);
+    res.json({
+      success: true,
+      patient: patientRecord,
+    });
+  } catch (err) {
+    res.status(403).json({ error: err.message });
+  }
+});
+
+// ==================================================
+// 1. GEMINI LIVE API WEBSOCKET BRIDGE (/api/live-voice)
+// ==================================================
+const wss = new WebSocketServer({ server, path: "/api/live-voice" });
+
+wss.on("connection", async (clientWs) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    clientWs.send(
+      JSON.stringify({
+        type: "status",
+        connected: false,
+        message: "Gemini Live API is not configured. Speech-to-Text and TTS fallback active.",
+        liveSupported: false,
+      })
+    );
+    return;
+  }
+
+  try {
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: { headers: { "User-Agent": "aistudio-build" } },
+    });
+
+    const patientProfile = getPatientProfile();
+    const liveSession = await ai.live.connect({
+      model: "gemini-3.8-live",
+      config: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+        },
+        systemInstruction: `You are Anvesha, a gentle eldercare AI voice assistant speaking with ${patientProfile.name} in Room ${patientProfile.room}. Maintain a comforting, non-diagnostic tone and answer questions about routine and reminders simply.`,
+      },
+      callbacks: {
+        onmessage: (msg) => {
+          const audioChunk = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+          if (audioChunk) {
+            clientWs.send(JSON.stringify({ type: "audio", audio: audioChunk }));
+          }
+          if (msg.serverContent?.interrupted) {
+            clientWs.send(JSON.stringify({ type: "interrupted", interrupted: true }));
+          }
+        },
+      },
+    });
+
+    clientWs.send(
+      JSON.stringify({
+        type: "status",
+        connected: true,
+        message: "Live bidirectional voice connection established with Anvesha",
+        liveSupported: true,
+      })
+    );
+
+    clientWs.on("message", (raw) => {
+      try {
+        const data = JSON.parse(raw.toString());
+        if (data.audio) {
+          liveSession.sendRealtimeInput({
+            audio: { data: data.audio, mimeType: "audio/pcm;rate=16000" },
+          });
+        }
+      } catch (err) {
+        console.warn("Live voice chunk parse error:", err.message);
+      }
+    });
+
+    clientWs.on("close", () => {
+      try {
+        liveSession.close?.();
+      } catch (_) {}
+    });
+  } catch (liveErr) {
+    console.warn("Gemini Live session connection failed:", liveErr.message);
+    clientWs.send(
+      JSON.stringify({
+        type: "status",
+        connected: false,
+        error: liveErr.message,
+        message: "Live streaming audio session unavailable. Standard voice messaging fallback active.",
+        liveSupported: false,
+      })
+    );
+  }
 });
 
 // ==================================================
@@ -906,7 +1467,7 @@ async function start() {
     app.use(vite.middlewares);
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`ANVESHA server running on http://0.0.0.0:${PORT}`);
   });
 }

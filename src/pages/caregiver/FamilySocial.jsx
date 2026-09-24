@@ -79,20 +79,11 @@ function FamilySocial({ setCurrentView }) {
     preferred: "Call",
   });
 
-  const availableCount = contacts.filter(
-    (contact) => contact.status === "Available",
-  ).length;
+  const availableCount = contacts.filter((c) => c.status === "Available").length;
 
   const handleAddContact = (e) => {
     e.preventDefault();
-
-    if (
-      !newContact.name ||
-      !newContact.relation ||
-      !newContact.phone
-    ) {
-      return;
-    }
+    if (!newContact.name || !newContact.relation || !newContact.phone) return;
 
     const contact = {
       id: Date.now(),
@@ -100,640 +91,262 @@ function FamilySocial({ setCurrentView }) {
       relation: newContact.relation,
       phone: newContact.phone,
       preferred: newContact.preferred,
-      lastContact: "Never",
+      lastContact: "Just added",
       status: "Available",
     };
 
-    setContacts((prev) => [...prev, contact]);
-
+    setContacts((prev) => [contact, ...prev]);
     setNewContact({
       name: "",
       relation: "",
       phone: "",
       preferred: "Call",
     });
-
     setShowAddForm(false);
-    showToast(`Added ${contact.name} to family roster.`);
-  };
-
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  const handleAction = (action, contact) => {
-    showToast(`${action} with ${contact.name} initiated.`);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 rounded-2xl bg-[#0f3e3a] text-white px-5 py-3 shadow-lg text-sm font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-          <CheckCircle2 size={18} className="text-emerald-400" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-[#F7F7FC] dark:bg-[#11121C] p-6 transition-colors">
       {/* HEADER */}
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
         <div className="flex items-center gap-3">
-
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-50 text-pink-700">
-            <Heart size={23} />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8]">
+            <Users size={24} />
           </div>
-
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              Family & Social
+            <h1 className="text-3xl font-extrabold text-[#202238] dark:text-[#F3F4F6]">
+              Family & Social Circle
             </h1>
-
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
               Help Asha stay connected with familiar people.
             </p>
           </div>
-
         </div>
 
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] px-5 py-3 text-sm font-semibold text-white hover:bg-[#0c312e]"
+          className="flex items-center justify-center gap-2 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-3 text-sm font-semibold text-white shadow-soft transition"
         >
           <Plus size={16} />
           Add Family Member
         </button>
-
       </div>
 
       {/* PATIENT CONTEXT */}
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
-        <div className="flex items-center gap-4">
-
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">
-            👵
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              Asha
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Family and social support
-            </p>
-          </div>
-
+      <div className="mb-6 rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-5 shadow-soft flex items-center gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-2xl border border-[#6366D8]/20">
+          👵
         </div>
-
+        <div>
+          <h2 className="text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">Asha</h2>
+          <p className="mt-0.5 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">Family and social support network</p>
+        </div>
       </div>
 
       {/* SUMMARY */}
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
           title="Family Members"
           value={contacts.length}
           text="Trusted contacts"
           icon={<Users size={18} />}
         />
-
         <SummaryCard
           title="Available Now"
           value={availableCount}
           text="Ready to connect"
-          icon={<CheckCircle2 size={18} />}
+          icon={<CheckCircle2 size={18} className="text-[#78CFA3]" />}
         />
-
         <SummaryCard
           title="Today's Interactions"
           value="3"
           text="Calls and messages"
-          icon={<MessageCircle size={18} />}
+          icon={<MessageCircle size={18} className="text-[#6366D8]" />}
         />
-
         <SummaryCard
           title="Social Engagement"
           value="87%"
           text="This week"
-          icon={<Heart size={18} />}
+          icon={<Heart size={18} className="text-[#E98B9B]" />}
         />
-
       </div>
 
-      {/* WELL-BEING */}
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <div className="mb-5">
-
-          <h2 className="text-lg font-semibold text-slate-900">
-            Asha's Social Well-being
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Recent social interaction indicators.
-          </p>
-
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-
-          <WellBeingCard
-            title="Family Interaction"
-            value="4"
-            text="interactions today"
-          />
-
-          <WellBeingCard
-            title="Most Frequent Contact"
-            value="Priya"
-            text="daughter"
-          />
-
-          <WellBeingCard
-            title="Engagement Time"
-            value="28 min"
-            text="today"
-          />
-
-        </div>
-
-      </div>
-
-      {/* CONTACTS */}
+      {/* CONTACTS GRID */}
       <div className="mb-6">
-
-        <div className="mb-4">
-
-          <h2 className="text-lg font-semibold text-slate-900">
-            Family & Trusted Contacts
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            People connected to Asha's care network.
-          </p>
-
-        </div>
-
+        <h2 className="mb-4 text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
+          Family & Trusted Contacts
+        </h2>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-
           {contacts.map((contact) => (
-
             <div
               key={contact.id}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              className="rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-5 shadow-soft transition hover:-translate-y-1 hover:shadow-card"
             >
-
-              {/* CONTACT HEADER */}
               <div className="flex items-start justify-between">
-
                 <div className="flex items-center gap-3">
-
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-xl">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-xl">
                     👤
                   </div>
-
                   <div>
-
-                    <h3 className="text-sm font-bold text-slate-900">
+                    <h3 className="text-base font-bold text-[#202238] dark:text-[#F3F4F6]">
                       {contact.name}
                     </h3>
-
-                    <p className="mt-1 text-xs text-slate-400">
-                      {contact.relation}
-                    </p>
-
+                    <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">{contact.relation}</p>
                   </div>
-
                 </div>
 
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
                     contact.status === "Available"
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-slate-100 text-slate-500"
+                      ? "bg-[#78CFA3]/15 text-[#78CFA3]"
+                      : "bg-stone-100 dark:bg-stone-800 text-[#6B6E85]"
                   }`}
                 >
                   {contact.status}
                 </span>
-
               </div>
 
-              {/* DETAILS */}
-              <div className="mt-5 space-y-3">
-
-                <InfoRow
-                  label="Phone"
-                  value={contact.phone}
-                />
-
-                <InfoRow
-                  label="Preferred"
-                  value={contact.preferred}
-                />
-
-                <InfoRow
-                  label="Last interaction"
-                  value={contact.lastContact}
-                />
-
+              <div className="mt-4 space-y-1.5 border-t border-stone-100 dark:border-stone-800 pt-3 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+                <div className="flex items-center justify-between">
+                  <span>Phone:</span>
+                  <span className="font-semibold text-[#202238] dark:text-[#F3F4F6]">{contact.phone}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Preferred:</span>
+                  <span className="font-semibold text-[#6366D8] dark:text-[#8B8FE8]">{contact.preferred}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Last contact:</span>
+                  <span>{contact.lastContact}</span>
+                </div>
               </div>
 
-              {/* ACTIONS */}
-              <div className="mt-5 grid grid-cols-3 gap-2">
-
+              <div className="mt-4 flex gap-2">
                 <button
-                  onClick={() => handleAction("Call", contact)}
-                  className="flex items-center justify-center gap-1 rounded-xl bg-[#0f3e3a] py-2.5 text-[10px] font-bold text-white hover:bg-[#0c312e]"
+                  type="button"
+                  onClick={() => alert(`Calling ${contact.name} at ${contact.phone}...`)}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] py-2 text-xs font-semibold text-white transition shadow-soft"
                 >
                   <Phone size={13} />
-                  Call
+                  <span>Call</span>
                 </button>
-
                 <button
-                  onClick={() => handleAction("Message", contact)}
-                  className="flex items-center justify-center gap-1 rounded-xl bg-slate-100 py-2.5 text-[10px] font-bold text-slate-700 hover:bg-slate-200"
-                >
-                  <MessageCircle size={13} />
-                  Message
-                </button>
-
-                <button
-                  onClick={() => handleAction("Video Call", contact)}
-                  className="flex items-center justify-center gap-1 rounded-xl bg-teal-50 py-2.5 text-[10px] font-bold text-[#0f3e3a] hover:bg-teal-100"
+                  type="button"
+                  onClick={() => alert(`Starting video session with ${contact.name}...`)}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#E8E8FA] dark:bg-[#25283C] hover:bg-[#6366D8]/20 py-2 text-xs font-semibold text-[#6366D8] dark:text-[#8B8FE8] transition"
                 >
                   <Video size={13} />
-                  Video
+                  <span>Video</span>
                 </button>
-
               </div>
-
             </div>
-
           ))}
-
         </div>
-
       </div>
 
-      {/* RECENT ACTIVITY */}
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <div className="mb-5 flex items-center gap-2">
-          <Clock size={17} className="text-[#0f3e3a]" />
-
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              Recent Social Activity
-            </h2>
-
-            <p className="mt-1 text-xs text-slate-400">
-              Latest family interactions involving Asha.
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-
-          <ActivityRow
-            icon="📹"
-            title="Video call with Priya"
-            time="Today, 10:30 AM"
-            duration="12 minutes"
-          />
-
-          <ActivityRow
-            icon="📞"
-            title="Call with Rahul"
-            time="Today, 9:15 AM"
-            duration="8 minutes"
-          />
-
-          <ActivityRow
-            icon="💬"
-            title="Message received from Anil"
-            time="Yesterday, 8:00 PM"
-            duration="2 minutes"
-          />
-
-        </div>
-
-      </div>
-
-      {/* AURA SOCIAL SUGGESTION */}
-      <div className="mb-6 rounded-2xl border border-pink-100 bg-pink-50/50 p-6">
-
-        <div className="flex items-start gap-4">
-
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-pink-700">
-            <Heart size={18} />
-          </div>
-
-          <div>
-
-            <h2 className="text-sm font-semibold text-pink-800">
-              ANVESHA Social Suggestion
-            </h2>
-
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Asha has responded positively to recent family
-              interactions. A short morning conversation with Priya
-              may support continued social engagement.
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* NAVIGATION */}
-      <div className="flex flex-wrap gap-3">
-
-        <button
-          onClick={() => setCurrentView("caregiver-patients")}
-          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          ← Back to Patients
-        </button>
-
-        <button
-          onClick={() => setCurrentView("caregiver-vault")}
-          className="rounded-xl bg-[#0f3e3a] px-5 py-3 text-sm font-semibold text-white hover:bg-[#0c312e]"
-        >
-          Open Memory Vault
-        </button>
-
-      </div>
-
-      {/* ADD CONTACT MODAL */}
+      {/* ADD MODAL */}
       {showAddForm && (
-
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-
-          <div className="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl">
-
-            <button
-              onClick={() => setShowAddForm(false)}
-              className="absolute right-5 top-5 text-slate-400 hover:text-slate-700"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="mb-6 flex items-center gap-3">
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-50 text-pink-700">
-                <UserPlus size={18} />
-              </div>
-
-              <div>
-
-                <h2 className="text-xl font-bold text-slate-900">
-                  Add Family Member
-                </h2>
-
-                <p className="mt-1 text-xs text-slate-400">
-                  Add someone to Asha's trusted family network.
-                </p>
-
-              </div>
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-[#1B1D2A] p-7 shadow-2xl border border-stone-200/80 dark:border-stone-800/80">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-[#202238] dark:text-[#F3F4F6]">
+                Add Family Contact
+              </h2>
+              <button onClick={() => setShowAddForm(false)} className="text-[#6B6E85]">
+                <X size={20} />
+              </button>
             </div>
 
-            <form
-              onSubmit={handleAddContact}
-              className="space-y-4"
-            >
-
-              <InputField
-                label="Full Name"
-                value={newContact.name}
-                onChange={(e) =>
-                  setNewContact({
-                    ...newContact,
-                    name: e.target.value,
-                  })
-                }
-                placeholder="e.g. Priya Sharma"
-              />
-
-              <InputField
-                label="Relationship"
-                value={newContact.relation}
-                onChange={(e) =>
-                  setNewContact({
-                    ...newContact,
-                    relation: e.target.value,
-                  })
-                }
-                placeholder="e.g. Daughter"
-              />
-
-              <InputField
-                label="Phone Number"
-                value={newContact.phone}
-                onChange={(e) =>
-                  setNewContact({
-                    ...newContact,
-                    phone: e.target.value,
-                  })
-                }
-                placeholder="+91 XXXXX XXXXX"
-              />
+            <form onSubmit={handleAddContact} className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newContact.name}
+                  onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
+                  placeholder="e.g. Ramesh Kumar"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8]"
+                />
+              </div>
 
               <div>
-
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                  Preferred Contact Method
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
+                  Relationship *
                 </label>
+                <input
+                  type="text"
+                  required
+                  value={newContact.relation}
+                  onChange={(e) => setNewContact({ ...newContact, relation: e.target.value })}
+                  placeholder="e.g. Son, Sister"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8]"
+                />
+              </div>
 
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
+                  Phone Number *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newContact.phone}
+                  onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
+                  placeholder="+91 98765 43210"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8]"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
+                  Preferred Method
+                </label>
                 <select
                   value={newContact.preferred}
-                  onChange={(e) =>
-                    setNewContact({
-                      ...newContact,
-                      preferred: e.target.value,
-                    })
-                  }
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                  onChange={(e) => setNewContact({ ...newContact, preferred: e.target.value })}
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8]"
                 >
-                  <option>Call</option>
-                  <option>Video Call</option>
-                  <option>Message</option>
+                  <option value="Call">Phone Call</option>
+                  <option value="Video Call">Video Call</option>
+                  <option value="Message">Message</option>
                 </select>
-
               </div>
 
               <div className="flex gap-3 pt-2">
-
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  className="flex-1 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] py-3 text-sm font-semibold text-[#6B6E85] dark:text-[#C5C8D8]"
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-[#0f3e3a] py-3 text-sm font-semibold text-white hover:bg-[#0c312e]"
+                  className="flex-1 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] py-3 text-sm font-semibold text-white shadow-soft transition"
                 >
-                  Add Member
+                  Add Contact
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 }
 
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function SummaryCard({
-  title,
-  value,
-  text,
-  icon,
-}) {
+function SummaryCard({ title, value, text, icon }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
+    <div className="rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-5 shadow-soft">
       <div className="flex items-center justify-between">
-
-        <p className="text-sm text-slate-500">
-          {title}
-        </p>
-
-        <div className="text-[#0f3e3a]">
-          {icon}
-        </div>
-
+        <p className="text-xs font-medium text-[#6B6E85] dark:text-[#9A9DB5]">{title}</p>
+        <div className="text-[#6366D8] dark:text-[#8B8FE8]">{icon}</div>
       </div>
-
-      <p className="mt-3 text-3xl font-bold text-slate-900">
-        {value}
-      </p>
-
-      <p className="mt-1 text-xs text-slate-400">
-        {text}
-      </p>
-
-    </div>
-  );
-}
-
-function WellBeingCard({
-  title,
-  value,
-  text,
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-
-      <p className="text-xs text-slate-400">
-        {title}
-      </p>
-
-      <p className="mt-2 text-xl font-bold text-slate-900">
-        {value}
-      </p>
-
-      <p className="mt-1 text-xs text-slate-400">
-        {text}
-      </p>
-
-    </div>
-  );
-}
-
-function InfoRow({
-  label,
-  value,
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-
-      <span className="text-xs text-slate-400">
-        {label}
-      </span>
-
-      <span className="text-xs font-semibold text-slate-700">
-        {value}
-      </span>
-
-    </div>
-  );
-}
-
-function ActivityRow({
-  icon,
-  title,
-  time,
-  duration,
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
-
-      <div className="flex items-center gap-3">
-
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg">
-          {icon}
-        </div>
-
-        <div>
-
-          <p className="text-sm font-semibold text-slate-800">
-            {title}
-          </p>
-
-          <p className="mt-1 text-xs text-slate-400">
-            {time}
-          </p>
-
-        </div>
-
-      </div>
-
-      <span className="text-xs text-slate-400">
-        {duration}
-      </span>
-
-    </div>
-  );
-}
-
-function InputField({
-  label,
-  value,
-  onChange,
-  placeholder,
-}) {
-  return (
-    <div>
-
-      <label className="mb-1.5 block text-xs font-semibold text-slate-600">
-        {label}
-      </label>
-
-      <input
-        type="text"
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-      />
-
+      <p className="mt-2 text-3xl font-extrabold text-[#202238] dark:text-[#F3F4F6]">{value}</p>
+      <p className="mt-1 text-xs text-[#6B6E85]/80 dark:text-[#9A9DB5]/80">{text}</p>
     </div>
   );
 }

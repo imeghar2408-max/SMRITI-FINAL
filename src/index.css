@@ -1,18 +1,47 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
+
 :root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.5;
   font-weight: 400;
 
-  color: #1f2937;
-  background: #f8faf9;
+  color: #202238;
+  background: #F7F7FC;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Lavender / Periwinkle Eldercare System */
+  --color-primary: #6366D8;
+  --color-primary-light: #8B8FE8;
+  --color-primary-dark: #4F52B2;
+  --color-bg-canvas: #F7F7FC;
+  --color-bg-card: #FFFFFF;
+  --color-accent-soft: #E8E8FA;
+  --color-text-main: #202238;
+  --color-text-secondary: #6B6E85;
+  --color-success: #78CFA3;
+  --color-warning: #F3B562;
+  --color-health: #E98B9B;
+  --color-card-border: #EAEBF4;
+}
+
+.dark, [data-theme="dark"] {
+  color: #EDEFFF;
+  background: #11121C;
+  color-scheme: dark;
+
+  --color-bg-canvas: #11121C;
+  --color-bg-card: #1B1D2A;
+  --color-accent-soft: #25283C;
+  --color-text-main: #EDEFFF;
+  --color-text-secondary: #9A9DB5;
+  --color-card-border: #2B2E42;
 }
 
 * {
@@ -27,14 +56,16 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f8faf9;
+  background: var(--color-bg-canvas);
+  color: var(--color-text-main);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 button,
 input,
 textarea,
 select {
-  font: inherit;
+  font-family: inherit;
 }
 
 button {
@@ -43,4 +74,116 @@ button {
 
 #root {
   min-height: 100vh;
+}
+
+/* Subtle Eldercare Card Shadow */
+.shadow-soft {
+  box-shadow: 0 4px 20px -2px rgba(99, 102, 216, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-soft-lg {
+  box-shadow: 0 10px 30px -4px rgba(99, 102, 216, 0.10), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .shadow-soft {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+}
+
+.dark .shadow-soft-lg {
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.45);
+}
+
+/* Animations */
+@keyframes heroSlowZoom {
+  0% {
+    transform: scale(1.0);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes heroFadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-hero-zoom {
+  animation: heroSlowZoom 22s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
+  will-change: transform;
+}
+
+.animate-hero-fade {
+  animation: heroFadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-hero-fade-d1 {
+  animation: heroFadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.12s forwards;
+  opacity: 0;
+}
+
+.animate-hero-fade-d2 {
+  animation: heroFadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.24s forwards;
+  opacity: 0;
+}
+
+.animate-hero-fade-d3 {
+  animation: heroFadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.36s forwards;
+  opacity: 0;
+}
+
+.animate-gentle-float {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 2.5s ease-in-out infinite;
+}
+
+/* Accessible Focus States */
+:focus-visible {
+  outline: 2px solid #6366D8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-zoom,
+  .animate-hero-fade,
+  .animate-hero-fade-d1,
+  .animate-hero-fade-d2,
+  .animate-hero-fade-d3,
+  .animate-gentle-float,
+  .animate-pulse-subtle {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
 }

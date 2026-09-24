@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Background & Ambience Gradients -->
+    <linearGradient id="hero-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8faf9"/>
+      <stop offset="50%" stop-color="#f0f6f4"/>
+      <stop offset="100%" stop-color="#e6f0ed"/>
+    </linearGradient>
+    <linearGradient id="teal-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#115e59"/>
+      <stop offset="100%" stop-color="#0f3e3a"/>
+    </linearGradient>
+    <linearGradient id="warm-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="emerald-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a7f3d0"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <filter id="soft-shadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f3e3a" flood-opacity="0.08"/>
+    </filter>
+    <filter id="badge-shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f3e3a" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+
+  <!-- Canvas Frame with Rounded Corners -->
+  <rect width="520" height="420" rx="28" fill="url(#hero-bg)" stroke="#e2ece8" stroke-width="1.5"/>
+
+  <!-- Subtle Ambient Circles -->
+  <circle cx="260" cy="190" r="140" fill="#d1fae5" opacity="0.35" filter="blur(30px)"/>
+  <circle cx="100" cy="90" r="70" fill="#fef3c7" opacity="0.4" filter="blur(25px)"/>
+  <circle cx="430" cy="330" r="85" fill="#99f6e4" opacity="0.3" filter="blur(25px)"/>
+
+  <!-- Floor Horizon / Gentle Arc -->
+  <path d="M 40 340 Q 260 365 480 340" stroke="#cbdad5" stroke-width="1.5" stroke-dasharray="4 6"/>
+
+  <!-- Memory Connection Aura in Background -->
+  <path d="M 180 180 C 180 110, 340 110, 340 180" fill="none" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 5" opacity="0.7"/>
+
+  <!-- Central Floating Memory & Care Motif -->
+  <g filter="url(#badge-shadow)" transform="translate(260, 110)">
+    <!-- Outer Glow Ring -->
+    <circle cx="0" cy="0" r="32" fill="#ffffff" stroke="#a7f3d0" stroke-width="2"/>
+    <circle cx="0" cy="0" r="24" fill="#ecfdf5"/>
+    <!-- Connected Lotus / Memory Heart -->
+    <path d="M 0 -12 C -8 -4, -14 4, 0 16 C 14 4, 8 -4, 0 -12 Z" fill="#0f3e3a"/>
+    <path d="M -8 2 C -4 -2, 4 -2, 8 2" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <circle cx="0" cy="2" r="2.5" fill="#f59e0b"/>
+  </g>
+
+  <!-- Left: Elderly Patient (Dignified, Relaxed in comfortable armchair) -->
+  <g filter="url(#soft-shadow)">
+    <!-- Armchair Backrest -->
+    <path d="M 110 320 L 110 200 C 110 185, 130 175, 160 175 C 190 175, 210 185, 210 200 L 210 320 Z" fill="#e2ede9" stroke="#cbdad5" stroke-width="1.5"/>
+    <path d="M 100 240 C 95 240, 90 250, 95 270 L 105 315 L 115 315 Z" fill="#d1e3dd"/>
+    <path d="M 210 240 C 215 240, 220 250, 215 270 L 205 315 L 195 315 Z" fill="#d1e3dd"/>
+    
+    <!-- Torso / Warm Cardigan -->
+    <path d="M 125 250 C 125 220, 195 220, 195 250 L 200 320 L 120 320 Z" fill="#115e59"/>
+    <!-- Collar & Soft Scarf -->
+    <path d="M 148 225 L 160 255 L 172 225 Z" fill="#fef3c7"/>
+    <path d="M 160 255 L 160 305" stroke="#fef3c7" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Head & Expression -->
+    <circle cx="160" cy="192" r="24" fill="#fed7aa"/>
+    <!-- Silver Hair (Neat, Dignified) -->
+    <path d="M 136 190 C 136 166, 184 166, 184 190 C 182 174, 168 170, 160 170 C 148 170, 138 176, 136 190 Z" fill="#e2e8f0"/>
+    <path d="M 136 190 C 137 197, 142 195, 142 190" fill="#e2e8f0"/>
+    <!-- Reading Glasses (Warm intellect) -->
+    <rect x="149" y="190" width="10" height="7" rx="2" fill="none" stroke="#78350f" stroke-width="1.5"/>
+    <rect x="163" y="190" width="10" height="7" rx="2" fill="none" stroke="#78350f" stroke-width="1.5"/>
+    <line x1="159" y1="193" x2="163" y2="193" stroke="#78350f" stroke-width="1.5"/>
+    <!-- Warm smile -->
+    <path d="M 156 205 Q 161 208 166 205" stroke="#9a3412" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+    <!-- Arms resting gently holding a warm cup/tablet -->
+    <path d="M 124 260 Q 140 285 160 285 Q 180 285 196 260" stroke="#0f3e3a" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <rect x="150" y="275" width="22" height="18" rx="4" fill="#ffffff" stroke="#99f6e4" stroke-width="1.5"/>
+    <!-- Tablet screen heart -->
+    <path d="M 161 281 Q 159 279 157 281 Q 155 283 161 288 Q 167 283 165 281 Q 163 279 161 281 Z" fill="#10b981"/>
+  </g>
+
+  <!-- Right: Caregiver / Family Member (Warm posture leaning in, attentive) -->
+  <g filter="url(#soft-shadow)">
+    <!-- Body / Soft Teal Smock / Sweater -->
+    <path d="M 315 235 C 315 205, 375 205, 375 235 L 385 330 L 305 330 Z" fill="#0f3e3a"/>
+    <!-- Collar -->
+    <path d="M 336 215 L 345 232 L 354 215 Z" fill="#a7f3d0"/>
+
+    <!-- Head -->
+    <circle cx="345" cy="182" r="22" fill="#fed7aa"/>
+    <!-- Hair (Caregiver, warm brown/chestnut updo) -->
+    <path d="M 324 182 C 322 158, 368 158, 366 182 C 366 164, 355 160, 345 160 C 333 160, 325 166, 324 182 Z" fill="#451a03"/>
+    <circle cx="352" cy="156" r="8" fill="#451a03"/>
+    <!-- Smile & Eyes -->
+    <path d="M 338 182 Q 340 180 342 182" stroke="#78350f" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    <path d="M 342 192 Q 346 195 350 192" stroke="#9a3412" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+    <!-- Reaching Out / Supportive Hand on Shoulder -->
+    <!-- Arm reaching toward patient -->
+    <path d="M 320 235 Q 260 220 205 240" stroke="#0f3e3a" stroke-width="11" stroke-linecap="round" fill="none"/>
+    <!-- Gentle Hand resting on patient shoulder -->
+    <ellipse cx="202" cy="242" rx="7" ry="5" fill="#fed7aa"/>
+  </g>
+
+  <!-- Floating Feature Badges (Balanced & Modern) -->
+  <!-- Top Left: Memory Care Badge -->
+  <g filter="url(#badge-shadow)" transform="translate(48, 65)">
+    <rect width="132" height="42" rx="21" fill="#ffffff" stroke="#e2ece8" stroke-width="1.5"/>
+    <circle cx="21" cy="21" r="13" fill="#ecfdf5"/>
+    <!-- Small Brain / Leaf -->
+    <path d="M 21 13 C 16 13, 14 17, 16 20 C 14 23, 17 28, 21 28 C 25 28, 28 23, 26 20 C 28 17, 26 13, 21 13 Z" fill="#0f3e3a"/>
+    <text x="44" y="20" fill="#0f3e3a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700">Memory Support</text>
+    <text x="44" y="32" fill="#059669" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600">Daily Recalls</text>
+  </g>
+
+  <!-- Top Right: Live Connection Badge -->
+  <g filter="url(#badge-shadow)" transform="translate(340, 65)">
+    <rect width="135" height="42" rx="21" fill="#ffffff" stroke="#e2ece8" stroke-width="1.5"/>
+    <circle cx="21" cy="21" r="13" fill="#eff6ff"/>
+    <circle cx="21" cy="21" r="5" fill="#3b82f6"/>
+    <circle cx="21" cy="21" r="9" fill="none" stroke="#3b82f6" stroke-width="1" stroke-dasharray="2 2"/>
+    <text x="44" y="20" fill="#0f3e3a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700">Caregiver Sync</text>
+    <text x="44" y="32" fill="#2563eb" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600">Active Telemetry</text>
+  </g>
+
+  <!-- Bottom Center: Adaptive Care Badge -->
+  <g filter="url(#badge-shadow)" transform="translate(180, 345)">
+    <rect width="160" height="38" rx="19" fill="#ffffff" stroke="#d1fae5" stroke-width="1.5"/>
+    <circle cx="20" cy="19" r="11" fill="#ecfdf5"/>
+    <!-- Heart pulse -->
+    <path d="M 15 19 L 18 19 L 20 15 L 22 23 L 24 19 L 26 19" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <text x="39" y="23" fill="#0f3e3a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700">Dignified Independence</text>
+  </g>
+</svg>

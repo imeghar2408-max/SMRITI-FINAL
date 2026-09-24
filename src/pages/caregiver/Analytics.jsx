@@ -1,5 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { RefreshCw, CheckCircle2, AlertTriangle, Radio, BarChart3, ChevronRight } from "lucide-react";
+import {
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  Radio,
+  BarChart3,
+  ChevronRight,
+  Sparkles,
+  Brain,
+  Clock,
+  Activity,
+  UserCheck,
+  ShieldCheck,
+  Info,
+} from "lucide-react";
 
 const defaultPatient = {
   id: "P001",
@@ -21,31 +35,32 @@ const defaultPatient = {
 };
 
 function getInsight(patient) {
-  const trend = Array.isArray(patient?.trend) && patient.trend.length > 0 ? patient.trend : [75, 75];
+  const trend =
+    Array.isArray(patient?.trend) && patient.trend.length > 0 ? patient.trend : [75, 75];
   const first = trend[0];
   const latest = trend[trend.length - 1];
   const change = latest - first;
 
   if (change <= -10) {
     return {
-      title: "Significant decline detected",
-      text: `Recent cognitive performance for ${patient?.name || "the patient"} shows a noticeable downward trend. A clinical review is recommended.`,
-      style: "bg-red-50 border-red-200 text-red-700",
+      title: "Noticeable variance detected",
+      text: `Recent cognitive metrics for ${patient?.name || "the patient"} show an observed downward variance. An attentive clinical check is recommended.`,
+      style: "bg-[#E98B9B]/15 border-[#E98B9B]/40 text-[#C7485E] dark:text-[#E98B9B]",
     };
   }
 
   if (change < 0) {
     return {
-      title: "Performance requires monitoring",
-      text: `Recent sessions show mild decline. Continue monitoring ${patient?.name || "patient"} performance and engagement closely.`,
-      style: "bg-amber-50 border-amber-200 text-amber-700",
+      title: "Gentle monitoring suggested",
+      text: `Recent sessions indicate mild fatigue or hesitation. Continue observing ${patient?.name || "patient"} engagement closely.`,
+      style: "bg-[#F3B562]/15 border-[#F3B562]/40 text-[#9C6119] dark:text-[#F3B562]",
     };
   }
 
   return {
-    title: "Performance appears stable",
-    text: `Recent sessions show stable cognitive performance with consistent engagement across activities.`,
-    style: "bg-emerald-50 border-emerald-200 text-emerald-800",
+    title: "Cognitive rhythm stable",
+    text: `Recent sessions reflect steady cognitive performance with consistent engagement across scheduled activities.`,
+    style: "bg-[#78CFA3]/15 border-[#78CFA3]/40 text-[#2E7D56] dark:text-[#78CFA3]",
   };
 }
 
@@ -55,8 +70,45 @@ function Analytics({ setCurrentView, initialPatientId = "P001" }) {
   const [patient, setPatient] = useState(defaultPatient);
   const [syncStatus, setSyncStatus] = useState(null);
   const [recentActivities, setRecentActivities] = useState([]);
+  const [aiInsights, setAiInsights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Caregiver External Clinical Knowledge & Grounding Query State
+  const [caregiverQueryText, setCaregiverQueryText] = useState("");
+  const [useSearchGrounding, setUseSearchGrounding] = useState(true);
+  const [queryResult, setQueryResult] = useState(null);
+  const [queryLoading, setQueryLoading] = useState(false);
+
+  const handleCaregiverQuery = async (e) => {
+    e.preventDefault();
+    if (!caregiverQueryText.trim() || queryLoading) return;
+
+    setQueryLoading(true);
+    setQueryResult(null);
+
+    try {
+      const res = await fetch("/api/ai/caregiver-query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: caregiverQueryText.trim(),
+          patientId: selectedPatientId,
+          enableSearchGrounding: useSearchGrounding,
+        }),
+      });
+      const data = await res.json();
+      setQueryResult(data);
+    } catch (err) {
+      setQueryResult({
+        answer: "Failed to connect to caregiver research service.",
+        isExternallyGrounded: false,
+        disclaimer: "Offline fallback observation.",
+      });
+    } finally {
+      setQueryLoading(false);
+    }
+  };
 
   // Load patient list
   useEffect(() => {
@@ -73,43 +125,60 @@ function Analytics({ setCurrentView, initialPatientId = "P001" }) {
       .catch((err) => console.warn("Failed to load caregiver patient roster:", err));
   }, []);
 
-  const fetchAnalytics = useCallback(async (isManual = false) => {
-    if (isManual) setRefreshing(true);
-    try {
-      const [analyticsRes, activitiesRes, syncRes] = await Promise.all([
-        fetch(`/api/caregiver/analytics?patientId=${selectedPatientId}`),
-        fetch(`/api/caregiver/patients/${selectedPatientId}/activities`),
-        fetch(`/api/caregiver/patients/${selectedPatientId}/sync-status`),
-      ]);
+  const fetchAnalytics = useCallback(
+    async (isManual = false) => {
+      if (isManual) setRefreshing(true);
+      try {
+        const [analyticsRes, activitiesRes, syncRes, insightsRes] = await Promise.allSettled([
+          fetch(`/api/caregiver/analytics?patientId=${selectedPatientId}`),
+          fetch(`/api/caregiver/patients/${selectedPatientId}/activities`),
+          fetch(`/api/caregiver/patients/${selectedPatientId}/sync-status`),
+          fetch(`/api/ai/insights?patientId=${selectedPatientId}`),
+        ]);
 
-      if (analyticsRes.ok) {
-        const data = await analyticsRes.json();
-        if (data && data.patient) {
-          setPatient({
-            ...defaultPatient,
-            ...data.patient,
-            trend: Array.isArray(data.trend) && data.trend.length > 0 ? data.trend : (data.patient.trend || defaultPatient.trend),
-            activities: Array.isArray(data.activities) && data.activities.length > 0 ? data.activities : defaultPatient.activities,
-          });
+        if (analyticsRes.status === "fulfilled" && analyticsRes.value.ok) {
+          const data = await analyticsRes.value.json();
+          if (data && data.patient) {
+            setPatient({
+              ...defaultPatient,
+              ...data.patient,
+              trend:
+                Array.isArray(data.trend) && data.trend.length > 0
+                  ? data.trend
+                  : data.patient.trend || defaultPatient.trend,
+              activities:
+                Array.isArray(data.activities) && data.activities.length > 0
+                  ? data.activities
+                  : defaultPatient.activities,
+            });
+          }
         }
-      }
 
-      if (activitiesRes.ok) {
-        const actData = await activitiesRes.json();
-        setRecentActivities(actData.activities || []);
-      }
+        if (activitiesRes.status === "fulfilled" && activitiesRes.value.ok) {
+          const actData = await activitiesRes.value.json();
+          setRecentActivities(actData.activities || []);
+        }
 
-      if (syncRes.ok) {
-        const sData = await syncRes.json();
-        setSyncStatus(sData);
+        if (syncRes.status === "fulfilled" && syncRes.value.ok) {
+          const sData = await syncRes.value.json();
+          setSyncStatus(sData);
+        }
+
+        if (insightsRes.status === "fulfilled" && insightsRes.value.ok) {
+          const insData = await insightsRes.value.json();
+          if (Array.isArray(insData.insights) && insData.insights.length > 0) {
+            setAiInsights(insData.insights);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load analytics:", err);
+      } finally {
+        setLoading(false);
+        if (isManual) setRefreshing(false);
       }
-    } catch (err) {
-      console.warn("Failed to load analytics:", err);
-    } finally {
-      setLoading(false);
-      if (isManual) setRefreshing(false);
-    }
-  }, [selectedPatientId]);
+    },
+    [selectedPatientId]
+  );
 
   useEffect(() => {
     fetchAnalytics();
@@ -121,213 +190,220 @@ function Analytics({ setCurrentView, initialPatientId = "P001" }) {
 
   const insight = getInsight(patient);
 
-  const trendList = Array.isArray(patient.trend) && patient.trend.length > 0 ? patient.trend : [70, 75, 80];
+  const trendList =
+    Array.isArray(patient.trend) && patient.trend.length > 0
+      ? patient.trend
+      : [70, 75, 80];
   const maxTrend = Math.max(...trendList);
   const minTrend = Math.min(...trendList);
   const trendChange = (trendList[trendList.length - 1] || 0) - (trendList[0] || 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      {/* Header */}
-      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-8 animate-in fade-in duration-300">
+      {/* Header & Controls */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-bold text-slate-900">
-              Cognitive Analytics
-            </h1>
-
-            {/* Synchronization Status Indicator */}
-            {syncStatus && (
-              <span
-                className={`text-xs font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${
-                  syncStatus.state === "synced"
-                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                    : syncStatus.state === "pending"
-                    ? "bg-amber-50 text-amber-800 border-amber-200"
-                    : "bg-slate-100 text-slate-700 border-slate-300"
-                }`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    syncStatus.state === "synced"
-                      ? "bg-emerald-500"
-                      : syncStatus.state === "pending"
-                      ? "bg-amber-500"
-                      : "bg-slate-400"
-                  }`}
-                />
-                {syncStatus.label}
-              </span>
-            )}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#6366D8] dark:text-[#8B8FE8]">
+              Caregiver Intelligence Layer
+            </span>
           </div>
-          <p className="mt-1 text-slate-500">
-            Real-time cognitive performance, engagement scores, and session analytics for {patient.name}.
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#202238] dark:text-white">
+            Cognitive Analytics &amp; Trajectory
+          </h1>
+          <p className="text-xs md:text-sm text-[#6B6E85] dark:text-[#9A9DB5] mt-1">
+            Evidence-based observations derived from interactive telemetry and daily rhythms.
           </p>
         </div>
 
-        {/* Controls */}
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Patient Selection Dropdown */}
-          {patientList.length > 0 && (
-            <div className="flex items-center gap-2">
-              <label htmlFor="analytics-patient-select" className="text-xs font-bold text-slate-600">
-                Patient:
-              </label>
-              <select
-                id="analytics-patient-select"
-                value={selectedPatientId}
-                onChange={(e) => setSelectedPatientId(e.target.value)}
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-teal-600 focus:outline-hidden"
-              >
-                {patientList.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} (Room {p.room})
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* Sync Status & Refresh */}
+        <div className="flex items-center gap-3">
+          {syncStatus && (
+            <span
+              className={`text-xs font-semibold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 ${
+                syncStatus.state === "synced"
+                  ? "bg-[#78CFA3]/15 text-[#2E7D56] dark:text-[#78CFA3] border-[#78CFA3]/30"
+                  : syncStatus.state === "pending"
+                  ? "bg-[#F3B562]/15 text-[#9C6119] dark:text-[#F3B562] border-[#F3B562]/30"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 border-slate-200"
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  syncStatus.state === "synced"
+                    ? "bg-[#78CFA3] animate-pulse"
+                    : syncStatus.state === "pending"
+                    ? "bg-[#F3B562]"
+                    : "bg-slate-400"
+                }`}
+              />
+              <span>{syncStatus.label}</span>
+            </span>
           )}
 
           <button
-            type="button"
             onClick={() => fetchAnalytics(true)}
             disabled={refreshing}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition shadow-xs"
+            className="p-2.5 rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] text-[#6B6E85] dark:text-[#9A9DB5] hover:text-[#6366D8] hover:border-[#6366D8] transition cursor-pointer"
+            title="Refresh Telemetry"
           >
-            <RefreshCw size={14} className={refreshing ? "animate-spin text-teal-700" : ""} />
-            <span>{refreshing ? "Refreshing..." : "Refresh"}</span>
+            <RefreshCw size={16} className={refreshing ? "animate-spin text-[#6366D8]" : ""} />
           </button>
         </div>
       </div>
 
-      {/* Patient Identity Strip */}
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-xl border border-teal-100">
-              👵
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-slate-900">
-                  {patient.name}
-                </h2>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 font-semibold">
-                  Room {patient.room || "402"}
-                </span>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-teal-50 text-[#0f3e3a] font-semibold">
-                  ID: {selectedPatientId}
-                </span>
-              </div>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {patient.age} years old • Caregiver: Dr. Sarah Jenkins • Family: Priya Sharma
-              </p>
-            </div>
-          </div>
+      {/* Patient Selector Switcher (if multiple) */}
+      {patientList.length > 1 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          {patientList.map((p) => {
+            const isSel = p.id === selectedPatientId;
+            return (
+              <button
+                key={p.id}
+                onClick={() => setSelectedPatientId(p.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                  isSel
+                    ? "bg-[#6366D8] text-white shadow-soft"
+                    : "bg-white dark:bg-[#1B1D2A] border border-[#EAEBF4] dark:border-[#2B2E42] text-[#6B6E85] dark:text-[#9A9DB5] hover:border-[#6366D8]"
+                }`}
+              >
+                {p.name} (Room {p.room})
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-          <span
-            className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
-              patient.status === "Stable"
-                ? "bg-emerald-50 text-emerald-700"
-                : patient.status === "Needs Attention"
-                ? "bg-amber-50 text-amber-700"
-                : "bg-red-50 text-red-700"
-            }`}
-          >
-            ● {patient.status}
-          </span>
+      {/* Patient Overview Summary Card */}
+      <div className="bg-white dark:bg-[#1B1D2A] rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] p-6 shadow-soft flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8] flex items-center justify-center text-2xl font-bold">
+            👵
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-[#202238] dark:text-white">
+                {patient.name}
+              </h2>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#78CFA3]/15 text-[#2E7D56] dark:text-[#78CFA3] font-bold">
+                {patient.status || "Stable"}
+              </span>
+            </div>
+            <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5] mt-0.5">
+              Age {patient.age} · Room {patient.room} · {patient.sessions || 18} total sessions logged
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="text-left md:text-right">
+            <span className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">Routine Adherence</span>
+            <p className="text-lg font-bold text-[#78CFA3] tabular-nums">
+              {patient.completion || 92}%
+            </p>
+          </div>
+          <div className="w-px h-8 bg-[#EAEBF4] dark:bg-[#2B2E42]" />
+          <div className="text-left md:text-right">
+            <span className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">Overall Index</span>
+            <p className="text-lg font-bold text-[#6366D8] dark:text-[#8B8FE8] tabular-nums">
+              {overallScore}%
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Main Stats */}
-      <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {/* Overall */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Overall Cognitive Score</p>
-          <p className="mt-2 text-4xl font-bold text-slate-900">{overallScore}%</p>
-          <p className="mt-2 text-xs text-slate-400">Average of memory and attention metrics</p>
-        </div>
-
-        {/* Engagement */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Engagement Rate</p>
-          <p className="mt-2 text-4xl font-bold text-slate-900">{patient.engagement || 87}%</p>
-          <p className="mt-2 text-xs text-slate-400">Consistent activity adherence</p>
-        </div>
-
-        {/* Sessions */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Recorded Sessions</p>
-          <p className="mt-2 text-4xl font-bold text-slate-900">{patient.sessions || recentActivities.length || 18}</p>
-          <p className="mt-2 text-xs text-slate-400">Total activities completed to date</p>
-        </div>
-
-        {/* Completion */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Completion Rate</p>
-          <p className="mt-2 text-4xl font-bold text-slate-900">{patient.completion || 92}%</p>
-          <p className="mt-2 text-xs text-slate-400">Sessions finished without abandonment</p>
-        </div>
-      </div>
-
-      {/* Memory + Attention Dual Gauge */}
-      <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Memory */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Memory Recall</p>
-              <p className="mt-1 text-3xl font-bold text-slate-900">{patient.memory}%</p>
-            </div>
-            <span className="text-2xl">🧠</span>
+      {/* 4 Core Metrics Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Metric 1: Overall Cognitive Score */}
+        <div className="rounded-2xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] p-5 shadow-soft">
+          <div className="flex items-center justify-between text-xs text-[#6B6E85] dark:text-[#9A9DB5] mb-2">
+            <span>Cognitive Index</span>
+            <span className="text-lg">🧠</span>
           </div>
-
-          <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+          <p className="text-3xl font-extrabold text-[#6366D8] dark:text-[#8B8FE8] tabular-nums">
+            {overallScore}%
+          </p>
+          <div className="mt-3 h-2 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] overflow-hidden">
             <div
-              className="h-full rounded-full bg-teal-800 transition-all duration-500"
+              className="h-full rounded-full bg-[#6366D8]"
+              style={{ width: `${overallScore}%` }}
+            />
+          </div>
+          <p className="mt-2 text-[11px] text-[#6B6E85] dark:text-[#9A9DB5]">Composite cognitive baseline</p>
+        </div>
+
+        {/* Metric 2: Memory Retention */}
+        <div className="rounded-2xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] p-5 shadow-soft">
+          <div className="flex items-center justify-between text-xs text-[#6B6E85] dark:text-[#9A9DB5] mb-2">
+            <span>Memory Retention</span>
+            <span className="text-lg">🌸</span>
+          </div>
+          <p className="text-3xl font-extrabold text-[#202238] dark:text-white tabular-nums">
+            {patient.memory}%
+          </p>
+          <div className="mt-3 h-2 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[#E98B9B]"
               style={{ width: `${patient.memory}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-slate-400">Visual and family memory retention</p>
+          <p className="mt-2 text-[11px] text-[#6B6E85] dark:text-[#9A9DB5]">Visual &amp; family recall</p>
         </div>
 
-        {/* Attention */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Attention & Focus</p>
-              <p className="mt-1 text-3xl font-bold text-slate-900">{patient.attention}%</p>
-            </div>
-            <span className="text-2xl">🎯</span>
+        {/* Metric 3: Attention & Focus */}
+        <div className="rounded-2xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] p-5 shadow-soft">
+          <div className="flex items-center justify-between text-xs text-[#6B6E85] dark:text-[#9A9DB5] mb-2">
+            <span>Attention &amp; Focus</span>
+            <span className="text-lg">🎯</span>
           </div>
-
-          <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+          <p className="text-3xl font-extrabold text-[#202238] dark:text-white tabular-nums">
+            {patient.attention}%
+          </p>
+          <div className="mt-3 h-2 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] overflow-hidden">
             <div
-              className="h-full rounded-full bg-slate-600 transition-all duration-500"
+              className="h-full rounded-full bg-[#F3B562]"
               style={{ width: `${patient.attention}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-slate-400">Target detection and pattern matching</p>
+          <p className="mt-2 text-[11px] text-[#6B6E85] dark:text-[#9A9DB5]">Pattern &amp; difference detection</p>
+        </div>
+
+        {/* Metric 4: Daily Adherence */}
+        <div className="rounded-2xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] p-5 shadow-soft">
+          <div className="flex items-center justify-between text-xs text-[#6B6E85] dark:text-[#9A9DB5] mb-2">
+            <span>Engagement &amp; Rhythm</span>
+            <span className="text-lg">🌿</span>
+          </div>
+          <p className="text-3xl font-extrabold text-[#202238] dark:text-white tabular-nums">
+            {patient.engagement || 87}%
+          </p>
+          <div className="mt-3 h-2 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[#78CFA3]"
+              style={{ width: `${patient.engagement || 87}%` }}
+            />
+          </div>
+          <p className="mt-2 text-[11px] text-[#6B6E85] dark:text-[#9A9DB5]">Completion &amp; response speed</p>
         </div>
       </div>
 
-      {/* Performance Trend Chart */}
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      {/* Cognitive Performance Trajectory Chart */}
+      <div className="rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] p-7 shadow-soft">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
-              Cognitive Performance Trend
+            <h2 className="text-lg font-bold text-[#202238] dark:text-white">
+              Cognitive Trajectory Progression
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Session-by-session progression across recent activities
+            <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+              Session-by-session telemetry across recent interactive exercises
             </p>
           </div>
 
           <div className="text-left sm:text-right">
-            <p className="text-xs text-slate-400">Net Trajectory</p>
+            <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">Net Trajectory Delta</p>
             <p
-              className={`text-lg font-bold ${
-                trendChange >= 0 ? "text-emerald-600" : "text-red-600"
+              className={`text-lg font-extrabold tabular-nums ${
+                trendChange >= 0 ? "text-[#78CFA3]" : "text-[#E98B9B]"
               }`}
             >
               {trendChange >= 0 ? "+" : ""}
@@ -336,8 +412,8 @@ function Analytics({ setCurrentView, initialPatientId = "P001" }) {
           </div>
         </div>
 
-        {/* Simple Bar Trend */}
-        <div className="flex h-56 items-end gap-3 rounded-xl bg-slate-50 p-5">
+        {/* Clean Bar Trend */}
+        <div className="flex h-56 items-end gap-3 rounded-2xl bg-[#F7F7FC] dark:bg-[#11121C] p-6 border border-[#EAEBF4] dark:border-[#2B2E42]">
           {trendList.map((value, index) => {
             const height =
               maxTrend === minTrend
@@ -349,15 +425,15 @@ function Analytics({ setCurrentView, initialPatientId = "P001" }) {
                 key={index}
                 className="flex h-full flex-1 flex-col items-center justify-end gap-2"
               >
-                <span className="text-xs font-semibold text-slate-600">
+                <span className="text-xs font-bold text-[#202238] dark:text-white tabular-nums">
                   {value}%
                 </span>
                 <div
-                  className="w-full max-w-10 rounded-t-lg bg-slate-800 transition-all hover:bg-teal-700"
+                  className="w-full max-w-11 rounded-t-xl bg-[#6366D8] hover:bg-[#5255C5] transition-all"
                   style={{ height: `${height}%` }}
                   title={`Session ${index + 1}: ${value}%`}
                 />
-                <span className="text-[10px] text-slate-400">
+                <span className="text-[10px] font-semibold text-[#6B6E85] dark:text-[#9A9DB5]">
                   S{index + 1}
                 </span>
               </div>
@@ -367,37 +443,37 @@ function Analytics({ setCurrentView, initialPatientId = "P001" }) {
       </div>
 
       {/* Activity Performance Breakdown */}
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] p-7 shadow-soft">
         <div className="mb-5">
-          <h2 className="text-lg font-bold text-slate-900">
-            Activity Performance Breakdown
+          <h2 className="text-lg font-bold text-[#202238] dark:text-white">
+            Activity Domain Breakdown
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Persistent scores categorized by cognitive exercise domain
+          <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+            Persistent retention scores categorized by cognitive task
           </p>
         </div>
 
-        <div className="space-y-5">
-          {patient.activities.map((activity) => (
-            <div key={activity.name}>
+        <div className="space-y-4">
+          {patient.activities.map((act) => (
+            <div key={act.name} className="p-3.5 rounded-2xl bg-[#F7F7FC] dark:bg-[#11121C] border border-[#EAEBF4] dark:border-[#2B2E42]">
               <div className="mb-2 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">
-                    {activity.name}
+                  <p className="text-sm font-bold text-[#202238] dark:text-white">
+                    {act.name}
                   </p>
-                  <p className="text-xs text-slate-400">
-                    {activity.sessions} logged {activity.sessions === 1 ? "session" : "sessions"}
+                  <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+                    {act.sessions} completed {act.sessions === 1 ? "session" : "sessions"}
                   </p>
                 </div>
-                <span className="text-sm font-bold text-slate-900">
-                  {activity.score}%
+                <span className="text-base font-extrabold text-[#6366D8] dark:text-[#8B8FE8] tabular-nums">
+                  {act.score}%
                 </span>
               </div>
 
-              <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-2.5 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-teal-800 transition-all duration-500"
-                  style={{ width: `${activity.score}%` }}
+                  className="h-full rounded-full bg-[#6366D8]"
+                  style={{ width: `${act.score}%` }}
                 />
               </div>
             </div>
@@ -407,35 +483,49 @@ function Analytics({ setCurrentView, initialPatientId = "P001" }) {
 
       {/* Recent Persisted Game Sessions */}
       {recentActivities.length > 0 && (
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-slate-900 mb-1">
-            Recent Activity Logs
+        <div className="rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] p-7 shadow-soft">
+          <h2 className="text-lg font-bold text-[#202238] dark:text-white mb-1">
+            Recent Telemetry Logs
           </h2>
-          <p className="text-xs text-slate-500 mb-4">
-            Directly recorded from {patient.name}'s interactive sessions
+          <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5] mb-4">
+            Recorded directly from {patient.name}'s interactive sessions
           </p>
 
           <div className="space-y-3">
             {recentActivities.slice(0, 5).map((act, idx) => (
-              <div key={act.id || idx} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-4">
+              <div
+                key={act.id || idx}
+                className="p-4 rounded-2xl bg-[#F7F7FC] dark:bg-[#11121C] border border-[#EAEBF4] dark:border-[#2B2E42] flex items-center justify-between gap-4"
+              >
                 <div className="flex items-center gap-3">
                   <span className="text-xl">
-                    {act.gameId === "memory-match" ? "🧠" : act.gameId === "spot-the-difference" ? "🎯" : "🧩"}
+                    {act.gameId === "memory-match"
+                      ? "🧠"
+                      : act.gameId === "spot-the-difference"
+                      ? "🎯"
+                      : "🧩"}
                   </span>
                   <div>
-                    <p className="text-xs font-bold text-slate-800">{act.game || act.gameId}</p>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-xs font-bold text-[#202238] dark:text-white">
+                      {act.game || act.gameId}
+                    </p>
+                    <p className="text-[11px] text-[#6B6E85] dark:text-[#9A9DB5]">
                       {act.difficulty || "standard"} • {act.performanceLevel || "Completed"}
                     </p>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-xs font-bold text-teal-800 px-2 py-0.5 rounded-md bg-teal-50">
+                  <span className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8] px-2.5 py-1 rounded-md bg-[#E8E8FA] dark:bg-[#25283C] tabular-nums">
                     {act.score ?? act.accuracy}%
                   </span>
-                  <p className="text-[10px] text-slate-400 mt-0.5">
-                    {act.timestamp ? new Date(act.timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "Recorded"}
+                  <p className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5] mt-1">
+                    {act.timestamp
+                      ? new Date(act.timestamp).toLocaleTimeString([], {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })
+                      : "Recorded"}
                   </p>
                 </div>
               </div>
@@ -444,38 +534,214 @@ function Analytics({ setCurrentView, initialPatientId = "P001" }) {
         </div>
       )}
 
-      {/* Clinical Insight */}
-      <div className={`rounded-2xl border p-6 shadow-sm ${insight.style}`}>
-        <div className="flex gap-4">
-          <div className="text-2xl">
-            {patient.status === "Stable" ? "✓" : patient.status === "Needs Attention" ? "⚠️" : "🚨"}
-          </div>
+      {/* AI Observational Insights Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-base">{insight.title}</h2>
-            <p className="mt-1 text-sm leading-6 opacity-90">{insight.text}</p>
+            <div className="flex items-center gap-2">
+              <Sparkles size={18} className="text-[#6366D8] dark:text-[#8B8FE8]" />
+              <h2 className="text-lg md:text-xl font-bold text-[#202238] dark:text-white">
+                AI Observational Insights
+              </h2>
+            </div>
+            <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5] mt-0.5">
+              Explainable pattern detection based on telemetry trends and daily rhythms.
+            </p>
           </div>
+          <span className="text-xs px-3 py-1 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8] font-bold border border-[#6366D8]/20">
+            ANVESHA AI Service
+          </span>
+        </div>
+
+        {aiInsights && aiInsights.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4">
+            {aiInsights.map((ins, idx) => {
+              const isHigh = ins.severity === "high";
+              const isMod = ins.severity === "moderate";
+              const cardBorder = isHigh
+                ? "bg-[#E98B9B]/10 border-[#E98B9B]/40"
+                : isMod
+                ? "bg-[#F3B562]/10 border-[#F3B562]/40"
+                : "bg-white dark:bg-[#1B1D2A] border-[#EAEBF4] dark:border-[#2B2E42]";
+              const badgeBg = isHigh
+                ? "bg-[#E98B9B]/20 text-[#C7485E] dark:text-[#E98B9B]"
+                : isMod
+                ? "bg-[#F3B562]/20 text-[#9C6119] dark:text-[#F3B562]"
+                : "bg-[#78CFA3]/20 text-[#2E7D56] dark:text-[#78CFA3]";
+
+              const typeLabel =
+                ins.type === "cognitive_trend"
+                  ? "Cognitive Trajectory"
+                  : ins.type === "assistance_pattern"
+                  ? "Assistance & Latency Pattern"
+                  : ins.type === "routine_correlation"
+                  ? "Routine & Wellness Correlation"
+                  : String(ins.type || "Observation").replace(/_/g, " ").toUpperCase();
+
+              return (
+                <div
+                  key={idx}
+                  className={`rounded-3xl border p-6 shadow-soft transition-all duration-200 ${cardBorder}`}
+                >
+                  <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">
+                        {isHigh ? "🚨" : isMod ? "⚠️" : "📊"}
+                      </span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#6366D8] dark:text-[#8B8FE8]">
+                        {typeLabel}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase ${badgeBg}`}
+                    >
+                      {ins.severity} priority
+                    </span>
+                  </div>
+
+                  <p className="text-sm font-semibold text-[#202238] dark:text-white mb-3">
+                    {ins.observation}
+                  </p>
+
+                  {/* Supporting Evidence Points */}
+                  {Array.isArray(ins.evidence) && ins.evidence.length > 0 && (
+                    <div className="mb-3 rounded-2xl bg-[#F7F7FC]/80 dark:bg-[#11121C]/80 p-3.5 border border-[#EAEBF4] dark:border-[#2B2E42]">
+                      <p className="text-xs font-bold text-[#6B6E85] dark:text-[#9A9DB5] mb-1.5 uppercase tracking-wider">
+                        Evidence Points
+                      </p>
+                      <ul className="list-disc list-inside space-y-1 text-xs text-[#202238] dark:text-[#EDEFFF]">
+                        {ins.evidence.map((ev, eIdx) => (
+                          <li key={eIdx}>{ev}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Caregiver Recommendation */}
+                  {ins.recommendation && (
+                    <div className="rounded-2xl bg-[#E8E8FA]/50 dark:bg-[#25283C]/60 p-3.5 border border-[#6366D8]/20">
+                      <p className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8] mb-0.5 uppercase tracking-wider">
+                        Caregiver Recommendation
+                      </p>
+                      <p className="text-xs text-[#202238] dark:text-[#EDEFFF] leading-relaxed">
+                        {ins.recommendation}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className={`rounded-3xl border p-6 shadow-soft ${insight.style}`}>
+            <div className="flex gap-4">
+              <div className="text-2xl">
+                {patient.status === "Stable" ? "✓" : patient.status === "Needs Attention" ? "⚠️" : "🚨"}
+              </div>
+              <div>
+                <h2 className="font-bold text-base">{insight.title}</h2>
+                <p className="mt-1 text-sm leading-6 opacity-90">{insight.text}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* NON-DIAGNOSTIC ADVISORY FOOTNOTE */}
+        <div className="rounded-2xl bg-[#F7F7FC] dark:bg-[#11121C] border border-[#EAEBF4] dark:border-[#2B2E42] p-4 flex items-start gap-3">
+          <Info size={18} className="text-[#6366D8] dark:text-[#8B8FE8] shrink-0 mt-0.5" />
+          <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5] leading-relaxed">
+            <strong>Clinical Notice:</strong> ANVESHA insights are behavioral and observational suggestions derived from gameplay and routine telemetry. They do not constitute formal medical diagnoses or clinical prescriptions.
+          </p>
+        </div>
+
+        {/* 7. CAREGIVER CLINICAL RESEARCH & SEARCH GROUNDING */}
+        <div className="rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] p-6 shadow-soft space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 dark:border-stone-800 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🔎</span>
+                <h3 className="text-base font-bold text-[#202238] dark:text-white">
+                  Caregiver Clinical Guidance &amp; Grounding
+                </h3>
+              </div>
+              <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5] mt-0.5">
+                Query external eldercare guidelines grounded with Google Search. Patient context remains strictly observational.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label htmlFor="search-grounding-toggle" className="text-xs font-semibold text-[#6B6E85] dark:text-[#9A9DB5] cursor-pointer">
+                Google Search Grounding
+              </label>
+              <input
+                id="search-grounding-toggle"
+                type="checkbox"
+                checked={useSearchGrounding}
+                onChange={(e) => setUseSearchGrounding(e.target.checked)}
+                className="w-4 h-4 accent-[#6366D8] rounded cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <form onSubmit={handleCaregiverQuery} className="flex gap-2">
+            <input
+              type="text"
+              value={caregiverQueryText}
+              onChange={(e) => setCaregiverQueryText(e.target.value)}
+              placeholder="e.g. Best non-pharmacological pacing techniques for evening agitation in Assam..."
+              className="flex-1 rounded-2xl border border-stone-200 dark:border-stone-700 bg-[#F7F7FC] dark:bg-[#11121C] px-4 py-2.5 text-xs text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8]"
+            />
+            <button
+              type="submit"
+              disabled={queryLoading || !caregiverQueryText.trim()}
+              className="rounded-2xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-2.5 text-xs font-bold text-white shadow-soft transition disabled:opacity-40"
+            >
+              {queryLoading ? "Searching..." : "Ask Clinical AI"}
+            </button>
+          </form>
+
+          {queryResult && (
+            <div className="p-4 rounded-2xl bg-[#F7F7FC] dark:bg-[#11121C] border border-[#6366D8]/20 space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-[#6366D8] dark:text-[#8B8FE8]">
+                  {queryResult.isExternallyGrounded ? "Grounded with Google Search" : "Internal Knowledge Reference"}
+                </span>
+                <span className="text-[10px] text-[#78CFA3] font-mono">
+                  Telemetry Grounded: {patient.name}
+                </span>
+              </div>
+              <p className="text-xs text-[#202238] dark:text-[#EDEFFF] leading-relaxed whitespace-pre-wrap">
+                {queryResult.answer}
+              </p>
+              {queryResult.disclaimer && (
+                <p className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5] italic pt-1 border-t border-stone-100 dark:border-stone-800">
+                  {queryResult.disclaimer}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Navigation & Action */}
+      {/* Navigation Shortcuts */}
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           onClick={() => setCurrentView("caregiver-patients")}
-          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] px-5 py-3 text-xs md:text-sm font-semibold text-[#202238] dark:text-white hover:border-[#6366D8] transition cursor-pointer"
         >
           ← Back to Patients
         </button>
 
         <button
           onClick={() => setCurrentView("caregiver-rhythm")}
-          className="rounded-xl bg-[#0f3e3a] px-5 py-3 text-sm font-semibold text-white hover:bg-[#0c312e]"
+          className="rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-3 text-xs md:text-sm font-semibold text-white transition shadow-soft cursor-pointer"
         >
           View Adaptive Rhythm
         </button>
 
         <button
           onClick={() => setCurrentView("caregiver-location")}
-          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] px-5 py-3 text-xs md:text-sm font-semibold text-[#202238] dark:text-white hover:border-[#6366D8] transition cursor-pointer"
         >
           Patient Location Map
         </button>

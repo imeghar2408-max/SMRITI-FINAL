@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Clock,
   User,
+  ArrowRight,
 } from "lucide-react";
 
 function Vault({ setCurrentView, initialPatientId = "P001" }) {
@@ -134,7 +135,6 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
       });
 
       if (res.ok) {
-        // Reload persisted memories
         await loadMemories(true);
         setShowAddForm(false);
         setNewMemory({
@@ -159,19 +159,19 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
   const patientDisplayName = patient?.name || (selectedPatientId === "P001" ? "Asha" : `Patient ${selectedPatientId}`);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-[#F7F7FC] dark:bg-[#11121C] p-6 transition-colors">
       {/* HEADER */}
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-[#0f3e3a]">
-              <Heart size={23} />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8]">
+              <Heart size={24} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">
+              <h1 className="text-3xl font-extrabold text-[#202238] dark:text-[#F3F4F6]">
                 Memory Vault
               </h1>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
                 Persistent photos and cognitive recall memories for {patientDisplayName}.
               </p>
             </div>
@@ -182,14 +182,14 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
           {/* Patient Selector */}
           {patientList.length > 0 && (
             <div className="flex items-center gap-2">
-              <label htmlFor="vault-patient-select" className="text-xs font-bold text-slate-600">
+              <label htmlFor="vault-patient-select" className="text-xs font-bold text-[#6B6E85] dark:text-[#9A9DB5]">
                 Patient:
               </label>
               <select
                 id="vault-patient-select"
                 value={selectedPatientId}
                 onChange={(e) => setSelectedPatientId(e.target.value)}
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-teal-600 focus:outline-hidden"
+                className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] px-3 py-2 text-xs font-semibold text-[#202238] dark:text-[#F3F4F6] shadow-xs focus:border-[#6366D8] focus:outline-hidden"
               >
                 {patientList.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -204,15 +204,15 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
             type="button"
             onClick={() => loadMemories(true)}
             disabled={refreshing}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition shadow-xs"
+            className="flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] px-4 py-2.5 text-xs font-semibold text-[#6B6E85] dark:text-[#C5C8D8] hover:bg-stone-50 dark:hover:bg-stone-800 transition shadow-xs"
           >
-            <RefreshCw size={14} className={refreshing ? "animate-spin text-teal-700" : ""} />
+            <RefreshCw size={14} className={refreshing ? "animate-spin text-[#6366D8]" : ""} />
             <span>{refreshing ? "Syncing..." : "Refresh"}</span>
           </button>
 
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0c312e] shadow-xs"
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition"
           >
             <Plus size={16} />
             Add Memory
@@ -221,32 +221,32 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
       </div>
 
       {/* PATIENT CONTEXT STRIP */}
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between flex-wrap gap-4">
+      <div className="mb-6 rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-5 shadow-soft flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-2xl border border-teal-100">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-2xl border border-[#6366D8]/20">
             👵
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
                 {patientDisplayName}
               </h2>
-              <span className="text-xs px-2.5 py-0.5 rounded-md bg-stone-100 text-stone-600 font-semibold">
+              <span className="text-xs px-2.5 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-[#6B6E85] dark:text-[#C5C8D8] font-semibold">
                 Room {patient?.room || "402"}
               </span>
-              <span className="text-xs px-2.5 py-0.5 rounded-md bg-teal-50 text-[#0f3e3a] font-semibold">
+              <span className="text-xs px-2.5 py-0.5 rounded-lg bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8] font-semibold">
                 ID: {selectedPatientId}
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
               {memories.length} saved {memories.length === 1 ? "memory" : "memories"} synchronized with patient portal
             </p>
           </div>
         </div>
 
-        <div className="text-right text-xs text-slate-500">
-          <p className="font-semibold text-slate-700">Storage Backend</p>
-          <p className="text-[11px] text-emerald-700 font-medium">Persistent Disk & SQLite/JSON DB</p>
+        <div className="text-right text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+          <p className="font-semibold text-[#202238] dark:text-[#F3F4F6]">Storage Backend</p>
+          <p className="text-[11px] text-[#78CFA3] font-medium">Persistent Disk & SQLite/JSON DB</p>
         </div>
       </div>
 
@@ -255,14 +255,14 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
         <div className="relative mb-4">
           <Search
             size={17}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B6E85] dark:text-[#9A9DB5]"
           />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search memories by name, relationship, description..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            className="w-full rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] py-3 pl-11 pr-4 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20 transition"
           />
         </div>
 
@@ -271,10 +271,10 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+              className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
                 activeCategory === category
-                  ? "bg-slate-900 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                  ? "bg-[#6366D8] text-white shadow-soft"
+                  : "border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] text-[#6B6E85] dark:text-[#C5C8D8] hover:bg-stone-50 dark:hover:bg-stone-800"
               }`}
             >
               {category}
@@ -285,38 +285,38 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
 
       {/* MEMORY GRID OR EMPTY STATES */}
       {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
-          <RefreshCw size={28} className="mx-auto animate-spin text-teal-700 mb-3" />
-          <p className="text-sm font-semibold text-slate-700">Loading {patientDisplayName}'s memories...</p>
+        <div className="rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-12 text-center shadow-soft">
+          <RefreshCw size={28} className="mx-auto animate-spin text-[#6366D8] mb-3" />
+          <p className="text-sm font-semibold text-[#202238] dark:text-[#F3F4F6]">Loading {patientDisplayName}'s memories...</p>
         </div>
       ) : memories.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white p-12 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-[#0f3e3a]">
+        <div className="rounded-3xl border-2 border-dashed border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] p-12 text-center shadow-soft">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8]">
             <ImageIcon size={28} />
           </div>
-          <h3 className="text-lg font-bold text-slate-900">
+          <h3 className="text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
             No memories uploaded yet for {patientDisplayName}
           </h3>
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+          <p className="mx-auto mt-2 max-w-md text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
             When {patientDisplayName} uploads photos from the patient Memory portal, or when you add photos here, they will securely appear in this vault.
           </p>
           <button
             onClick={() => setShowAddForm(true)}
-            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#0f3e3a] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#0c312e] transition"
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-2.5 text-xs font-bold text-white transition shadow-soft"
           >
             <Plus size={16} />
             Add First Memory
           </button>
         </div>
       ) : filteredMemories.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-            <Search size={20} className="text-slate-400" />
+        <div className="rounded-3xl border border-dashed border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] px-6 py-12 text-center shadow-soft">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800">
+            <Search size={20} className="text-[#6B6E85] dark:text-[#9A9DB5]" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-900">
+          <h3 className="text-lg font-semibold text-[#202238] dark:text-[#F3F4F6]">
             No memories found matching "{searchTerm}"
           </h3>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
             Try another search keyword or switch the category filter.
           </p>
         </div>
@@ -333,16 +333,16 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
       )}
 
       {/* HOW IT WORKS */}
-      <div className="mt-8 rounded-2xl border border-teal-100 bg-teal-50/60 p-6">
+      <div className="mt-8 rounded-3xl border border-[#6366D8]/20 bg-[#E8E8FA]/50 dark:bg-[#25283C]/50 p-6">
         <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0f3e3a] text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#6366D8] text-white">
             <Heart size={18} />
           </div>
           <div>
-            <h2 className="font-semibold text-[#0f3e3a]">
+            <h2 className="font-bold text-[#6366D8] dark:text-[#8B8FE8]">
               Personalized Cognitive Content
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-[#202238] dark:text-[#C5C8D8]">
               Caregivers can review familiar people, places, objects, and meaningful memories uploaded by {patientDisplayName}.
               ANVESHA utilizes this persistent content in personalized recognition and recall activities.
             </p>
@@ -354,14 +354,14 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           onClick={() => setCurrentView("caregiver-patients")}
-          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] px-5 py-3 text-sm font-semibold text-[#202238] dark:text-[#F3F4F6] hover:bg-stone-50 dark:hover:bg-stone-800 transition"
         >
           ← Back to Patients
         </button>
 
         <button
           onClick={() => setCurrentView("caregiver-rhythm")}
-          className="rounded-xl bg-[#0f3e3a] px-5 py-3 text-sm font-semibold text-white hover:bg-[#0c312e]"
+          className="rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-3 text-sm font-semibold text-white shadow-soft transition"
         >
           View Adaptive Rhythm
         </button>
@@ -369,31 +369,31 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
 
       {/* ADD MEMORY MODAL WITH PERSISTENT FILE UPLOAD */}
       {showAddForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-3xl bg-white dark:bg-[#1B1D2A] p-7 shadow-2xl max-h-[90vh] overflow-y-auto border border-stone-200/80 dark:border-stone-800/80">
             <button
               onClick={() => {
                 setShowAddForm(false);
                 setSelectedFile(null);
                 setPreviewUrl(null);
               }}
-              className="absolute right-5 top-5 text-slate-400 hover:text-slate-700"
+              className="absolute right-5 top-5 text-[#6B6E85] hover:text-[#202238] dark:hover:text-white"
             >
               <X size={20} />
             </button>
 
             <div className="mb-6">
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-[#202238] dark:text-[#F3F4F6]">
                 Add Memory for {patientDisplayName}
               </h2>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
                 This will persist permanently to the backend for patient and caregiver portals.
               </p>
             </div>
 
             <form onSubmit={handleAddMemory} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
                   Name / Memory Title *
                 </label>
                 <input
@@ -407,12 +407,12 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
                     })
                   }
                   placeholder="e.g. Priya"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
                   Relationship / Type
                 </label>
                 <input
@@ -425,12 +425,12 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
                     })
                   }
                   placeholder="e.g. Daughter"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
                   Category
                 </label>
                 <select
@@ -441,7 +441,7 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
                       category: e.target.value,
                     })
                   }
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20"
                 >
                   <option value="Family">Family</option>
                   <option value="Places">Places</option>
@@ -451,7 +451,7 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
                   Description
                 </label>
                 <textarea
@@ -464,13 +464,13 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
                   }
                   placeholder="Add a short description to assist recall..."
                   rows="3"
-                  className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                  className="w-full resize-none rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20"
                 />
               </div>
 
               {/* REAL IMAGE UPLOAD */}
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
                   Memory Photo
                 </label>
                 <input
@@ -482,7 +482,7 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
                 />
 
                 {previewUrl ? (
-                  <div className="relative rounded-xl border border-slate-200 overflow-hidden h-36 bg-slate-100">
+                  <div className="relative rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden h-36 bg-stone-100 dark:bg-stone-800">
                     <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -498,14 +498,14 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex h-28 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition"
+                    className="flex h-28 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-[#11121C] hover:bg-stone-100 dark:hover:bg-stone-800 transition"
                   >
                     <div className="text-center">
-                      <Upload size={20} className="mx-auto text-slate-400" />
-                      <p className="mt-1 text-xs text-slate-600 font-semibold">
+                      <Upload size={20} className="mx-auto text-[#6B6E85] dark:text-[#9A9DB5]" />
+                      <p className="mt-1 text-xs text-[#202238] dark:text-[#F3F4F6] font-semibold">
                         Click to select image file
                       </p>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5]">
                         PNG, JPG, or WEBP saved directly to backend
                       </p>
                     </div>
@@ -522,7 +522,7 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
                     setSelectedFile(null);
                     setPreviewUrl(null);
                   }}
-                  className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  className="flex-1 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] py-3 text-sm font-semibold text-[#6B6E85] dark:text-[#C5C8D8] hover:bg-stone-50 dark:hover:bg-stone-800 transition"
                 >
                   Cancel
                 </button>
@@ -530,7 +530,7 @@ function Vault({ setCurrentView, initialPatientId = "P001" }) {
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="flex-1 rounded-xl bg-[#0f3e3a] py-3 text-sm font-semibold text-white hover:bg-[#0c312e] flex items-center justify-center gap-2"
+                  className="flex-1 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] py-3 text-sm font-semibold text-white flex items-center justify-center gap-2 shadow-soft transition"
                 >
                   {uploading ? (
                     <>
@@ -565,10 +565,10 @@ function MemoryCard({ memory, patientName }) {
     : null;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between">
+    <div className="overflow-hidden rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] shadow-soft flex flex-col justify-between transition-all hover:-translate-y-1 hover:shadow-card">
       <div>
         {/* IMAGE AREA */}
-        <div className="relative flex h-48 items-center justify-center bg-slate-100 overflow-hidden">
+        <div className="relative flex h-48 items-center justify-center bg-stone-100 dark:bg-[#11121C] overflow-hidden">
           {memory.image ? (
             <img
               src={memory.image}
@@ -577,13 +577,13 @@ function MemoryCard({ memory, patientName }) {
             />
           ) : (
             <div className="text-center p-4">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-[#1B1D2A] text-[#6B6E85] dark:text-[#9A9DB5] shadow-xs">
                 <ImageIcon size={24} />
               </div>
-              <p className="mt-3 text-xs font-semibold text-slate-500">
+              <p className="mt-3 text-xs font-semibold text-[#6B6E85] dark:text-[#9A9DB5]">
                 No image file uploaded
               </p>
-              <p className="mt-0.5 text-[10px] text-slate-400">
+              <p className="mt-0.5 text-[10px] text-[#6B6E85]/70 dark:text-[#9A9DB5]/70">
                 Upload image to show in recognition games
               </p>
             </div>
@@ -602,23 +602,23 @@ function MemoryCard({ memory, patientName }) {
         <div className="p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#6366D8] dark:text-[#8B8FE8]">
                 {memory.category || "Memory"}
               </p>
-              <h3 className="mt-1 text-lg font-bold text-slate-900">
+              <h3 className="mt-1 text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
                 {displayName}
               </h3>
-              <p className="mt-0.5 text-xs text-slate-500 font-medium">
+              <p className="mt-0.5 text-xs text-[#6B6E85] dark:text-[#9A9DB5] font-medium">
                 {relation}
               </p>
             </div>
 
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
+            <span className="rounded-full bg-[#E8E8FA] dark:bg-[#25283C] px-2.5 py-1 text-[10px] font-semibold text-[#6366D8] dark:text-[#8B8FE8]">
               {memory.category || "Personal"}
             </span>
           </div>
 
-          <p className="mt-3 text-xs leading-5 text-slate-600 line-clamp-3">
+          <p className="mt-3 text-xs leading-5 text-[#6B6E85] dark:text-[#C5C8D8] line-clamp-3">
             {memory.description || "No description recorded for this memory."}
           </p>
         </div>
@@ -626,13 +626,13 @@ function MemoryCard({ memory, patientName }) {
 
       {/* ACTIONS */}
       <div className="p-5 pt-0">
-        <div className="mt-2 flex gap-2 border-t border-slate-100 pt-3">
+        <div className="mt-2 flex gap-2 border-t border-stone-100 dark:border-stone-800 pt-3">
           <button
             type="button"
             onClick={() =>
               alert(`Voice memory playback for "${displayName}" will be available in future audio updates.`)
             }
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-100 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 py-2.5 text-xs font-semibold text-[#202238] dark:text-[#F3F4F6] hover:bg-stone-200 dark:hover:bg-stone-700 transition"
           >
             <Mic size={14} />
             Voice Note
@@ -643,7 +643,7 @@ function MemoryCard({ memory, patientName }) {
             onClick={() =>
               alert(`Memory Details:\n\nTitle: ${displayName}\nRelationship: ${relation}\nCategory: ${memory.category}\nPatient: ${patientName}\nDate: ${formattedDate || "N/A"}\n\n${memory.description}`)
             }
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#0f3e3a] py-2.5 text-xs font-semibold text-white hover:bg-[#0c312e] transition"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] py-2.5 text-xs font-semibold text-white transition shadow-soft"
           >
             View Details
           </button>

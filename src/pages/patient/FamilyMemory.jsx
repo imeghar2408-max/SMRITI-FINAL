@@ -96,17 +96,14 @@ const initialMemories = [
 ];
 
 const categories = ["All", "People", "Places", "Events", "Culture"];
-
 const recallOptions = ["Priya", "Rahul", "Anil"];
 
 function speak(text) {
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.85;
     utterance.pitch = 1;
-
     window.speechSynthesis.speak(utterance);
   }
 }
@@ -114,15 +111,15 @@ function speak(text) {
 function ImageSlot({ image, onUpload, large = false, isUploading = false }) {
   return (
     <label
-      className={`relative flex cursor-pointer items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 bg-stone-100 transition hover:border-[#0f3e3a] ${
+      className={`relative flex cursor-pointer items-center justify-center overflow-hidden border-2 border-dashed border-[#EAEBF4] dark:border-[#2B2E42] bg-[#F7F7FC] dark:bg-[#11121C] transition hover:border-[#6366D8] ${
         large ? "h-48 rounded-2xl" : "h-44 rounded-3xl"
       }`}
     >
       {isUploading ? (
-        <div className="flex flex-col items-center justify-center text-center text-[#0f3e3a] p-4">
-          <Loader2 size={32} className="animate-spin mb-2 text-[#0f3e3a]" />
-          <p className="text-xs font-bold text-[#0f3e3a]">Saving photo...</p>
-          <p className="text-[11px] text-gray-400 mt-0.5">Uploading to vault</p>
+        <div className="flex flex-col items-center justify-center text-center text-[#6366D8] dark:text-[#8B8FE8] p-4">
+          <Loader2 size={32} className="animate-spin mb-2 text-[#6366D8]" />
+          <p className="text-xs font-bold">Saving photo...</p>
+          <p className="text-[11px] text-[#6B6E85] dark:text-[#9A9DB5] mt-0.5">Uploading to vault</p>
         </div>
       ) : image ? (
         <img
@@ -130,25 +127,24 @@ function ImageSlot({ image, onUpload, large = false, isUploading = false }) {
           alt="Memory"
           className="h-full w-full object-cover"
           onError={(e) => {
-            // Gracefully handle broken image links
             e.currentTarget.style.display = "none";
           }}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center text-center text-gray-400">
-          <ImagePlus size={36} className="mb-2 text-[#0f3e3a]" />
-          <p className="text-sm font-bold text-gray-600">
+        <div className="flex flex-col items-center justify-center text-center text-[#6B6E85] dark:text-[#9A9DB5]">
+          <ImagePlus size={36} className="mb-2 text-[#6366D8] dark:text-[#8B8FE8]" />
+          <p className="text-sm font-bold text-[#202238] dark:text-white">
             Add Memory Photo
           </p>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
             Click to upload an image
           </p>
         </div>
       )}
 
       {!isUploading && (
-        <div className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-md">
-          <Upload size={16} className="text-[#0f3e3a]" />
+        <div className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white dark:bg-[#1B1D2A] shadow-soft">
+          <Upload size={16} className="text-[#6366D8] dark:text-[#8B8FE8]" />
         </div>
       )}
 
@@ -177,7 +173,6 @@ export default function FamilyMemory() {
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [pendingUploads, setPendingUploads] = useState([]);
 
-  // Fetch patient memories from backend on mount
   const fetchPatientMemories = async () => {
     try {
       const res = await fetch("/api/memories/P001");
@@ -188,7 +183,6 @@ export default function FamilyMemory() {
           return;
         }
       }
-      // Fallback if needed
       const fallbackRes = await fetch("/api/patient/memories");
       if (fallbackRes.ok) {
         const fallbackData = await fallbackRes.json();
@@ -205,7 +199,6 @@ export default function FamilyMemory() {
     fetchPatientMemories();
   }, []);
 
-  // Offline retry handler
   useEffect(() => {
     const handleOnline = async () => {
       if (pendingUploads.length > 0) {
@@ -235,21 +228,14 @@ export default function FamilyMemory() {
   const [recallMemory, setRecallMemory] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState("");
   const [recallResult, setRecallResult] = useState(null);
-
   const [isListening, setIsListening] = useState(false);
 
   const filteredMemories = useMemo(() => {
     if (activeCategory === "All") return memories;
-
-    return memories.filter(
-      (memory) => memory.category === activeCategory
-    );
+    return memories.filter((memory) => memory.category === activeCategory);
   }, [memories, activeCategory]);
 
-  const favoriteMemories = memories.filter(
-    (memory) => memory.favorite
-  );
-
+  const favoriteMemories = memories.filter((memory) => memory.favorite);
   const memoryOfTheDay = memories[0] || initialMemories[0];
 
   const toggleFavorite = async (id) => {
@@ -258,9 +244,7 @@ export default function FamilyMemory() {
 
     setMemories((current) =>
       current.map((memory) =>
-        String(memory.id) === String(id)
-          ? { ...memory, favorite: newFavorite }
-          : memory
+        String(memory.id) === String(id) ? { ...memory, favorite: newFavorite } : memory
       )
     );
 
@@ -281,7 +265,7 @@ export default function FamilyMemory() {
     if (!file.type || !file.type.startsWith("image/")) {
       setFeedbackMessage({
         type: "error",
-        text: "Please select a valid image file (JPEG, PNG, WebP, GIF).",
+        text: "Please select a valid image file (JPEG, PNG, WebP).",
       });
       return;
     }
@@ -325,7 +309,6 @@ export default function FamilyMemory() {
       const savedData = await response.json();
       const updatedMemory = savedData.memory || savedData;
 
-      // Update state strictly upon backend confirmation
       setMemories((current) =>
         current.map((memory) =>
           String(memory.id) === String(id)
@@ -353,21 +336,10 @@ export default function FamilyMemory() {
       setTimeout(() => setFeedbackMessage(null), 4000);
     } catch (error) {
       console.error("Unable to upload image:", error);
-      if (
-        (typeof navigator !== "undefined" && !navigator.onLine) ||
-        error.message.includes("Failed to fetch")
-      ) {
-        setFeedbackMessage({
-          type: "pending",
-          text: "Upload pending — will sync when connection returns.",
-        });
-        setPendingUploads((prev) => [...prev, { id, file }]);
-      } else {
-        setFeedbackMessage({
-          type: "error",
-          text: error.message || "Unable to upload this image. Please try again.",
-        });
-      }
+      setFeedbackMessage({
+        type: "error",
+        text: error.message || "Unable to upload this image. Please try again.",
+      });
     } finally {
       setUploadingId(null);
     }
@@ -375,23 +347,6 @@ export default function FamilyMemory() {
 
   const handleNewMemoryImage = (file) => {
     if (!file) return;
-
-    if (!file.type || !file.type.startsWith("image/")) {
-      setFeedbackMessage({
-        type: "error",
-        text: "Please select a valid image file.",
-      });
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      setFeedbackMessage({
-        type: "error",
-        text: "Image file is too large (max 10MB).",
-      });
-      return;
-    }
-
     setNewMemoryFile(file);
     const previewUrl = URL.createObjectURL(file);
     setNewMemoryImage(previewUrl);
@@ -399,7 +354,6 @@ export default function FamilyMemory() {
 
   const addMemory = async (event) => {
     event.preventDefault();
-
     if (!newMemoryTitle.trim()) return;
 
     setIsSubmittingNew(true);
@@ -422,11 +376,7 @@ export default function FamilyMemory() {
           body: formData,
         });
 
-        if (!response.ok) {
-          const errJson = await response.json().catch(() => ({}));
-          throw new Error(errJson.error || "Failed to save memory with image");
-        }
-
+        if (!response.ok) throw new Error("Failed to save memory with image");
         const data = await response.json();
         const created = data.memory || data;
         setMemories((current) => [created, ...current]);
@@ -448,87 +398,41 @@ export default function FamilyMemory() {
           body: JSON.stringify(newMemory),
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to save memory");
-        }
-
+        if (!response.ok) throw new Error("Failed to save memory");
         const created = await response.json();
         setMemories((current) => [created, ...current]);
       }
 
+      setShowAddMemory(false);
       setNewMemoryTitle("");
       setNewMemorySubtitle("");
-      setNewMemoryCategory("People");
       setNewMemoryImage("");
       setNewMemoryFile(null);
-      setShowAddMemory(false);
-
-      setFeedbackMessage({
-        type: "success",
-        text: "New memory saved permanently to your vault!",
-      });
-      setTimeout(() => setFeedbackMessage(null), 4000);
-    } catch (err) {
-      console.warn("Could not persist memory to backend:", err);
+    } catch (error) {
       setFeedbackMessage({
         type: "error",
-        text: err.message || "Could not save memory. Please check connection.",
+        text: error.message || "Failed to add memory.",
       });
     } finally {
       setIsSubmittingNew(false);
     }
   };
 
-  const handleDeleteMemory = async (memoryId) => {
-    if (!window.confirm("Are you sure you want to delete this memory?")) {
-      return;
-    }
-
+  const handleDeleteMemory = async (id) => {
+    setMemories((current) => current.filter((m) => String(m.id) !== String(id)));
+    setSelectedMemory(null);
     try {
-      const res = await fetch(`/api/memories/${memoryId}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || "Failed to delete memory");
-      }
-
-      setMemories((current) =>
-        current.filter((m) => String(m.id) !== String(memoryId))
-      );
-
-      if (selectedMemory && String(selectedMemory.id) === String(memoryId)) {
-        setSelectedMemory(null);
-      }
-
-      if (recallMemory && String(recallMemory.id) === String(memoryId)) {
-        setRecallMemory(null);
-      }
-
-      setFeedbackMessage({
-        type: "success",
-        text: "Memory removed from your vault.",
-      });
-      setTimeout(() => setFeedbackMessage(null), 3000);
-    } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Could not delete memory: " + err.message);
+      await fetch(`/api/memories/${id}`, { method: "DELETE" });
+    } catch (e) {
+      console.warn("Failed to delete memory on server:", e);
     }
   };
 
   const startRecallGame = () => {
-    const personMemories = memories.filter(
-      (memory) => memory.category === "People"
-    );
-
+    const personMemories = memories.filter((memory) => memory.category === "People");
     if (!personMemories.length) return;
-
     const randomMemory =
-      personMemories[
-        Math.floor(Math.random() * personMemories.length)
-      ];
-
+      personMemories[Math.floor(Math.random() * personMemories.length)];
     setRecallMemory(randomMemory);
     setSelectedAnswer("");
     setRecallResult(null);
@@ -539,8 +443,6 @@ export default function FamilyMemory() {
 
     if (selectedAnswer === recallMemory.title) {
       setRecallResult("correct");
-
-      // Record successful recall exercise to backend
       fetch("/api/patient/activities/record", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -564,45 +466,27 @@ export default function FamilyMemory() {
 
   const handleVoiceAnswer = () => {
     setIsListening(true);
-
-    if (
-      "SpeechRecognition" in window ||
-      "webkitSpeechRecognition" in window
-    ) {
-      const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
+    if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
-
       recognition.lang = "en-IN";
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
-
       recognition.start();
 
       recognition.onresult = (event) => {
-        const spokenText =
-          event.results[0][0].transcript.toLowerCase();
-
+        const spokenText = event.results[0][0].transcript.toLowerCase();
         const matchedOption = recallOptions.find((option) =>
           spokenText.includes(option.toLowerCase())
         );
-
         if (matchedOption) {
           setSelectedAnswer(matchedOption);
         }
-
         setIsListening(false);
       };
 
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
     } else {
       setIsListening(false);
       alert("Voice recognition is not supported in this browser.");
@@ -615,56 +499,50 @@ export default function FamilyMemory() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Heart
-              size={26}
-              className="text-[#0f3e3a]"
-              fill="currentColor"
-            />
-
-            <h1 className="text-3xl font-black text-[#0f3e3a]">
-              Family Memories
+            <Heart size={26} className="text-[#E98B9B]" fill="currentColor" />
+            <h1 className="text-3xl font-extrabold text-[#202238] dark:text-white">
+              Family Memories &amp; Vault
             </h1>
           </div>
-
-          <p className="mt-1 text-sm text-gray-500">
-            Familiar faces, places and moments that matter to you.
+          <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
+            Familiar faces, places and life milestones that matter to you.
           </p>
         </div>
 
         <button
           onClick={() => setShowAddMemory(true)}
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#0c312e]"
+          className="flex items-center justify-center gap-2 rounded-2xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-3 text-sm font-bold text-white transition shadow-soft cursor-pointer"
         >
           <Plus size={17} />
-          Add Memory
+          <span>Add Memory</span>
         </button>
       </div>
 
       {/* FEEDBACK STATUS BANNER */}
       {feedbackMessage && (
         <div
-          className={`flex items-center gap-3 rounded-2xl p-4 text-xs font-bold transition shadow-sm ${
+          className={`flex items-center gap-3 rounded-2xl p-4 text-xs font-bold transition shadow-xs ${
             feedbackMessage.type === "success"
-              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              ? "bg-[#78CFA3]/15 text-[#2E7D56] dark:text-[#78CFA3] border border-[#78CFA3]/30"
               : feedbackMessage.type === "pending"
-              ? "bg-amber-50 text-amber-800 border border-amber-200"
-              : "bg-red-50 text-red-800 border border-red-200"
+              ? "bg-[#F3B562]/15 text-[#9C6119] dark:text-[#F3B562] border border-[#F3B562]/30"
+              : "bg-[#E98B9B]/15 text-[#C7485E] dark:text-[#E98B9B] border border-[#E98B9B]/30"
           }`}
         >
           {feedbackMessage.type === "success" && (
-            <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+            <CheckCircle2 size={18} className="text-[#78CFA3] shrink-0" />
           )}
           {feedbackMessage.type === "pending" && (
-            <WifiOff size={18} className="text-amber-600 shrink-0" />
+            <WifiOff size={18} className="text-[#F3B562] shrink-0" />
           )}
           {feedbackMessage.type === "error" && (
-            <AlertCircle size={18} className="text-red-600 shrink-0" />
+            <AlertCircle size={18} className="text-[#E98B9B] shrink-0" />
           )}
           <span className="flex-1">{feedbackMessage.text}</span>
           <button
             type="button"
             onClick={() => setFeedbackMessage(null)}
-            className="text-gray-400 hover:text-gray-700 p-1 rounded-lg"
+            className="text-gray-400 hover:text-gray-700 dark:hover:text-white p-1 rounded-lg"
           >
             <X size={15} />
           </button>
@@ -672,42 +550,38 @@ export default function FamilyMemory() {
       )}
 
       {/* MEMORY OF THE DAY */}
-      <section className="overflow-hidden rounded-3xl border border-teal-100 bg-gradient-to-r from-teal-50 to-white p-6">
+      <section className="overflow-hidden rounded-3xl border border-[#6366D8]/20 bg-gradient-to-r from-[#E8E8FA]/50 to-white dark:from-[#25283C]/50 dark:to-[#1B1D2A] p-7 shadow-soft">
         <div className="grid gap-6 md:grid-cols-[1fr_220px] md:items-center">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0f3e3a]">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#6366D8] dark:text-[#8B8FE8]">
               <Sparkles size={15} />
-              Memory of the Day
+              <span>Memory of the Day</span>
             </div>
 
-            <h2 className="text-2xl font-black text-gray-900">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#202238] dark:text-white">
               {memoryOfTheDay.title}
             </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
               {memoryOfTheDay.subtitle}
             </p>
 
-            <p className="mt-4 max-w-xl text-sm leading-6 text-gray-600">
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[#202238] dark:text-[#EDEFFF]">
               {memoryOfTheDay.description}
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
               <button
-                onClick={() =>
-                  speak(
-                    `${memoryOfTheDay.title}. ${memoryOfTheDay.description}`
-                  )
-                }
-                className="flex items-center gap-2 rounded-xl bg-[#0f3e3a] px-4 py-2.5 text-xs font-bold text-white"
+                onClick={() => speak(`${memoryOfTheDay.title}. ${memoryOfTheDay.description}`)}
+                className="flex items-center gap-2 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-4 py-2.5 text-xs font-bold text-white transition shadow-soft cursor-pointer"
               >
                 <Volume2 size={15} />
-                Listen
+                <span>Listen Aloud</span>
               </button>
 
               <button
                 onClick={() => setSelectedMemory(memoryOfTheDay)}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50"
+                className="rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] px-4 py-2.5 text-xs font-bold text-[#202238] dark:text-white hover:border-[#6366D8] transition cursor-pointer"
               >
                 View Memory
               </button>
@@ -718,9 +592,7 @@ export default function FamilyMemory() {
             image={memoryOfTheDay.image}
             large
             isUploading={uploadingId === memoryOfTheDay.id}
-            onUpload={(file) =>
-              updateMemoryImage(memoryOfTheDay.id, file)
-            }
+            onUpload={(file) => updateMemoryImage(memoryOfTheDay.id, file)}
           />
         </div>
       </section>
@@ -731,10 +603,10 @@ export default function FamilyMemory() {
           <button
             key={category}
             onClick={() => setActiveCategory(category)}
-            className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+            className={`rounded-full px-4 py-2 text-xs font-bold transition cursor-pointer ${
               activeCategory === category
-                ? "bg-[#0f3e3a] text-white"
-                : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                ? "bg-[#6366D8] text-white shadow-soft"
+                : "border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] text-[#6B6E85] dark:text-[#9A9DB5] hover:border-[#6366D8]/50"
             }`}
           >
             {category}
@@ -746,47 +618,43 @@ export default function FamilyMemory() {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-black text-gray-900">
+            <h2 className="text-lg font-bold text-[#202238] dark:text-white">
               Your Memories
             </h2>
-
-            <p className="text-xs text-gray-400">
-              Add real photos to make memories more meaningful.
+            <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+              Real family photos keep memories vivid and reassuring.
             </p>
           </div>
-
-          <div className="text-xs font-semibold text-gray-400">
+          <div className="text-xs font-semibold text-[#6B6E85] dark:text-[#9A9DB5]">
             {filteredMemories.length} memories
           </div>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredMemories.map((memory) => (
             <div
               key={memory.id}
-              className="group overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              className="group overflow-hidden rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] shadow-soft transition hover:-translate-y-1 hover:shadow-soft-lg flex flex-col justify-between"
             >
               <ImageSlot
                 image={memory.image}
                 isUploading={uploadingId === memory.id}
-                onUpload={(file) =>
-                  updateMemoryImage(memory.id, file)
-                }
+                onUpload={(file) => updateMemoryImage(memory.id, file)}
               />
 
               <div className="space-y-3 p-5">
                 <div>
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="font-black text-gray-900">
+                    <h3 className="font-bold text-[#202238] dark:text-white group-hover:text-[#6366D8] dark:group-hover:text-[#8B8FE8] transition-colors">
                       {memory.title}
                     </h3>
 
-                    <span className="rounded-full bg-teal-50 px-2.5 py-1 text-[10px] font-bold text-[#0f3e3a]">
+                    <span className="rounded-full bg-[#E8E8FA] dark:bg-[#25283C] px-2.5 py-0.5 text-[10px] font-bold text-[#6366D8] dark:text-[#8B8FE8]">
                       {memory.category}
                     </span>
                   </div>
 
-                  <p className="mt-1 text-xs text-gray-400">
+                  <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
                     {memory.subtitle}
                   </p>
                 </div>
@@ -794,38 +662,28 @@ export default function FamilyMemory() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setSelectedMemory(memory)}
-                    className="flex-1 rounded-xl bg-[#0f3e3a] py-2.5 text-xs font-bold text-white"
+                    className="flex-1 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] py-2.5 text-xs font-bold text-white transition shadow-soft cursor-pointer"
                   >
                     Open Memory
                   </button>
 
                   <button
                     onClick={() => toggleFavorite(memory.id)}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] hover:bg-[#F7F7FC] dark:hover:bg-[#25283C] cursor-pointer"
                     aria-label="Favorite memory"
                   >
                     <Star
                       size={16}
                       className={
-                        memory.favorite
-                          ? "text-amber-500"
-                          : "text-gray-400"
+                        memory.favorite ? "text-[#F3B562]" : "text-gray-400"
                       }
-                      fill={
-                        memory.favorite
-                          ? "currentColor"
-                          : "none"
-                      }
+                      fill={memory.favorite ? "currentColor" : "none"}
                     />
                   </button>
 
                   <button
-                    onClick={() =>
-                      speak(
-                        `${memory.title}. ${memory.description}`
-                      )
-                    }
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-[#0f3e3a] hover:bg-gray-50"
+                    onClick={() => speak(`${memory.title}. ${memory.description}`)}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] text-[#6366D8] dark:text-[#8B8FE8] hover:bg-[#F7F7FC] dark:hover:bg-[#25283C] cursor-pointer"
                   >
                     <Volume2 size={16} />
                   </button>
@@ -836,139 +694,42 @@ export default function FamilyMemory() {
         </div>
       </section>
 
-      {/* FAVORITES + TIMELINE */}
-      <div className="grid gap-5 lg:grid-cols-2">
-        <section className="rounded-3xl border border-gray-200 bg-white p-6">
-          <div className="mb-5 flex items-center gap-2">
-            <Star size={18} className="text-amber-500" />
-
-            <h2 className="font-black text-gray-900">
-              Favorite Memories
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {favoriteMemories.length > 0 ? (
-              favoriteMemories.map((memory) => (
-                <button
-                  key={memory.id}
-                  onClick={() => setSelectedMemory(memory)}
-                  className="flex w-full items-center gap-3 rounded-2xl bg-gray-50 p-3 text-left hover:bg-gray-100"
-                >
-                  <div className="h-12 w-12 overflow-hidden rounded-xl bg-white">
-                    {memory.image ? (
-                      <img
-                        src={memory.image}
-                        alt={memory.title}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center">
-                        <ImagePlus
-                          size={19}
-                          className="text-[#0f3e3a]"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-bold text-gray-800">
-                      {memory.title}
-                    </p>
-
-                    <p className="text-xs text-gray-400">
-                      {memory.subtitle}
-                    </p>
-                  </div>
-                </button>
-              ))
-            ) : (
-              <p className="text-sm text-gray-400">
-                Mark memories as favorites to see them here.
-              </p>
-            )}
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-gray-200 bg-white p-6">
-          <div className="mb-5 flex items-center gap-2">
-            <Calendar size={18} className="text-[#0f3e3a]" />
-
-            <h2 className="font-black text-gray-900">
-              Memory Timeline
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            {memories.slice(0, 4).map((memory) => (
-              <div
-                key={memory.id}
-                className="flex gap-3"
-              >
-                <div className="flex flex-col items-center">
-                  <div className="h-3 w-3 rounded-full bg-[#0f3e3a]" />
-                  <div className="h-full w-px bg-gray-200" />
-                </div>
-
-                <button
-                  onClick={() => setSelectedMemory(memory)}
-                  className="pb-3 text-left"
-                >
-                  <p className="text-xs font-bold text-[#0f3e3a]">
-                    {memory.year}
-                  </p>
-
-                  <p className="mt-1 text-sm font-bold text-gray-800">
-                    {memory.title}
-                  </p>
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      {/* RECALL GAME */}
-      <section className="rounded-3xl border border-teal-100 bg-teal-50/60 p-6">
+      {/* RECALL ACTIVITY */}
+      <section className="rounded-3xl border border-[#6366D8]/20 bg-[#E8E8FA]/40 dark:bg-[#25283C]/40 p-7 shadow-soft">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Users size={19} className="text-[#0f3e3a]" />
-
-              <h2 className="font-black text-[#0f3e3a]">
-                Who is this?
+              <Users size={19} className="text-[#6366D8] dark:text-[#8B8FE8]" />
+              <h2 className="font-bold text-lg text-[#202238] dark:text-white">
+                Who is this familiar person?
               </h2>
             </div>
-
-            <p className="mt-1 text-xs text-gray-500">
-              A gentle memory recall activity using familiar people.
+            <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+              A gentle memory recall exercise using familiar family members.
             </p>
           </div>
 
           <button
             onClick={startRecallGame}
-            className="flex items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] px-5 py-3 text-xs font-bold text-white"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-3 text-xs font-bold text-white transition shadow-soft cursor-pointer"
           >
             <Play size={15} />
-            Start Activity
+            <span>Start Activity</span>
           </button>
         </div>
 
         {recallMemory && (
-          <div className="mt-6 rounded-2xl bg-white p-5">
+          <div className="mt-6 rounded-2xl bg-white dark:bg-[#1B1D2A] border border-[#EAEBF4] dark:border-[#2B2E42] p-5 shadow-soft">
             <div className="mb-5">
               <ImageSlot
                 image={recallMemory.image}
                 large
                 isUploading={uploadingId === recallMemory.id}
-                onUpload={(file) =>
-                  updateMemoryImage(recallMemory.id, file)
-                }
+                onUpload={(file) => updateMemoryImage(recallMemory.id, file)}
               />
             </div>
 
-            <p className="mb-3 text-center text-sm font-bold text-gray-800">
+            <p className="mb-3 text-center text-sm font-bold text-[#202238] dark:text-white">
               Who is this person?
             </p>
 
@@ -977,10 +738,10 @@ export default function FamilyMemory() {
                 <button
                   key={option}
                   onClick={() => setSelectedAnswer(option)}
-                  className={`rounded-xl border p-3 text-sm font-semibold ${
+                  className={`rounded-xl border p-3 text-sm font-semibold transition cursor-pointer ${
                     selectedAnswer === option
-                      ? "border-[#0f3e3a] bg-teal-50 text-[#0f3e3a]"
-                      : "border-gray-200 hover:bg-gray-50"
+                      ? "border-[#6366D8] bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8]"
+                      : "border-[#EAEBF4] dark:border-[#2B2E42] bg-[#F7F7FC] dark:bg-[#11121C] text-[#202238] dark:text-white hover:border-[#6366D8]"
                   }`}
                 >
                   {option}
@@ -991,42 +752,38 @@ export default function FamilyMemory() {
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <button
                 onClick={handleVoiceAnswer}
-                className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-xs font-bold"
+                className="flex items-center gap-2 rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] px-4 py-2.5 text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8] hover:bg-[#E8E8FA]/30 cursor-pointer"
               >
                 <Mic size={15} />
-
-                {isListening
-                  ? "Listening..."
-                  : "Answer by Voice"}
+                <span>{isListening ? "Listening..." : "Answer by Voice"}</span>
               </button>
 
               <button
                 onClick={checkRecallAnswer}
-                className="rounded-xl bg-[#0f3e3a] px-5 py-2.5 text-xs font-bold text-white"
+                className="rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-2.5 text-xs font-bold text-white transition shadow-soft cursor-pointer"
               >
                 Check Answer
               </button>
 
               <button
                 onClick={startRecallGame}
-                className="flex items-center gap-1 rounded-xl border border-gray-200 px-4 py-2.5 text-xs font-bold"
+                className="flex items-center gap-1 rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] px-4 py-2.5 text-xs font-bold text-[#6B6E85] dark:text-[#9A9DB5] hover:bg-[#F7F7FC] dark:hover:bg-[#25283C] cursor-pointer"
               >
                 <RotateCcw size={14} />
-                New
+                <span>New</span>
               </button>
             </div>
 
             {recallResult === "correct" && (
-              <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-700">
+              <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#78CFA3]/20 p-3 text-sm font-bold text-[#2E7D56] dark:text-[#78CFA3]">
                 <CheckCircle2 size={17} />
-                Great job! That's correct.
+                <span>Great job! That is correct.</span>
               </div>
             )}
 
             {recallResult === "wrong" && (
-              <div className="mt-4 rounded-xl bg-amber-50 p-3 text-center text-sm font-semibold text-amber-700">
-                That's okay. The correct answer is{" "}
-                <strong>{recallMemory.title}</strong>.
+              <div className="mt-4 rounded-xl bg-[#F3B562]/20 p-3 text-center text-sm font-semibold text-[#9C6119] dark:text-[#F3B562]">
+                That is okay! The correct answer is <strong>{recallMemory.title}</strong>.
               </div>
             )}
           </div>
@@ -1035,81 +792,65 @@ export default function FamilyMemory() {
 
       {/* MEMORY MODAL */}
       {selectedMemory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white dark:bg-[#1B1D2A] border border-[#EAEBF4] dark:border-[#2B2E42] p-7 shadow-soft-lg animate-in fade-in zoom-in-95">
             <button
-  type="button"
-  onClick={() => setSelectedMemory(null)}
-  className="absolute right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-2xl font-bold text-gray-700 shadow-md hover:bg-gray-200"
-  aria-label="Close memory"
->
-  ×
-</button>
+              type="button"
+              onClick={() => setSelectedMemory(null)}
+              className="absolute right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-[#F7F7FC] dark:bg-[#25283C] text-lg font-bold text-[#6B6E85] hover:text-[#202238] dark:hover:text-white"
+              aria-label="Close memory"
+            >
+              <X size={20} />
+            </button>
 
             <ImageSlot
               image={selectedMemory.image}
               large
               isUploading={uploadingId === selectedMemory.id}
-              onUpload={(file) =>
-                updateMemoryImage(selectedMemory.id, file)
-              }
+              onUpload={(file) => updateMemoryImage(selectedMemory.id, file)}
             />
 
             <div className="mt-5">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-2xl font-black text-gray-900">
+                <h2 className="text-2xl font-bold text-[#202238] dark:text-white">
                   {selectedMemory.title}
                 </h2>
 
-                <button
-                  onClick={() =>
-                    toggleFavorite(selectedMemory.id)
-                  }
-                >
+                <button onClick={() => toggleFavorite(selectedMemory.id)}>
                   <Star
                     size={21}
                     className={
-                      selectedMemory.favorite
-                        ? "text-amber-500"
-                        : "text-gray-400"
+                      selectedMemory.favorite ? "text-[#F3B562]" : "text-gray-400"
                     }
-                    fill={
-                      selectedMemory.favorite
-                        ? "currentColor"
-                        : "none"
-                    }
+                    fill={selectedMemory.favorite ? "currentColor" : "none"}
                   />
                 </button>
               </div>
 
-              <p className="mt-1 text-sm text-gray-400">
+              <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
                 {selectedMemory.subtitle}
               </p>
 
-              <p className="mt-5 text-sm leading-7 text-gray-600">
+              <p className="mt-4 text-sm leading-7 text-[#202238] dark:text-[#EDEFFF]">
                 {selectedMemory.description}
               </p>
 
               <div className="mt-5 space-y-2">
                 <button
-                  onClick={() =>
-                    speak(
-                      `${selectedMemory.title}. ${selectedMemory.description}`
-                    )
-                  }
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] py-3 text-sm font-bold text-white transition hover:bg-[#0c312e]"
+                  onClick={() => speak(`${selectedMemory.title}. ${selectedMemory.description}`)}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#6366D8] hover:bg-[#5255C5] py-3.5 text-sm font-bold text-white transition shadow-soft cursor-pointer"
                 >
                   <Volume2 size={17} />
-                  Listen to Memory
+                  <span>Listen to Memory</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleDeleteMemory(selectedMemory.id)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50/70 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-100"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#E98B9B]/30 bg-[#E98B9B]/10 py-2.5 text-xs font-bold text-[#C7485E] dark:text-[#E98B9B] hover:bg-[#E98B9B]/20 transition cursor-pointer"
                 >
                   <Trash2 size={15} />
-                  Delete Memory
+                  <span>Delete Memory</span>
                 </button>
               </div>
             </div>
@@ -1119,28 +860,28 @@ export default function FamilyMemory() {
 
       {/* ADD MEMORY MODAL */}
       {showAddMemory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
           <form
             onSubmit={addMemory}
-            className="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl"
+            className="relative w-full max-w-md rounded-3xl bg-white dark:bg-[#1B1D2A] border border-[#EAEBF4] dark:border-[#2B2E42] p-7 shadow-soft-lg animate-in fade-in zoom-in-95"
           >
             <button
               type="button"
               onClick={() => setShowAddMemory(false)}
-              className="absolute right-5 top-5"
+              className="absolute right-5 top-5 text-[#6B6E85] hover:text-[#202238] dark:hover:text-white"
             >
               <X size={19} />
             </button>
 
-            <h2 className="text-xl font-black text-[#0f3e3a]">
-              Add a Memory
+            <h2 className="text-xl font-bold text-[#202238] dark:text-white">
+              Add a Family Memory
             </h2>
 
-            <p className="mt-1 text-xs text-gray-400">
-              Add a photo and details for a familiar memory.
+            <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+              Upload a photo and details to cherish in the memory vault.
             </p>
 
-            <div className="mt-6 space-y-4">
+            <div className="mt-5 space-y-4">
               <ImageSlot
                 image={newMemoryImage}
                 large
@@ -1150,50 +891,43 @@ export default function FamilyMemory() {
 
               <input
                 value={newMemoryTitle}
-                onChange={(e) =>
-                  setNewMemoryTitle(e.target.value)
-                }
-                placeholder="Memory title"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#0f3e3a]"
+                onChange={(e) => setNewMemoryTitle(e.target.value)}
+                placeholder="Memory title (e.g. Priya)"
+                className="w-full rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-[#F7F7FC] dark:bg-[#11121C] text-[#202238] dark:text-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#6366D8]"
+                required
               />
 
               <input
                 value={newMemorySubtitle}
-                onChange={(e) =>
-                  setNewMemorySubtitle(e.target.value)
-                }
-                placeholder="Relationship or short description"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#0f3e3a]"
+                onChange={(e) => setNewMemorySubtitle(e.target.value)}
+                placeholder="Relationship or short note"
+                className="w-full rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-[#F7F7FC] dark:bg-[#11121C] text-[#202238] dark:text-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#6366D8]"
               />
 
               <select
                 value={newMemoryCategory}
-                onChange={(e) =>
-                  setNewMemoryCategory(e.target.value)
-                }
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none"
+                onChange={(e) => setNewMemoryCategory(e.target.value)}
+                className="w-full rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-[#F7F7FC] dark:bg-[#11121C] text-[#202238] dark:text-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#6366D8]"
               >
                 {categories
-                  .filter((category) => category !== "All")
-                  .map((category) => (
-                    <option key={category}>
-                      {category}
-                    </option>
+                  .filter((c) => c !== "All")
+                  .map((c) => (
+                    <option key={c}>{c}</option>
                   ))}
               </select>
 
               <button
                 type="submit"
                 disabled={isSubmittingNew}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0f3e3a] py-3.5 text-sm font-bold text-white transition hover:bg-[#0c312e] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#6366D8] hover:bg-[#5255C5] py-3.5 text-sm font-bold text-white transition shadow-soft cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingNew ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    Saving Memory...
+                    <span>Saving Memory...</span>
                   </>
                 ) : (
-                  "Save Memory"
+                  <span>Save Memory</span>
                 )}
               </button>
             </div>

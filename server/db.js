@@ -9,7 +9,8 @@ const defaultSeed = {
     name: "Asha",
     age: 78,
     room: "402",
-    status: "Stable",
+    status: "active",
+    hasDemoData: true,
     memory: 82,
     attention: 76,
     engagement: 87,
@@ -27,10 +28,12 @@ const defaultSeed = {
   patients: [
     {
       id: "P001",
+      patientId: "P001",
       name: "Asha",
       age: 78,
       room: "402",
-      status: "Stable",
+      status: "active",
+      hasDemoData: true,
       memory: 82,
       attention: 76,
       lastActive: "Just now",
@@ -58,6 +61,93 @@ const defaultSeed = {
           icon: "🧠"
         }
       ]
+    },
+    {
+      id: "P002",
+      patientId: "P002",
+      name: "Ramesh",
+      age: 74,
+      room: "205",
+      status: "active",
+      hasDemoData: false,
+      caregiver: "Dr. Sarah Jenkins",
+      familyContact: "Anita Kumar",
+      familyRelation: "Spouse",
+      emergencyContact: "Anita Kumar",
+      memory: null,
+      attention: null,
+      engagement: null,
+      lastActive: "No sessions yet",
+      recentActivity: null,
+      gameScore: null,
+      mood: "Not logged",
+      alert: "None",
+      activityTime: null,
+      language: "Hindi",
+      location: "Care Wing B",
+      medication: "Pending",
+      hydration: "Pending",
+      sleep: "Not recorded",
+      safetyStatus: "Safe",
+      activityHistory: []
+    },
+    {
+      id: "P003",
+      patientId: "P003",
+      name: "Kavita",
+      age: 69,
+      room: "318",
+      status: "active",
+      hasDemoData: false,
+      caregiver: "Dr. Sarah Jenkins",
+      familyContact: "Suresh Patel",
+      familyRelation: "Son",
+      emergencyContact: "Suresh Patel",
+      memory: null,
+      attention: null,
+      engagement: null,
+      lastActive: "No sessions yet",
+      recentActivity: null,
+      gameScore: null,
+      mood: "Not logged",
+      alert: "None",
+      activityTime: null,
+      language: "English",
+      location: "Care Wing C",
+      medication: "Pending",
+      hydration: "Pending",
+      sleep: "Not recorded",
+      safetyStatus: "Safe",
+      activityHistory: []
+    },
+    {
+      id: "P004",
+      patientId: "P004",
+      name: "David",
+      age: 81,
+      room: "114",
+      status: "active",
+      hasDemoData: false,
+      caregiver: "Dr. Sarah Jenkins",
+      familyContact: "Grace Chen",
+      familyRelation: "Daughter",
+      emergencyContact: "Grace Chen",
+      memory: null,
+      attention: null,
+      engagement: null,
+      lastActive: "No sessions yet",
+      recentActivity: null,
+      gameScore: null,
+      mood: "Not logged",
+      alert: "None",
+      activityTime: null,
+      language: "English",
+      location: "Care Wing A",
+      medication: "Pending",
+      hydration: "Pending",
+      sleep: "Not recorded",
+      safetyStatus: "Safe",
+      activityHistory: []
     }
   ],
   reminders: [
@@ -142,7 +232,127 @@ export function readDb() {
       return defaultSeed;
     }
     const raw = fs.readFileSync(DB_PATH, "utf8");
-    return JSON.parse(raw);
+    const db = JSON.parse(raw);
+
+    // Normalize patients list to guarantee the 4 official patients
+    if (!db.patients || !Array.isArray(db.patients)) {
+      db.patients = defaultSeed.patients;
+    }
+
+    const asha = db.patients.find((p) => p.id === "P001") || defaultSeed.patients[0];
+    asha.hasDemoData = true;
+    asha.patientId = "P001";
+    asha.status = "active";
+    asha.room = "402";
+    asha.caregiver = "Dr. Sarah Jenkins";
+    asha.familyContact = "Priya Sharma";
+
+    const officialEmpty = [
+      {
+        id: "P002",
+        patientId: "P002",
+        name: "Ramesh",
+        age: 74,
+        room: "205",
+        status: "active",
+        hasDemoData: false,
+        caregiver: "Dr. Sarah Jenkins",
+        familyContact: "Anita Kumar",
+        familyRelation: "Spouse",
+        emergencyContact: "Anita Kumar",
+        memory: null,
+        attention: null,
+        engagement: null,
+        lastActive: "No sessions yet",
+        recentActivity: null,
+        gameScore: null,
+        mood: "Not logged",
+        alert: "None",
+        activityTime: null,
+        language: "Hindi",
+        location: "Care Wing B",
+        medication: "Pending",
+        hydration: "Pending",
+        sleep: "Not recorded",
+        safetyStatus: "Safe",
+        activityHistory: [],
+      },
+      {
+        id: "P003",
+        patientId: "P003",
+        name: "Kavita",
+        age: 69,
+        room: "318",
+        status: "active",
+        hasDemoData: false,
+        caregiver: "Dr. Sarah Jenkins",
+        familyContact: "Suresh Patel",
+        familyRelation: "Son",
+        emergencyContact: "Suresh Patel",
+        memory: null,
+        attention: null,
+        engagement: null,
+        lastActive: "No sessions yet",
+        recentActivity: null,
+        gameScore: null,
+        mood: "Not logged",
+        alert: "None",
+        activityTime: null,
+        language: "English",
+        location: "Care Wing C",
+        medication: "Pending",
+        hydration: "Pending",
+        sleep: "Not recorded",
+        safetyStatus: "Safe",
+        activityHistory: [],
+      },
+      {
+        id: "P004",
+        patientId: "P004",
+        name: "David",
+        age: 81,
+        room: "114",
+        status: "active",
+        hasDemoData: false,
+        caregiver: "Dr. Sarah Jenkins",
+        familyContact: "Grace Chen",
+        familyRelation: "Daughter",
+        emergencyContact: "Grace Chen",
+        memory: null,
+        attention: null,
+        engagement: null,
+        lastActive: "No sessions yet",
+        recentActivity: null,
+        gameScore: null,
+        mood: "Not logged",
+        alert: "None",
+        activityTime: null,
+        language: "English",
+        location: "Care Wing A",
+        medication: "Pending",
+        hydration: "Pending",
+        sleep: "Not recorded",
+        safetyStatus: "Safe",
+        activityHistory: [],
+      },
+    ];
+
+    const normalizedEmpty = officialEmpty.map((reqP) => {
+      const existing = db.patients.find((p) => p.id === reqP.id);
+      if (existing) {
+        return {
+          ...existing,
+          ...reqP,
+          hasDemoData: false,
+          activityHistory: existing.activityHistory && existing.activityHistory.length > 0 && existing.name === reqP.name ? existing.activityHistory : [],
+        };
+      }
+      return reqP;
+    });
+
+    db.patients = [asha, ...normalizedEmpty];
+
+    return db;
   } catch (err) {
     console.error("Error reading db.json:", err);
     return defaultSeed;
@@ -247,15 +457,21 @@ export function updatePatientProfile(updates) {
   return db.patient;
 }
 
-export function getReminders() {
+export function getReminders(patientId) {
   const db = readDb();
-  return db.reminders || [];
+  const all = db.reminders || [];
+  if (!patientId) return all;
+  if (patientId === "P001") {
+    return all.filter((r) => !r.patientId || r.patientId === "P001");
+  }
+  return all.filter((r) => r.patientId === patientId);
 }
 
 export function addReminder(reminder) {
   const db = readDb();
   const newReminder = {
     id: Date.now(),
+    patientId: reminder.patientId || "P001",
     type: reminder.type || "Medicine",
     title: reminder.title || "New Reminder",
     time: reminder.time || "12:00 PM",
@@ -548,17 +764,21 @@ export function getCaregiverPatientById(id) {
 
 export function getPatientActivities(patientId = "P001") {
   const db = readDb();
-  const targetPatient = (db.patients || []).find((p) => p.id === patientId) || db.patient;
+  const targetPatient = (db.patients || []).find((p) => p.id === patientId) || (patientId === "P001" ? db.patient : null);
+  const isDemo = targetPatient?.hasDemoData ?? (patientId === "P001");
   const allActivities = db.activityResults || [];
-  const patientActivities = allActivities.filter((a) => !a.patientId || a.patientId === patientId);
+  const patientActivities = allActivities.filter((a) => (a.patientId ? a.patientId === patientId : patientId === "P001"));
+
+  const hasData = isDemo || patientActivities.length > 0;
 
   return {
     patientId,
     patientName: targetPatient?.name || "Patient",
+    hasData,
     activities: patientActivities,
-    recentActivity: targetPatient?.recentActivity || (patientActivities[0]?.game ?? "Memory Game"),
-    gameScore: targetPatient?.gameScore || (patientActivities[0]?.score ?? 84),
-    activityHistory: targetPatient?.activityHistory || [],
+    recentActivity: hasData ? (targetPatient?.recentActivity || (patientActivities[0]?.game ?? "Memory Game")) : null,
+    gameScore: hasData ? (targetPatient?.gameScore || (patientActivities[0]?.score ?? 84)) : null,
+    activityHistory: hasData ? (targetPatient?.activityHistory || []) : [],
     totalSessions: patientActivities.length,
     syncStatus: getPatientSyncStatus(patientId),
   };
@@ -626,8 +846,40 @@ export function resolveCaregiverAlert(id) {
 
 export function getCaregiverAnalytics(patientId = "P001") {
   const db = readDb();
-  const patient = (db.patients || []).find((p) => p.id === patientId) || db.patients?.[0] || db.patient;
-  const activities = (db.activityResults || []).filter((a) => !a.patientId || a.patientId === patient?.id);
+  const patient = (db.patients || []).find((p) => p.id === patientId) || (patientId === "P001" ? db.patient : null);
+  
+  if (!patient) {
+    return {
+      patient: null,
+      hasData: false,
+      trend: [],
+      totalSessions: 0,
+      recentActivities: [],
+      activities: [],
+      message: "Patient not found",
+    };
+  }
+
+  const isDemo = patient.hasDemoData ?? (patient.id === "P001");
+  const activities = (db.activityResults || []).filter((a) => (a.patientId ? a.patientId === patient.id : patient.id === "P001"));
+
+  if (!isDemo && activities.length === 0) {
+    return {
+      patient: {
+        ...patient,
+        trend: [],
+        completion: 0,
+        sessions: 0,
+        syncStatus: getPatientSyncStatus(patient.id),
+      },
+      hasData: false,
+      trend: [],
+      totalSessions: 0,
+      recentActivities: [],
+      activities: [],
+      message: "No cognitive assessment data available",
+    };
+  }
 
   const memorySessions = activities.filter((a) => a.gameId === "memory-match" || a.game?.includes("Memory")).length || 7;
   const spotSessions = activities.filter((a) => a.gameId === "spot-the-difference" || a.game?.includes("Spot")).length || 5;
@@ -653,6 +905,7 @@ export function getCaregiverAnalytics(patientId = "P001") {
       sessions: totalSessions,
       syncStatus: getPatientSyncStatus(patient?.id || patientId),
     },
+    hasData: true,
     trend,
     totalSessions,
     recentActivities: activities.slice(0, 10),
@@ -936,16 +1189,33 @@ export function addMemory(mem) {
 // ==================================================
 export function getPatientLocation(patientId = "P001") {
   const db = readDb();
-  let patient = (db.patients || []).find((p) => p.id === patientId) || db.patient;
+  let patient = (db.patients || []).find((p) => p.id === patientId);
+  if (!patient && patientId === "P001") {
+    patient = db.patient || { id: "P001", name: "Asha", room: "402", hasDemoData: true };
+  }
+
   if (!patient) {
-    patient = db.patient || { id: "P001", name: "Asha" };
+    return {
+      patientId,
+      name: "Patient",
+      room: null,
+      latitude: null,
+      longitude: null,
+      accuracy: null,
+      address: null,
+      sharingEnabled: false,
+      timestamp: null,
+      updatedAt: null,
+      status: "UNAVAILABLE",
+    };
   }
 
   const loc = patient?.currentLocation;
-  if (!loc || typeof loc.latitude !== "number" || typeof loc.longitude !== "number") {
+  if (!loc || typeof loc.latitude !== "number" || typeof loc.longitude !== "number" || (!patient.hasDemoData && patient.id !== "P001")) {
     return {
-      patientId: patient?.id || patientId,
-      name: patient?.name || "Asha",
+      patientId: patient.id || patientId,
+      name: patient.name || "Patient",
+      room: patient.room || null,
       latitude: null,
       longitude: null,
       accuracy: null,
@@ -978,6 +1248,7 @@ export function getPatientLocation(patientId = "P001") {
   return {
     patientId: patient.id || patientId,
     name: patient.name || "Asha",
+    room: patient.room || "402",
     latitude: loc.latitude,
     longitude: loc.longitude,
     accuracy: loc.accuracy != null ? Number(loc.accuracy) : null,

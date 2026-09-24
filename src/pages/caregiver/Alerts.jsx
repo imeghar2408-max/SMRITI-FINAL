@@ -180,18 +180,17 @@ function Alerts({ setCurrentView }) {
         </div>
 
         <div className="text-right">
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
             Pending alerts
           </p>
-          <p className="text-2xl font-black text-[#0f3e3a]">
+          <p className="text-2xl font-black text-[#6366D8] dark:text-[#8B8FE8]">
             {pendingCount}
           </p>
         </div>
       </div>
 
       {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-4 gap-4">
-
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard
           label="Total Pending"
           value={pendingCount}
@@ -223,39 +222,36 @@ function Alerts({ setCurrentView }) {
           icon={<CheckCircle2 size={17} />}
           success
         />
-
       </div>
 
       {/* SEARCH + FILTER */}
-      <div className="bg-white rounded-3xl border border-gray-200 p-5 shadow-sm">
+      <div className="bg-white dark:bg-[#1B1D2A] rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] p-5 shadow-soft">
         <div className="flex items-center justify-between gap-4">
-
           <div className="relative flex-1 max-w-md">
             <Search
               size={16}
-              className="absolute left-3 top-3 text-gray-400"
+              className="absolute left-3.5 top-3.5 text-[#6B6E85]"
             />
-
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search patient or alert..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#0f3e3a]/20"
+              className="w-full pl-10 pr-4 py-2.5 border border-[#EAEBF4] dark:border-[#2B2E42] bg-[#F7F7FC] dark:bg-[#11121C] text-[#202238] dark:text-white rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#6366D8]"
             />
           </div>
 
           <div className="relative">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] bg-white dark:bg-[#1B1D2A] text-xs font-semibold text-[#202238] dark:text-white hover:border-[#6366D8] cursor-pointer"
             >
               <Filter size={15} />
-              Filter
+              <span>Filter</span>
             </button>
 
             {showFilters && (
-              <div className="absolute right-0 top-12 z-20 w-44 bg-white rounded-2xl border border-gray-200 shadow-xl p-2">
+              <div className="absolute right-0 top-12 z-20 w-44 bg-white dark:bg-[#1B1D2A] rounded-2xl border border-[#EAEBF4] dark:border-[#2B2E42] shadow-soft-lg p-2">
                 {["All", "EMERGENCY", "HIGH", "MEDIUM", "LOW"].map(
                   (option) => (
                     <button
@@ -264,10 +260,10 @@ function Alerts({ setCurrentView }) {
                         setFilter(option);
                         setShowFilters(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold ${
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer ${
                         filter === option
-                          ? "bg-teal-50 text-[#0f3e3a]"
-                          : "text-gray-600 hover:bg-gray-50"
+                          ? "bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8]"
+                          : "text-[#6B6E85] dark:text-[#9A9DB5] hover:bg-[#F7F7FC] dark:hover:bg-[#25283C]"
                       }`}
                     >
                       {option}
@@ -281,18 +277,16 @@ function Alerts({ setCurrentView }) {
 
         {/* ACTIVE FILTER */}
         <div className="flex items-center gap-2 mt-4">
-          <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">
+          <span className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5] uppercase tracking-wider font-bold">
             Showing
           </span>
-
-          <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">
+          <span className="px-2.5 py-0.5 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8] text-[10px] font-bold">
             {filter}
           </span>
-
           {filter !== "All" && (
             <button
               onClick={() => setFilter("All")}
-              className="text-gray-400 hover:text-gray-700"
+              className="text-[#6B6E85] hover:text-[#202238] dark:hover:text-white"
             >
               <X size={13} />
             </button>
@@ -301,179 +295,141 @@ function Alerts({ setCurrentView }) {
       </div>
 
       {/* ALERT TABLE */}
-      <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
-
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+      <div className="bg-white dark:bg-[#1B1D2A] rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] overflow-hidden shadow-soft">
+        <div className="p-5 border-b border-[#EAEBF4] dark:border-[#2B2E42] flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-gray-800 text-sm">
+            <h3 className="font-bold text-[#202238] dark:text-white text-sm">
               Patient Alerts
             </h3>
-
-            <p className="text-[10px] text-gray-400 mt-1">
-              Review and respond to alerts generated by the platform.
+            <p className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5] mt-0.5">
+              Review and respond to alerts generated by telemetry and safety geofences.
             </p>
           </div>
-
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5]">
             {filteredAlerts.length} alerts
           </span>
         </div>
 
-        <table className="w-full text-left text-xs">
-
-          <thead className="bg-gray-50 text-gray-400 font-semibold border-b">
-            <tr>
-              <th className="p-4">PATIENT</th>
-              <th>TYPE</th>
-              <th>ALERT</th>
-              <th>TIME</th>
-              <th>PRIORITY</th>
-              <th>STATUS</th>
-              <th className="text-right p-4">ACTION</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-100">
-
-            {filteredAlerts.length > 0 ? (
-              filteredAlerts.map((alert) => (
-                <tr
-                  key={alert.id}
-                  className={`transition ${
-                    alert.priority === "EMERGENCY"
-                      ? "bg-red-50/50"
-                      : "hover:bg-gray-50"
-                  }`}
-                >
-
-                  {/* PATIENT */}
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-
-                      <div className="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-base">
-                        {alert.icon}
-                      </div>
-
-                      <div>
-                        <p className="font-bold text-gray-900">
-                          {alert.patient}
-                        </p>
-
-                        <p className="text-[10px] text-gray-400">
-                          {alert.age} yrs • {alert.room}
-                        </p>
-                      </div>
-
-                    </div>
-                  </td>
-
-                  {/* TYPE */}
-                  <td>
-                    <span className="text-[10px] font-semibold text-gray-600">
-                      {alert.type}
-                    </span>
-                  </td>
-
-                  {/* MESSAGE */}
-                  <td className="max-w-xs">
-                    <p className="font-semibold text-gray-800">
-                      {alert.message}
-                    </p>
-                  </td>
-
-                  {/* TIME */}
-                  <td>
-                    <div className="flex items-center gap-1.5 text-gray-500">
-                      <Clock size={13} />
-                      {alert.time}
-                    </div>
-                  </td>
-
-                  {/* PRIORITY */}
-                  <td>
-                    <PriorityBadge priority={alert.priority} />
-                  </td>
-
-                  {/* STATUS */}
-                  <td>
-                    {alert.status === "Resolved" ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-[10px] font-bold">
-                        <CheckCircle2 size={11} />
-                        Resolved
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold">
-                        <Clock size={11} />
-                        Pending
-                      </span>
-                    )}
-                  </td>
-
-                  {/* ACTION */}
-                  <td className="p-4">
-
-                    <div className="flex items-center justify-end gap-2">
-
-                      {alert.status === "Pending" && (
-                        <button
-                          onClick={() => resolveAlert(alert.id)}
-                          className="px-3 py-1.5 rounded-lg bg-[#0f3e3a] text-white text-[10px] font-bold hover:bg-[#0c312e]"
-                        >
-                          Resolve
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => dismissAlert(alert.id)}
-                        className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-[10px] font-bold hover:bg-gray-50"
-                      >
-                        Dismiss
-                      </button>
-
-                      <button
-                        onClick={() => setCurrentView?.("caregiver-patient")}
-                        className="p-1.5 text-gray-400 hover:text-[#0f3e3a]"
-                        title="View patient"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-              ))
-            ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#F7F7FC] dark:bg-[#11121C] text-[#6B6E85] dark:text-[#9A9DB5] font-semibold border-b border-[#EAEBF4] dark:border-[#2B2E42]">
               <tr>
-                <td
-                  colSpan="7"
-                  className="p-12 text-center"
-                >
-                  <div className="flex flex-col items-center gap-3">
-
-                    <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
-                      <CheckCircle2 size={22} />
-                    </div>
-
-                    <div>
-                      <p className="font-bold text-gray-800">
-                        No matching alerts
-                      </p>
-
-                      <p className="text-xs text-gray-400 mt-1">
-                        Try changing your search or filter.
-                      </p>
-                    </div>
-
-                  </div>
-                </td>
+                <th className="p-4">PATIENT</th>
+                <th>TYPE</th>
+                <th>ALERT</th>
+                <th>TIME</th>
+                <th>PRIORITY</th>
+                <th>STATUS</th>
+                <th className="text-right p-4">ACTION</th>
               </tr>
-            )}
-
-          </tbody>
-
-        </table>
+            </thead>
+            <tbody className="divide-y divide-[#EAEBF4] dark:divide-[#2B2E42]">
+              {filteredAlerts.length > 0 ? (
+                filteredAlerts.map((alert) => (
+                  <tr
+                    key={alert.id}
+                    className={`transition ${
+                      alert.priority === "EMERGENCY"
+                        ? "bg-[#E98B9B]/10"
+                        : "hover:bg-[#F7F7FC] dark:hover:bg-[#25283C]/30"
+                    }`}
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] flex items-center justify-center text-base">
+                          {alert.icon}
+                        </div>
+                        <div>
+                          <p className="font-bold text-[#202238] dark:text-white">
+                            {alert.patient}
+                          </p>
+                          <p className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5]">
+                            {alert.age} yrs • {alert.room}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="text-[10px] font-semibold text-[#6B6E85] dark:text-[#9A9DB5]">
+                        {alert.type}
+                      </span>
+                    </td>
+                    <td className="max-w-xs">
+                      <p className="font-semibold text-[#202238] dark:text-white">
+                        {alert.message}
+                      </p>
+                    </td>
+                    <td>
+                      <div className="flex items-center gap-1.5 text-[#6B6E85] dark:text-[#9A9DB5]">
+                        <Clock size={13} />
+                        {alert.time}
+                      </div>
+                    </td>
+                    <td>
+                      <PriorityBadge priority={alert.priority} />
+                    </td>
+                    <td>
+                      {alert.status === "Resolved" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#78CFA3]/15 text-[#2E7D56] dark:text-[#78CFA3] text-[10px] font-bold">
+                          <CheckCircle2 size={11} />
+                          Resolved
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#F3B562]/15 text-[#9C6119] dark:text-[#F3B562] text-[10px] font-bold">
+                          <Clock size={11} />
+                          Pending
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {alert.status === "Pending" && (
+                          <button
+                            onClick={() => resolveAlert(alert.id)}
+                            className="px-3 py-1.5 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] text-white text-[10px] font-bold transition cursor-pointer"
+                          >
+                            Resolve
+                          </button>
+                        )}
+                        <button
+                          onClick={() => dismissAlert(alert.id)}
+                          className="px-3 py-1.5 rounded-xl border border-[#EAEBF4] dark:border-[#2B2E42] text-[#6B6E85] hover:text-[#202238] text-[10px] font-bold transition cursor-pointer"
+                        >
+                          Dismiss
+                        </button>
+                        <button
+                          onClick={() => setCurrentView?.("caregiver-patient")}
+                          className="p-1.5 text-[#6B6E85] hover:text-[#6366D8]"
+                          title="View patient"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="p-12 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-[#78CFA3]/15 text-[#78CFA3] flex items-center justify-center">
+                        <CheckCircle2 size={22} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#202238] dark:text-white">
+                          No matching alerts
+                        </p>
+                        <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5] mt-1">
+                          Try adjusting your search query or filter.
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* FOOTNOTE */}
@@ -505,43 +461,41 @@ function SummaryCard({
 }) {
   return (
     <div
-      className={`bg-white p-5 rounded-2xl border ${
+      className={`p-5 rounded-2xl border shadow-soft ${
         danger
-          ? "border-red-100"
-          : "border-gray-100"
+          ? "bg-[#E98B9B]/10 border-[#E98B9B]/30"
+          : "bg-white dark:bg-[#1B1D2A] border-[#EAEBF4] dark:border-[#2B2E42]"
       }`}
     >
       <div className="flex items-center justify-between mb-3">
-
         <div
-          className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+          className={`w-9 h-9 rounded-xl flex items-center justify-center ${
             danger
-              ? "bg-red-50 text-red-600"
+              ? "bg-[#E98B9B]/20 text-[#C7485E] dark:text-[#E98B9B]"
               : success
-              ? "bg-green-50 text-green-600"
-              : "bg-teal-50 text-[#0f3e3a]"
+              ? "bg-[#78CFA3]/20 text-[#2E7D56] dark:text-[#78CFA3]"
+              : "bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8]"
           }`}
         >
           {icon}
         </div>
-
       </div>
 
-      <p className="text-[10px] text-gray-400 font-semibold">
+      <p className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5] font-semibold uppercase tracking-wider">
         {label}
       </p>
 
       <p
-        className={`text-2xl font-black mt-1 ${
+        className={`text-2xl font-black mt-1 tabular-nums ${
           danger
-            ? "text-red-600"
-            : "text-gray-900"
+            ? "text-[#C7485E] dark:text-[#E98B9B]"
+            : "text-[#202238] dark:text-white"
         }`}
       >
         {value}
       </p>
 
-      <p className="text-[10px] text-gray-400 mt-1">
+      <p className="text-[10px] text-[#6B6E85] dark:text-[#9A9DB5] mt-1">
         {subtitle}
       </p>
     </div>

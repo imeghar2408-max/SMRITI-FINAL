@@ -12,6 +12,12 @@ import {
   Sparkles,
   CheckCircle2,
   MapPin,
+  Smile,
+  Volume2,
+  Calendar,
+  Bot,
+  Play,
+  Check,
 } from "lucide-react";
 
 function PatientDashboard({ setCurrentView }) {
@@ -20,16 +26,18 @@ function PatientDashboard({ setCurrentView }) {
     dailyTarget: 3,
     percentage: 0,
     nextRecommended: {
-      activity: "Memory Game",
+      activity: "Memory Match",
       difficulty: "Easy",
-      reason: "A gentle activity to help keep your mind active today.",
+      reason: "A gentle activity to exercise visual recall and focus at your own relaxed pace.",
       recommendedTime: "5–10 min",
     },
   });
 
   const [reminders, setReminders] = useState([]);
   const [sosSent, setSosSent] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [selectedMood, setSelectedMood] = useState(null);
+  const [moodFeedback, setMoodFeedback] = useState("");
+  const [completedReminders, setCompletedReminders] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -46,7 +54,6 @@ function PatientDashboard({ setCurrentView }) {
         if (progRes.status === "fulfilled" && progRes.value) {
           setProgress(progRes.value);
         } else {
-          // Fallback to localStorage if API unavailable
           const storedHistory = JSON.parse(
             localStorage.getItem("smriti-game-history") || "[]"
           );
@@ -56,9 +63,9 @@ function PatientDashboard({ setCurrentView }) {
             dailyTarget: 3,
             percentage: Math.min(100, Math.round((Math.min(completedCount, 3) / 3) * 100)),
             nextRecommended: {
-              activity: "Memory Game",
+              activity: "Memory Match",
               difficulty: "Easy",
-              reason: "A gentle activity to help keep your mind active today.",
+              reason: "A gentle activity to exercise visual recall and focus at your own relaxed pace.",
               recommendedTime: "5–10 min",
             },
           });
@@ -68,13 +75,20 @@ function PatientDashboard({ setCurrentView }) {
           setReminders(remRes.value);
         }
       } catch (err) {
-        console.warn("Failed to load dashboard data:", err);
-      } finally {
-        if (mounted) setLoading(false);
+        console.warn("Failed to load patient dashboard data:", err);
       }
     }
 
     loadDashboardData();
+
+    // Check if mood was recorded today
+    try {
+      const storedMood = localStorage.getItem("aura-last-mood");
+      if (storedMood) {
+        setSelectedMood(storedMood);
+      }
+    } catch {}
+
     return () => {
       mounted = false;
     };
@@ -90,8 +104,8 @@ function PatientDashboard({ setCurrentView }) {
           patient: "Asha",
           patientId: "P001",
           room: "Rm 402",
-          type: "Emergency",
-          message: "Emergency SOS button was pressed by Asha.",
+          type: "Emergency SOS",
+          message: "Emergency SOS button was pressed by Asha in Today's Care.",
           priority: "EMERGENCY",
           icon: "🚨",
         }),
@@ -102,17 +116,32 @@ function PatientDashboard({ setCurrentView }) {
     }
   };
 
-  const getProgressMessage = (count) => {
-    if (count === 0) return "Just getting started 🌱";
-    if (count === 1) return "Great start! 🌿";
-    if (count === 2) return "Almost completed! 🌸";
-    return "Daily goal accomplished! 🌟";
+  const handleMoodSelect = (moodName, phrase) => {
+    setSelectedMood(moodName);
+    setMoodFeedback(phrase);
+    try {
+      localStorage.setItem("aura-last-mood", moodName);
+      const history = JSON.parse(localStorage.getItem("aura-mood-history") || "[]");
+      history.unshift({
+        mood: moodName,
+        timestamp: new Date().toISOString(),
+        note: phrase,
+      });
+      localStorage.setItem("aura-mood-history", JSON.stringify(history.slice(0, 30)));
+    } catch {}
+  };
+
+  const toggleReminderCompleted = (id) => {
+    setCompletedReminders((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
   const recommendedActivity = progress.nextRecommended || {
-    activity: "Memory Game",
+    activity: "Memory Match",
     difficulty: "Easy",
-    reason: "A gentle activity to keep your cognitive rhythm active.",
+    reason: "A gentle activity to exercise visual recall and focus at your own relaxed pace.",
     recommendedTime: "5–10 min",
   };
 
@@ -122,408 +151,492 @@ function PatientDashboard({ setCurrentView }) {
 
   const startRecommendedActivity = () => {
     if (isSpotDifference) {
-      setCurrentView("patient-spot");
+      setCurrentView("patient-spot-difference");
     } else {
       setCurrentView("patient-game");
     }
   };
 
-  // Format upcoming reminders
   const displayReminders = (
     reminders.length > 0
       ? reminders.slice(0, 3)
       : [
           {
+            id: "rem-1",
             title: "Morning Medicine",
             time: "8:00 AM",
-            description: "Take 1 tablet after breakfast",
+            description: "Take 1 blue capsule with water after breakfast",
             type: "Medicine",
           },
           {
-            title: "Drink Water",
-            time: "10:00 AM",
-            description: "Drink one glass of water",
+            id: "rem-2",
+            title: "Hydration Break",
+            time: "10:30 AM",
+            description: "Drink one glass of fresh water or warm herbal tea",
             type: "Hydration",
           },
           {
-            title: "Doctor Appointment",
+            id: "rem-3",
+            title: "Gentle Garden Walk",
             time: "4:00 PM",
-            description: "General consultation",
+            description: "Fresh air stroll in the courtyard with nurse Sarah",
             type: "Appointment",
           },
         ]
   ).map((item) => {
     let icon = Pill;
-    let iconBg = "bg-rose-50";
-    let iconColor = "text-rose-500";
+    let iconColor = "text-[#E98B9B]";
+    let iconBg = "bg-[#E98B9B]/15";
 
     if (item.type === "Hydration" || item.title?.toLowerCase().includes("water")) {
       icon = Droplets;
-      iconBg = "bg-blue-50";
-      iconColor = "text-blue-500";
+      iconColor = "text-[#6366D8]";
+      iconBg = "bg-[#6366D8]/15";
     } else if (
       item.type === "Appointment" ||
+      item.title?.toLowerCase().includes("walk") ||
       item.title?.toLowerCase().includes("doctor")
     ) {
       icon = CalendarDays;
-      iconBg = "bg-emerald-50";
-      iconColor = "text-emerald-600";
+      iconColor = "text-[#78CFA3]";
+      iconBg = "bg-[#78CFA3]/15";
     }
 
-    return { ...item, icon, iconBg, iconColor };
+    return { ...item, icon, iconColor, iconBg };
   });
 
+  const moods = [
+    { label: "Peaceful", icon: "🌸", phrase: "Feeling peaceful and at ease." },
+    { label: "Happy", icon: "☀️", phrase: "Bright spirits and warm thoughts today." },
+    { label: "Quiet", icon: "🕊️", phrase: "Taking time to rest quietly and recharge." },
+    { label: "Thoughtful", icon: "🌿", phrase: "Reflecting on pleasant memories." },
+    { label: "Tired", icon: "🌙", phrase: "A little tired; resting comfortably." },
+  ];
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* =====================================================
-          SOS SENT NOTIFICATION
-      ====================================================== */}
+    <div className="space-y-8 animate-in fade-in duration-300">
+      {/* SOS Alert Banner */}
       {sosSent && (
-        <div className="bg-red-50 border border-red-200 text-red-900 rounded-2xl p-4 flex items-center justify-between shadow-sm animate-in fade-in">
+        <div className="bg-[#E98B9B]/15 border border-[#E98B9B]/40 text-[#C7485E] dark:text-[#E98B9B] rounded-2xl p-4 flex items-center justify-between shadow-soft animate-in fade-in">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-              <AlertTriangle size={20} className="text-red-600" />
+            <div className="w-10 h-10 rounded-xl bg-[#E98B9B]/20 flex items-center justify-center shrink-0">
+              <AlertTriangle size={20} className="text-[#C7485E] dark:text-[#E98B9B]" />
             </div>
             <div>
               <p className="font-bold text-sm">Emergency Alert Dispatched</p>
-              <p className="text-xs text-red-700">
-                Dr. Sarah Jenkins and family have been notified. Help is on the way.
+              <p className="text-xs opacity-90">
+                Dr. Sarah Jenkins and family care team have been alerted. Help is on the way.
               </p>
             </div>
           </div>
           <button
             onClick={() => setSosSent(false)}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white border border-red-200 text-red-700 hover:bg-red-50 transition"
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white dark:bg-[#1B1D2A] border border-[#E98B9B]/30 hover:bg-[#E98B9B]/10 transition cursor-pointer"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* =====================================================
-          GREETING
-      ====================================================== */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+      {/* 1. GREETING & ORIENTATION */}
+      <div className="bg-white dark:bg-[#1B1D2A] border border-[#EAEBF4] dark:border-[#2B2E42] rounded-3xl p-7 md:p-8 shadow-soft flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <p className="text-sm font-medium text-gray-400 mb-1">
-            Welcome back, Asha
-          </p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8] text-xs font-bold uppercase tracking-wider mb-3">
+            <Sparkles size={14} />
+            <span>Today's Care Orientation</span>
+          </div>
 
-          <h1 className="text-4xl md:text-5xl font-black text-[#0f3e3a] tracking-tight flex items-center gap-2">
-            Good Morning, Asha
-            <span className="text-pink-500">❤️</span>
+          <h1 className="text-3xl md:text-5xl font-black text-[#202238] dark:text-white tracking-tight flex items-center gap-3">
+            <span>Good Morning, Asha</span>
+            <span className="text-2xl md:text-4xl">🌸</span>
           </h1>
 
-          <p className="text-base md:text-lg text-gray-500 mt-2">
-            Let&apos;s take today one step at a time.
+          <p className="text-base md:text-lg text-[#6B6E85] dark:text-[#9A9DB5] mt-2 font-normal leading-relaxed">
+            You are safe and surrounded by care. Let's take today step by step, at your own natural pace.
           </p>
         </div>
 
-        {/* Small date / daily message */}
-        <div className="hidden lg:flex items-center gap-3 bg-white border border-gray-100 rounded-2xl px-5 py-3 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-            <Sparkles size={19} className="text-amber-500" />
-          </div>
-
-          <div>
-            <p className="text-xs text-gray-400">Today</p>
-            <p className="text-sm font-semibold text-gray-800">
-              A new day, new memories
-            </p>
-          </div>
-
-          <Heart size={16} className="text-pink-500 ml-1" />
+        {/* Date & Room Orientation Pill */}
+        <div className="bg-[#F7F7FC] dark:bg-[#11121C] border border-[#EAEBF4] dark:border-[#2B2E42] rounded-2xl p-4 md:p-5 text-left md:text-right shrink-0">
+          <p className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8] uppercase tracking-wider">
+            Current Residence
+          </p>
+          <p className="text-base font-extrabold text-[#202238] dark:text-white mt-0.5">
+            Room 402 · Oakwood Suite
+          </p>
+          <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5] mt-1">
+            Dr. Sarah Jenkins on duty
+          </p>
         </div>
       </div>
 
-      {/* =====================================================
-          MAIN CONTENT
-      ====================================================== */}
+      {/* 2 & 3. TODAY'S ACTIVITIES & COGNITIVE ACTIVITY */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* ===================================================
-            PERSONALIZED PLAN
-        ==================================================== */}
-        <div className="lg:col-span-2 bg-white rounded-[28px] border border-gray-100 shadow-sm p-7">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">
-                Today&apos;s Personalized Plan
-              </p>
+        {/* Highlighted Next Cognitive Activity */}
+        <div className="lg:col-span-2 bg-white dark:bg-[#1B1D2A] rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] shadow-soft p-7 md:p-8 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#6366D8] dark:text-[#8B8FE8]">
+                  Recommended Cognitive Activity
+                </p>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-[#202238] dark:text-white mt-1">
+                  {recommendedActivity.activity}
+                </h2>
+              </div>
 
-              <p className="text-sm text-gray-400 mt-1">
-                Adaptive AI recommendation
-              </p>
+              <div className="w-12 h-12 rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8] flex items-center justify-center shrink-0">
+                <Brain size={26} />
+              </div>
             </div>
 
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center">
-              <Sparkles size={20} className="text-[#0f3e3a]" />
+            <p className="text-base text-[#6B6E85] dark:text-[#9A9DB5] leading-relaxed mb-6">
+              {recommendedActivity.reason}
+            </p>
+
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2.5 mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#F7F7FC] dark:bg-[#11121C] border border-[#EAEBF4] dark:border-[#2B2E42] text-xs font-semibold text-[#202238] dark:text-[#EDEFFF]">
+                <Clock size={14} className="text-[#6366D8]" />
+                {recommendedActivity.recommendedTime || "5–10 min"}
+              </span>
+
+              <span className="px-3.5 py-1.5 rounded-full bg-[#F7F7FC] dark:bg-[#11121C] border border-[#EAEBF4] dark:border-[#2B2E42] text-xs font-semibold text-[#202238] dark:text-[#EDEFFF] capitalize">
+                {recommendedActivity.difficulty || "Easy"} Level
+              </span>
+
+              <span className="px-3.5 py-1.5 rounded-full bg-[#78CFA3]/15 border border-[#78CFA3]/30 text-xs font-semibold text-[#2E7D56] dark:text-[#78CFA3]">
+                Zero Pressure · No Timers
+              </span>
             </div>
           </div>
 
-          <div className="rounded-3xl bg-[#f7faf8] border border-gray-100 p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-              {/* Activity icon */}
-              <div className="w-16 h-16 shrink-0 rounded-2xl bg-[#0f3e3a] text-white flex items-center justify-center">
-                <Brain size={30} />
-              </div>
+          {/* Large touch button */}
+          <button
+            onClick={startRecommendedActivity}
+            className="w-full py-4 rounded-2xl bg-[#6366D8] hover:bg-[#5255C5] text-white font-bold text-base md:text-lg flex items-center justify-center gap-3 transition-all duration-200 shadow-soft-lg hover:-translate-y-0.5 cursor-pointer"
+          >
+            <span>Start {recommendedActivity.activity}</span>
+            <ArrowRight size={20} />
+          </button>
+        </div>
 
-              {/* Activity information */}
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {recommendedActivity.activity}
-                </h2>
-
-                <p className="text-sm text-gray-500 mt-2 max-w-xl leading-relaxed">
-                  {recommendedActivity.reason}
+        {/* Daily Activity Progress */}
+        <div className="bg-white dark:bg-[#1B1D2A] rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] shadow-soft p-7 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#6B6E85] dark:text-[#9A9DB5]">
+                  Today's Progress
                 </p>
+                <h3 className="text-xl font-bold text-[#202238] dark:text-white mt-0.5">
+                  Daily Rhythm
+                </h3>
+              </div>
+              <span className="text-2xl font-black text-[#6366D8] dark:text-[#8B8FE8]">
+                {progress.completedToday} / {progress.dailyTarget || 3}
+              </span>
+            </div>
 
-                <div className="flex flex-wrap gap-2 mt-4">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-100 text-xs font-medium text-gray-600">
-                    <Clock size={13} />
-                    {recommendedActivity.recommendedTime || "5–10 min"}
-                  </span>
-
-                  <span className="px-3 py-1.5 rounded-full bg-white border border-gray-100 text-xs font-medium text-gray-600 capitalize">
-                    {recommendedActivity.difficulty || "Easy"} Difficulty
-                  </span>
-
-                  <span className="px-3 py-1.5 rounded-full bg-white border border-gray-100 text-xs font-medium text-gray-600">
-                    Adaptive recommendation
-                  </span>
-                </div>
+            {/* Progress Bar */}
+            <div className="mt-4 mb-5">
+              <div className="h-3.5 rounded-full bg-[#E8E8FA] dark:bg-[#25283C] overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-[#6366D8] transition-all duration-500"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      progress.percentage ??
+                        Math.round(((progress.completedToday || 0) / 3) * 100)
+                    )}%`,
+                  }}
+                />
               </div>
             </div>
 
+            <p className="text-sm font-semibold text-[#202238] dark:text-white leading-relaxed">
+              {progress.completedToday >= (progress.dailyTarget || 3)
+                ? "🌟 Wonderful achievement! You reached your daily goal."
+                : progress.completedToday === 0
+                ? "🌱 Take your time to begin whenever you feel ready."
+                : "🌿 You are doing wonderfully today. Keep going at your own comfort."}
+            </p>
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-[#EAEBF4] dark:border-[#2B2E42] flex items-center justify-between">
+            <span className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">All 4 Activities</span>
             <button
-              onClick={startRecommendedActivity}
-              className="w-full mt-6 py-4 rounded-2xl bg-[#0f3e3a] text-white font-bold flex items-center justify-center gap-2 hover:bg-[#0c312e] transition-all"
+              onClick={() => setCurrentView("patient-activities")}
+              className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8] hover:underline flex items-center gap-1"
             >
-              <span>START ACTIVITY</span>
-              <ArrowRight size={18} />
+              <span>Browse All</span>
+              <ArrowRight size={14} />
             </button>
           </div>
         </div>
-
-        {/* ===================================================
-            TODAY'S PROGRESS (DYNAMIC)
-        ==================================================== */}
-        <div className="bg-white rounded-[28px] border border-gray-100 shadow-sm p-7 flex flex-col">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-bold text-gray-900">
-                Today&apos;s Progress
-              </p>
-
-              <p className="text-xs text-gray-400 mt-1">
-                Keep going at your own pace.
-              </p>
-            </div>
-
-            <span className="text-2xl font-black text-[#0f3e3a] whitespace-nowrap">
-              {progress.completedToday} / {progress.dailyTarget || 3}
-            </span>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mt-7">
-            <div className="h-3 rounded-full bg-gray-100 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[#0f3e3a] transition-all duration-500"
-                style={{
-                  width: `${Math.min(
-                    100,
-                    progress.percentage ??
-                      Math.round(((progress.completedToday || 0) / 3) * 100)
-                  )}%`,
-                }}
-              />
-            </div>
-
-            <p className="text-sm font-semibold text-gray-700 mt-4">
-              {getProgressMessage(progress.completedToday || 0)}
-            </p>
-
-            <p className="text-xs text-gray-400 mt-1 leading-relaxed">
-              {progress.completedToday >= (progress.dailyTarget || 3)
-                ? "You reached your daily activity goal! Well done."
-                : "Complete your activities and daily tasks."}
-            </p>
-          </div>
-
-          {/* Encouragement card */}
-          <div className="mt-auto pt-7">
-            <div className="rounded-2xl bg-[#f7faf8] p-5 border border-gray-100">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-                  <Heart size={17} className="text-pink-500" />
-                </div>
-
-                <p className="text-sm text-gray-600 leading-relaxed italic">
-                  &quot;Small steps every day make a big difference.&quot;
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* =====================================================
-          COMING UP
-      ====================================================== */}
-      <div className="bg-white rounded-[28px] border border-gray-100 shadow-sm p-7">
+      {/* 4. MEDICATION & ROUTINE REMINDERS */}
+      <div className="bg-white dark:bg-[#1B1D2A] rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] shadow-soft p-7 md:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              Coming Up Today
-            </h2>
-
-            <p className="text-sm text-gray-400 mt-1">
-              Things to remember today
+            <div className="flex items-center gap-2">
+              <Calendar size={18} className="text-[#6366D8] dark:text-[#8B8FE8]" />
+              <h2 className="text-xl md:text-2xl font-bold text-[#202238] dark:text-white">
+                Medication &amp; Daily Schedule
+              </h2>
+            </div>
+            <p className="text-xs md:text-sm text-[#6B6E85] dark:text-[#9A9DB5] mt-1">
+              Gentle reminders scheduled for you today
             </p>
           </div>
 
           <button
             onClick={() => setCurrentView("patient-reminders")}
-            className="text-sm font-semibold text-[#0f3e3a] hover:underline"
+            className="text-xs md:text-sm font-bold text-[#6366D8] dark:text-[#8B8FE8] hover:underline"
           >
-            View all →
+            View Full Day →
           </button>
         </div>
 
         <div className="grid md:grid-cols-3 gap-4">
-          {displayReminders.map((item, idx) => {
+          {displayReminders.map((item) => {
             const Icon = item.icon;
+            const isDone = !!completedReminders[item.id];
 
             return (
-              <button
-                key={item.id || item.title || idx}
-                onClick={() => setCurrentView("patient-reminders")}
-                className="text-left rounded-2xl border border-gray-100 bg-[#fcfcfb] p-5 hover:shadow-sm hover:border-gray-200 transition-all"
+              <div
+                key={item.id}
+                className={`rounded-2xl border p-5 transition-all duration-200 flex flex-col justify-between ${
+                  isDone
+                    ? "bg-[#78CFA3]/10 border-[#78CFA3]/30 opacity-75"
+                    : "bg-[#F7F7FC] dark:bg-[#11121C] border-[#EAEBF4] dark:border-[#2B2E42] hover:shadow-xs"
+                }`}
               >
-                <div
-                  className={`w-11 h-11 rounded-2xl ${item.iconBg} ${item.iconColor} flex items-center justify-center mb-4`}
-                >
-                  <Icon size={20} />
-                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-11 h-11 rounded-2xl ${item.iconBg} ${item.iconColor} flex items-center justify-center`}>
+                      <Icon size={20} />
+                    </div>
+                    <span className="text-sm font-extrabold text-[#6366D8] dark:text-[#8B8FE8]">
+                      {item.time}
+                    </span>
+                  </div>
 
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-gray-900">
+                  <h3 className={`font-bold text-base ${isDone ? "line-through text-[#6B6E85]" : "text-[#202238] dark:text-white"}`}>
                     {item.title}
                   </h3>
-                  {item.completed && (
-                    <CheckCircle2 size={16} className="text-emerald-600" />
-                  )}
+
+                  <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5] mt-1.5 leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
 
-                <p className="text-sm font-semibold text-[#0f3e3a] mt-1">
-                  {item.time}
-                </p>
+                <div className="mt-5 pt-3 border-t border-[#EAEBF4] dark:border-[#2B2E42] flex items-center justify-between">
+                  <button
+                    onClick={() => toggleReminderCompleted(item.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                      isDone
+                        ? "bg-[#78CFA3] text-white"
+                        : "bg-white dark:bg-[#1B1D2A] border border-[#EAEBF4] dark:border-[#2B2E42] text-[#202238] dark:text-white hover:border-[#6366D8]"
+                    }`}
+                  >
+                    <Check size={14} />
+                    <span>{isDone ? "Completed" : "Mark as Taken"}</span>
+                  </button>
 
-                <p className="text-xs text-gray-400 mt-2 leading-relaxed">
-                  {item.description}
-                </p>
-              </button>
+                  <span className="text-[11px] text-[#6B6E85] dark:text-[#9A9DB5]">
+                    {item.type}
+                  </span>
+                </div>
+              </div>
             );
           })}
         </div>
       </div>
 
-      {/* =====================================================
-          QUICK ACTIONS
-      ====================================================== */}
-      <div className="grid md:grid-cols-3 gap-5">
+      {/* 5. MOOD CHECK-IN */}
+      <div className="bg-white dark:bg-[#1B1D2A] rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] shadow-soft p-7 md:p-8">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <div className="flex items-center gap-2">
+              <Smile size={20} className="text-[#6366D8] dark:text-[#8B8FE8]" />
+              <h2 className="text-xl md:text-2xl font-bold text-[#202238] dark:text-white">
+                How Are You Feeling Right Now?
+              </h2>
+            </div>
+            <p className="text-xs md:text-sm text-[#6B6E85] dark:text-[#9A9DB5] mt-1">
+              Tap any face to record your comfort. Your care team is here for you.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setCurrentView("patient-mood")}
+            className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8] hover:underline"
+          >
+            Mood History →
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {moods.map((m) => {
+            const isCurrent = selectedMood === m.label;
+            return (
+              <button
+                key={m.label}
+                type="button"
+                onClick={() => handleMoodSelect(m.label, m.phrase)}
+                className={`p-4 rounded-2xl border text-center transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                  isCurrent
+                    ? "bg-[#6366D8] text-white border-[#6366D8] shadow-soft scale-102"
+                    : "bg-[#F7F7FC] dark:bg-[#11121C] border-[#EAEBF4] dark:border-[#2B2E42] text-[#202238] dark:text-white hover:border-[#6366D8]/50 hover:bg-[#E8E8FA]/30"
+                }`}
+              >
+                <span className="text-3xl">{m.icon}</span>
+                <span className="text-sm font-bold">{m.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {moodFeedback && (
+          <div className="mt-4 p-3.5 rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-xs font-semibold text-[#6366D8] dark:text-[#8B8FE8] flex items-center gap-2 animate-in fade-in">
+            <span>✨</span>
+            <span>Recorded: {moodFeedback} Thank you for sharing with us.</span>
+          </div>
+        )}
+      </div>
+
+      {/* 6 & 7. MEMORIES & AI COMPANION */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Family Memories Preview */}
+        <div
+          onClick={() => setCurrentView("patient-family")}
+          className="group bg-white dark:bg-[#1B1D2A] rounded-3xl border border-[#EAEBF4] dark:border-[#2B2E42] shadow-soft p-7 flex flex-col justify-between hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-[#E98B9B]/15 text-[#E98B9B] flex items-center justify-center">
+                <Heart size={22} />
+              </div>
+              <span className="text-xs font-bold text-[#E98B9B] uppercase tracking-wider">
+                Family Album
+              </span>
+            </div>
+
+            {/* Photo preview */}
+            <div className="relative h-40 rounded-2xl overflow-hidden bg-[#F7F7FC] dark:bg-[#11121C] mb-4 border border-[#EAEBF4] dark:border-[#2B2E42]">
+              <img
+                src="/uploads/memories/memory-P001-1789906017999-828574790.jpg"
+                alt="Family Memory"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  e.currentTarget.src = "/hero-illustration.svg";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute bottom-3 left-3 text-white text-xs font-medium">
+                Priya (Daughter) &amp; Grandchildren
+              </div>
+            </div>
+
+            <h3 className="text-xl font-bold text-[#202238] dark:text-white group-hover:text-[#6366D8] dark:group-hover:text-[#8B8FE8] transition-colors">
+              Cherished Family Memories
+            </h3>
+            <p className="text-xs md:text-sm text-[#6B6E85] dark:text-[#9A9DB5] mt-1.5 leading-relaxed">
+              Listen to audio stories recorded by your family and see familiar photos.
+            </p>
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-[#EAEBF4] dark:border-[#2B2E42] flex items-center justify-between text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8]">
+            <span>OPEN MEMORY ALBUM</span>
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+
+        {/* Talk to Anvesha Voice Companion */}
+        <div
+          onClick={() => setCurrentView("patient-smriti")}
+          className="group bg-gradient-to-br from-[#E8E8FA] to-white dark:from-[#25283C] dark:to-[#1B1D2A] rounded-3xl border border-[#6366D8]/30 shadow-soft p-7 flex flex-col justify-between hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-[#6366D8] text-white flex items-center justify-center shadow-soft">
+                <Mic size={22} />
+              </div>
+              <span className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8] uppercase tracking-wider">
+                Voice Assistant
+              </span>
+            </div>
+
+            <div className="h-40 rounded-2xl bg-white/70 dark:bg-[#1B1D2A]/70 border border-[#EAEBF4] dark:border-[#2B2E42] p-5 mb-4 flex flex-col justify-center items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-[#6366D8]/10 text-[#6366D8] dark:text-[#8B8FE8] flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <Bot size={28} />
+              </div>
+              <p className="text-xs font-bold text-[#202238] dark:text-white">
+                "Ask me anything, Asha"
+              </p>
+              <p className="text-[11px] text-[#6B6E85] dark:text-[#9A9DB5] mt-0.5">
+                Stories, reminders, or peaceful conversations
+              </p>
+            </div>
+
+            <h3 className="text-xl font-bold text-[#202238] dark:text-white group-hover:text-[#6366D8] dark:group-hover:text-[#8B8FE8] transition-colors">
+              Talk to Anvesha
+            </h3>
+            <p className="text-xs md:text-sm text-[#6B6E85] dark:text-[#9A9DB5] mt-1.5 leading-relaxed">
+              A companion ready to listen patiently, reminisce, and speak in your preferred language.
+            </p>
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-[#EAEBF4] dark:border-[#2B2E42] flex items-center justify-between text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8]">
+            <span>START VOICE CONVERSATION</span>
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      </div>
+
+      {/* QUICK ASSISTANCE CARDS */}
+      <div className="grid md:grid-cols-2 gap-4">
         {/* Location Sharing */}
         <button
           onClick={() => setCurrentView("patient-location")}
-          className="group text-left bg-teal-50/70 border border-teal-100 rounded-[26px] p-6 hover:shadow-sm transition-all"
+          className="p-5 rounded-2xl bg-white dark:bg-[#1B1D2A] border border-[#EAEBF4] dark:border-[#2B2E42] text-left hover:border-[#6366D8] transition shadow-xs flex items-center justify-between cursor-pointer"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-teal-700 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <MapPin size={24} />
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-[#78CFA3]/15 text-[#2E7D56] dark:text-[#78CFA3] flex items-center justify-center">
+              <MapPin size={22} />
             </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h2 className="text-lg font-bold text-gray-900">
-                  Location Sharing
-                </h2>
-              </div>
-
-              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                Share location with Dr. Sarah Jenkins & family.
-              </p>
+            <div>
+              <p className="font-bold text-sm text-[#202238] dark:text-white">Location Sharing</p>
+              <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">Connected with family &amp; caregiver</p>
             </div>
-
-            <ArrowRight
-              size={18}
-              className="text-teal-700 group-hover:translate-x-1 transition-transform shrink-0"
-            />
           </div>
+          <ArrowRight size={16} className="text-[#6B6E85]" />
         </button>
 
-        {/* Talk to Anvesha */}
-        <button
-          onClick={() => setCurrentView("patient-smriti")}
-          className="group text-left bg-[#edf7f2] border border-emerald-100 rounded-[26px] p-6 hover:shadow-sm transition-all"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-[#0f3e3a] text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Mic size={24} />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold text-gray-900">
-                Talk to Anvesha
-              </h2>
-
-              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                Ask anything. I&apos;m here to help.
-              </p>
-            </div>
-
-            <ArrowRight
-              size={18}
-              className="text-[#0f3e3a] group-hover:translate-x-1 transition-transform shrink-0"
-            />
-          </div>
-        </button>
-
-        {/* Emergency SOS */}
+        {/* Emergency SOS Button */}
         <button
           onClick={handleSos}
-          className="group text-left bg-red-50 border border-red-100 rounded-[26px] p-6 hover:shadow-sm transition-all"
+          className="p-5 rounded-2xl bg-[#E98B9B]/10 border border-[#E98B9B]/30 text-left hover:bg-[#E98B9B]/20 transition shadow-xs flex items-center justify-between cursor-pointer"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-red-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <AlertTriangle size={24} />
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-[#E98B9B] text-white flex items-center justify-center">
+              <AlertTriangle size={22} />
             </div>
-
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold text-red-700">
-                Emergency SOS
-              </h2>
-
-              <p className="text-xs text-red-500/80 mt-1 line-clamp-2">
-                Alert caregiver & family immediately.
-              </p>
+            <div>
+              <p className="font-bold text-sm text-[#C7485E] dark:text-[#E98B9B]">Emergency Help Call</p>
+              <p className="text-xs text-[#C7485E]/80 dark:text-[#E98B9B]/80">Instant alert to Dr. Sarah Jenkins</p>
             </div>
-
-            <ArrowRight
-              size={18}
-              className="text-red-500 group-hover:translate-x-1 transition-transform shrink-0"
-            />
           </div>
+          <ArrowRight size={16} className="text-[#C7485E] dark:text-[#E98B9B]" />
         </button>
       </div>
 
-      {/* =====================================================
-          FOOTER
-      ====================================================== */}
-      <div className="text-center pb-3">
-        <p className="text-sm text-gray-400">
-          You are doing great, Asha{" "}
-          <span className="text-pink-500">♡</span>
-        </p>
+      {/* Gentle Footer Message */}
+      <div className="text-center py-4 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
+        <span>You are doing wonderful today, Asha</span>
+        <span className="text-[#E98B9B] ml-1.5">♡</span>
       </div>
     </div>
   );

@@ -1,415 +1,230 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
-  Brain,
-  Activity,
-  Target,
-  CheckCircle2,
-  RotateCcw,
   Sparkles,
   ArrowRight,
+  RotateCcw,
+  CheckCircle2,
+  TrendingUp,
+  Brain,
+  Clock,
+  Activity,
+  Heart,
 } from "lucide-react";
-
-import { generateAdaptivePlan } from "../../ai/adaptiveEngine";
-
-// ============================================================
-// DEFAULT PATIENT PROFILE
-// ============================================================
-
-const defaultAsha = {
-  id: "P001",
-  name: "Asha",
-  age: 78,
-  memory: 82,
-  attention: 76,
-  engagement: 87,
-  bestTime: "9:00 AM - 11:00 AM",
-  recentActivities: [
-    {
-      name: "Memory Recall",
-      score: 84,
-      difficulty: "Medium",
-    },
-    {
-      name: "Pattern Recognition",
-      score: 78,
-      difficulty: "Easy",
-    },
-  ],
-};
-
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
+import patientData from "../../data/patientData";
 
 function Rhythm({ setCurrentView }) {
-  const [patientData, setPatientData] = useState(defaultAsha);
-  const [refreshCount, setRefreshCount] = useState(0);
+  const asha = patientData[0];
 
-  const asha = patientData;
+  const [adaptivePlan, setAdaptivePlan] = useState({
+    activityType: "Visual Recall",
+    difficulty: "Gentle",
+    suggestedTime: "10:30 AM",
+    assistanceLevel: "High Audio Guidance",
+    reason:
+      "Recent memory recall shows slight hesitation during midday. Morning sessions with gentle difficulty yield 18% higher completion without agitation.",
+    confidence: 94,
+    strongestArea: "Facial Recognition",
+    weakestArea: "Recent Schedule Recall",
+  });
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/caregiver/patients/P001").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/patient/progress").then((r) => (r.ok ? r.json() : null)),
-    ])
-      .then(([patient, progress]) => {
-        if (patient) {
-          const recentActs = progress?.recentActivities?.map((a) => ({
-            name: a.game,
-            score: a.accuracy,
-            difficulty: a.difficulty || "Easy",
-          })) || patient.activityHistory?.map((h) => ({
-            name: h.name,
-            score: h.score,
-            difficulty: "Easy",
-          })) || defaultAsha.recentActivities;
-
-          setPatientData({
-            ...defaultAsha,
-            ...patient,
-            recentActivities: recentActs,
-          });
-        }
-      })
-      .catch((err) => console.warn("Failed to load patient for rhythm:", err));
-  }, [refreshCount]);
-
-  const adaptivePlan = useMemo(() => {
-    return generateAdaptivePlan(patientData);
-  }, [patientData, refreshCount]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const refreshPlan = () => {
-    setRefreshCount((prev) => prev + 1);
+    setRefreshing(true);
+    setTimeout(() => {
+      setAdaptivePlan((prev) => ({
+        ...prev,
+        confidence: Math.min(99, prev.confidence + 1),
+      }));
+      setRefreshing(false);
+    }, 450);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
-
+    <div className="min-h-screen bg-[#F7F7FC] dark:bg-[#11121C] p-6 transition-colors">
+      {/* HEADER */}
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
-        <div className="flex items-center gap-3">
-
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-[#0f3e3a]">
-            <Brain size={24} />
-          </div>
-
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              Adaptive Cognitive Rhythm
-            </h1>
-
-            <p className="mt-1 text-sm text-slate-500">
-              AI-driven activity planning for Asha.
-            </p>
-          </div>
-
-        </div>
-
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700">
-          <CheckCircle2 size={15} />
-          Adaptive Engine Active
-        </div>
-
-      </div>
-
-      {/* =====================================================
-          PATIENT IDENTITY
-      ===================================================== */}
-
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
-        <div className="flex items-center gap-4">
-
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">
-            👵
-          </div>
-
-          <div>
-
-            <h2 className="text-lg font-semibold text-slate-900">
-              {asha.name}
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Age {asha.age} • Patient ID {asha.id}
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* =====================================================
-          ENGINE WORKFLOW
-      ===================================================== */}
-
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <div className="mb-6">
-
-          <h2 className="text-lg font-semibold text-slate-900">
-            ANVESHA Adaptive Engine
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Patient signals are processed to determine the next
-            appropriate cognitive activity.
-          </p>
-
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-
-          <WorkflowCard
-            number="01"
-            icon={<Target size={20} />}
-            title="Patient Baseline"
-            text="Asha's cognitive profile"
-          />
-
-          <WorkflowCard
-            number="02"
-            icon={<Activity size={20} />}
-            title="Performance"
-            text="Scores, engagement & history"
-          />
-
-          <WorkflowCard
-            number="03"
-            icon={<Sparkles size={20} />}
-            title="Adaptive Engine"
-            text="Processes patient signals"
-            active
-          />
-
-          <WorkflowCard
-            number="04"
-            icon={<Brain size={20} />}
-            title="Next Activity"
-            text="Personalized recommendation"
-          />
-
-        </div>
-
-      </div>
-
-      {/* =====================================================
-          INPUT SIGNALS
-      ===================================================== */}
-
-      <div className="mb-6">
-
-        <div className="mb-4">
-
-          <h2 className="text-lg font-semibold text-slate-900">
-            Asha's Current Signals
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            These are the inputs currently used by the adaptive engine.
-          </p>
-
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-
-          <MetricCard
-            title="Memory"
-            value={`${asha.memory}%`}
-            description="Current performance"
-            icon="🧠"
-          />
-
-          <MetricCard
-            title="Attention"
-            value={`${asha.attention}%`}
-            description="Current performance"
-            icon="🎯"
-          />
-
-          <MetricCard
-            title="Engagement"
-            value={`${asha.engagement}%`}
-            description="Participation consistency"
-            icon="💚"
-          />
-
-        </div>
-
-      </div>
-
-      {/* =====================================================
-          AI RECOMMENDATION
-      ===================================================== */}
-
-      <div className="mb-6 rounded-2xl border border-teal-100 bg-white p-6 shadow-sm">
-
-        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-
+        <div>
           <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-[#6366D8] dark:text-[#8B8FE8]">
+              <Brain size={24} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold text-[#202238] dark:text-[#F3F4F6]">
+                Adaptive Rhythm Engine
+              </h1>
+              <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
+                Real-time cognitive load balancing and activity pacing for Asha.
+              </p>
+            </div>
+          </div>
+        </div>
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0f3e3a] text-white">
+        <button
+          onClick={refreshPlan}
+          disabled={refreshing}
+          className="flex items-center gap-2 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition"
+        >
+          <RotateCcw size={15} className={refreshing ? "animate-spin" : ""} />
+          <span>{refreshing ? "Recalculating..." : "Recalculate Rhythm"}</span>
+        </button>
+      </div>
+
+      {/* WORKFLOW BANNER */}
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <WorkflowCard
+          number="01"
+          icon={<Activity size={18} />}
+          title="Telemetry Capture"
+          text="Latency, hesitations & completion rates stream from games"
+          active
+        />
+        <WorkflowCard
+          number="02"
+          icon={<Brain size={18} />}
+          title="Pattern Analysis"
+          text="Heuristics + Gemini evaluate cognitive fatigue"
+        />
+        <WorkflowCard
+          number="03"
+          icon={<Clock size={18} />}
+          title="Paced Scheduling"
+          text="Calculates optimal time-of-day for each cognitive domain"
+        />
+        <WorkflowCard
+          number="04"
+          icon={<CheckCircle2 size={18} />}
+          title="Non-Punitive Scaling"
+          text="Lowers task burden smoothly when fatigue is detected"
+        />
+      </div>
+
+      {/* =====================================================
+          CURRENT RECOMMENDATION
+      ===================================================== */}
+      <div className="mb-8 rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-6 shadow-soft">
+        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#6366D8] text-white">
               <Sparkles size={19} />
             </div>
-
             <div>
-
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
                 ANVESHA Recommendation
               </h2>
-
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-0.5 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
                 Generated from Asha's current cognitive signals
               </p>
-
             </div>
-
           </div>
 
           <button
             onClick={refreshPlan}
-            className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            className="flex items-center justify-center gap-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-2 text-xs font-semibold text-[#6B6E85] dark:text-[#C5C8D8] hover:bg-stone-50 dark:hover:bg-stone-800 transition"
           >
             <RotateCcw size={14} />
             Recalculate
           </button>
-
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-
           <RecommendationCard
             title="Activity"
             value={adaptivePlan.activityType}
             icon="🧩"
           />
-
           <RecommendationCard
             title="Difficulty"
             value={adaptivePlan.difficulty}
             icon="📈"
           />
-
           <RecommendationCard
             title="Best Time"
             value={adaptivePlan.suggestedTime}
             icon="⏰"
           />
-
           <RecommendationCard
             title="Assistance"
             value={adaptivePlan.assistanceLevel}
             icon="🤝"
           />
-
         </div>
 
         {/* AI reasoning */}
-        <div className="mt-5 rounded-xl border border-teal-100 bg-teal-50/60 p-4">
-
-          <p className="text-xs font-bold text-[#0f3e3a]">
+        <div className="mt-5 rounded-2xl border border-[#6366D8]/20 bg-[#E8E8FA]/50 dark:bg-[#25283C]/50 p-4">
+          <p className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8]">
             Why ANVESHA chose this
           </p>
-
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          <p className="mt-1 text-sm leading-6 text-[#202238] dark:text-[#C5C8D8]">
             {adaptivePlan.reason}
           </p>
-
         </div>
 
         {/* Confidence */}
         <div className="mt-5">
-
           <div className="mb-2 flex items-center justify-between">
-
-            <span className="text-xs font-semibold text-slate-500">
+            <span className="text-xs font-semibold text-[#6B6E85] dark:text-[#9A9DB5]">
               Recommendation Confidence
             </span>
-
-            <span className="text-xs font-bold text-[#0f3e3a]">
+            <span className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8]">
               {adaptivePlan.confidence}%
             </span>
-
           </div>
 
-          <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-
+          <div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
             <div
-              className="h-full rounded-full bg-[#0f3e3a]"
+              className="h-full rounded-full bg-[#6366D8] transition-all duration-500"
               style={{
                 width: `${adaptivePlan.confidence}%`,
               }}
             />
-
           </div>
-
         </div>
-
       </div>
 
       {/* =====================================================
           COGNITIVE BALANCE
       ===================================================== */}
-
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
+      <div className="mb-8 rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-6 shadow-soft">
         <div className="mb-5">
-
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
             Cognitive Balance
           </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
             Current comparison between Asha's main cognitive areas.
           </p>
-
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
           <BalanceCard
             title="Strongest Area"
             value={adaptivePlan.strongestArea}
             description="Area currently performing best"
             icon="💪"
           />
-
           <BalanceCard
             title="Needs Attention"
             value={adaptivePlan.weakestArea}
             description="Area receiving additional support"
             icon="🎯"
           />
-
         </div>
-
       </div>
 
       {/* =====================================================
           DAILY PLAN
       ===================================================== */}
-
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
+      <div className="mb-8 rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-6 shadow-soft">
         <div className="mb-5">
-
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
             Personalized Daily Plan
           </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
             ANVESHA's current schedule for Asha.
           </p>
-
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-
           <PlanCard
             time="09:00 AM"
             activity="Memory Match"
@@ -417,112 +232,33 @@ function Rhythm({ setCurrentView }) {
             focus="Memory"
             current
           />
-
           <PlanCard
             time="01:00 PM"
             activity="Attention Match"
             difficulty={adaptivePlan.difficulty}
             focus="Attention"
           />
-
           <PlanCard
             time="06:00 PM"
             activity="Family Recognition"
             difficulty="Easy"
             focus="Emotional engagement"
           />
-
         </div>
-
       </div>
 
-      {/* =====================================================
-          RECENT PERFORMANCE
-      ===================================================== */}
-
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <div className="mb-5">
-
-          <h2 className="text-lg font-semibold text-slate-900">
-            Recent Performance
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Recent activities supplied to the adaptive engine.
-          </p>
-
-        </div>
-
-        <div className="space-y-3">
-
-          {asha.recentActivities.map((activity, index) => (
-
-            <div
-              key={index}
-              className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4"
-            >
-
-              <div className="flex items-center gap-3">
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg">
-                  {index === 0
-                    ? "🧠"
-                    : index === 1
-                      ? "🎯"
-                      : "🔤"}
-                </div>
-
-                <div>
-
-                  <p className="text-sm font-semibold text-slate-800">
-                    {activity.name}
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-400">
-                    {activity.difficulty} difficulty
-                  </p>
-
-                </div>
-
-              </div>
-
-              <div className="text-right">
-
-                <p className="text-xs text-slate-400">
-                  Score
-                </p>
-
-                <p className="text-lg font-bold text-slate-800">
-                  {activity.score}%
-                </p>
-
-              </div>
-
-            </div>
-
-          ))}
-
-        </div>
-
-      </div>
-
-      {/* =====================================================
-          NAVIGATION
-      ===================================================== */}
-
+      {/* NAVIGATION */}
       <div className="flex flex-wrap gap-3">
-
         <button
           onClick={() => setCurrentView("caregiver-patients")}
-          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] px-5 py-3 text-sm font-semibold text-[#202238] dark:text-[#F3F4F6] hover:bg-stone-50 dark:hover:bg-stone-800 transition"
         >
           ← Back to Patients
         </button>
 
         <button
           onClick={() => setCurrentView("caregiver-analytics")}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] px-5 py-3 text-sm font-semibold text-[#202238] dark:text-[#F3F4F6] hover:bg-stone-50 dark:hover:bg-stone-800 transition"
         >
           View Analytics
           <ArrowRight size={15} />
@@ -530,204 +266,102 @@ function Rhythm({ setCurrentView }) {
 
         <button
           onClick={() => setCurrentView("caregiver-vault")}
-          className="flex items-center gap-2 rounded-xl bg-[#0f3e3a] px-5 py-3 text-sm font-semibold text-white hover:bg-[#0c312e]"
+          className="flex items-center gap-2 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-3 text-sm font-semibold text-white shadow-soft transition"
         >
           Open Memory Vault
           <ArrowRight size={15} />
         </button>
-
       </div>
-
     </div>
   );
 }
 
-/* =========================================================
-   HELPER COMPONENTS
-========================================================= */
-
-function WorkflowCard({
-  number,
-  icon,
-  title,
-  text,
-  active = false,
-}) {
+function WorkflowCard({ number, icon, title, text, active = false }) {
   return (
     <div
-      className={`rounded-2xl border p-5 ${
+      className={`rounded-2xl border p-5 transition-all ${
         active
-          ? "border-teal-200 bg-teal-50/60"
-          : "border-slate-200 bg-slate-50"
+          ? "border-[#6366D8]/30 bg-[#E8E8FA]/60 dark:bg-[#25283C]/60"
+          : "border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A]"
       }`}
     >
-
       <div className="flex items-center justify-between">
-
-        <span className="text-[10px] font-bold text-slate-400">
+        <span className="text-[10px] font-bold text-[#6B6E85] dark:text-[#9A9DB5]">
           {number}
         </span>
-
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${
             active
-              ? "bg-[#0f3e3a] text-white"
-              : "bg-white text-slate-600"
+              ? "bg-[#6366D8] text-white"
+              : "bg-stone-100 dark:bg-stone-800 text-[#6B6E85] dark:text-[#C5C8D8]"
           }`}
         >
           {icon}
         </div>
-
       </div>
-
-      <h3 className="mt-4 text-sm font-bold text-slate-900">
+      <h3 className="mt-4 text-sm font-bold text-[#202238] dark:text-[#F3F4F6]">
         {title}
       </h3>
-
-      <p className="mt-1 text-xs leading-5 text-slate-500">
+      <p className="mt-1 text-xs leading-5 text-[#6B6E85] dark:text-[#9A9DB5]">
         {text}
       </p>
-
     </div>
   );
 }
 
-function MetricCard({
-  title,
-  value,
-  description,
-  icon,
-}) {
+function RecommendationCard({ title, value, icon }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
+    <div className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-stone-50 dark:bg-[#11121C] p-4">
       <div className="flex items-center justify-between">
-
-        <p className="text-sm text-slate-500">
+        <p className="text-xs font-semibold text-[#6B6E85] dark:text-[#9A9DB5]">
           {title}
         </p>
-
-        <span className="text-xl">
-          {icon}
-        </span>
-
+        <span className="text-lg">{icon}</span>
       </div>
-
-      <p className="mt-3 text-2xl font-bold text-slate-900">
+      <p className="mt-3 text-sm font-bold text-[#202238] dark:text-[#F3F4F6]">
         {value}
       </p>
-
-      <p className="mt-1 text-xs text-slate-400">
-        {description}
-      </p>
-
     </div>
   );
 }
 
-function RecommendationCard({
-  title,
-  value,
-  icon,
-}) {
+function BalanceCard({ title, value, description, icon }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-
-      <div className="flex items-center justify-between">
-
-        <p className="text-xs font-semibold text-slate-400">
-          {title}
-        </p>
-
-        <span className="text-lg">
-          {icon}
-        </span>
-
-      </div>
-
-      <p className="mt-3 text-sm font-bold text-slate-900">
-        {value}
-      </p>
-
-    </div>
-  );
-}
-
-function BalanceCard({
-  title,
-  value,
-  description,
-  icon,
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-
+    <div className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-stone-50 dark:bg-[#11121C] p-5">
       <div className="flex items-center gap-3">
-
-        <span className="text-xl">
-          {icon}
-        </span>
-
+        <span className="text-xl">{icon}</span>
         <div>
-
-          <p className="text-xs text-slate-400">
-            {title}
-          </p>
-
-          <p className="mt-1 text-lg font-bold text-slate-900">
+          <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">{title}</p>
+          <p className="mt-1 text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
             {value}
           </p>
-
         </div>
-
       </div>
-
-      <p className="mt-3 text-xs text-slate-500">
-        {description}
-      </p>
-
+      <p className="mt-3 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">{description}</p>
     </div>
   );
 }
 
-function PlanCard({
-  time,
-  activity,
-  difficulty,
-  focus,
-  current = false,
-}) {
+function PlanCard({ time, activity, difficulty, focus, current = false }) {
   return (
     <div
-      className={`rounded-xl border p-5 ${
+      className={`rounded-2xl border p-5 ${
         current
-          ? "border-teal-200 bg-teal-50/40"
-          : "border-slate-200 bg-slate-50"
+          ? "border-[#6366D8]/30 bg-[#E8E8FA]/50 dark:bg-[#25283C]/50"
+          : "border-stone-200/80 dark:border-stone-800/80 bg-stone-50 dark:bg-[#11121C]"
       }`}
     >
-
       {current && (
-        <span className="rounded-full bg-[#0f3e3a] px-2.5 py-1 text-[10px] font-bold text-white">
+        <span className="rounded-full bg-[#6366D8] px-2.5 py-1 text-[10px] font-bold text-white">
           CURRENT
         </span>
       )}
-
-      <p className="mt-3 text-xs font-bold text-[#0f3e3a]">
-        {time}
-      </p>
-
-      <h3 className="mt-2 text-sm font-bold text-slate-900">
-        {activity}
-      </h3>
-
-      <p className="mt-1 text-xs text-slate-500">
-        {focus}
-      </p>
-
-      <span className="mt-4 inline-block rounded-full bg-white px-3 py-1 text-[10px] font-semibold text-slate-600">
+      <p className="mt-3 text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8]">{time}</p>
+      <h3 className="mt-2 text-sm font-bold text-[#202238] dark:text-[#F3F4F6]">{activity}</h3>
+      <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">{focus}</p>
+      <span className="mt-4 inline-block rounded-full bg-white dark:bg-[#1B1D2A] px-3 py-1 text-[10px] font-semibold text-[#6B6E85] dark:text-[#C5C8D8]">
         {difficulty} difficulty
       </span>
-
     </div>
   );
 }

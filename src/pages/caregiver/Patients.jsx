@@ -1119,317 +1119,231 @@ function Patients({ setCurrentView }) {
   ========================================================= */
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-
+    <div className="min-h-screen bg-[#F7F7FC] dark:bg-[#11121C] p-6 transition-colors">
       {/* Page Header */}
       <div className="mb-8 flex items-center justify-between">
-
         <div>
-
-          <h1 className="text-3xl font-bold text-slate-900">
+          <h1 className="text-3xl font-extrabold text-[#202238] dark:text-[#F3F4F6]">
             Patients
           </h1>
-
-          <p className="mt-1 text-slate-500">
+          <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
             Manage and monitor your connected patients.
           </p>
-
         </div>
 
         <button
           onClick={() => setShowAddForm(true)}
-          className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          className="rounded-xl bg-[#6366D8] hover:bg-[#5255C5] px-5 py-3 text-sm font-semibold text-white shadow-soft transition"
         >
           + Add Patient
         </button>
-
       </div>
 
       {/* Search */}
       <div className="mb-6">
-
         <div className="relative mb-4">
-
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B6E85] dark:text-[#9A9DB5]">
             🔍
           </span>
-
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search patients by name..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            className="w-full rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] py-3 pl-11 pr-4 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none transition focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20"
           />
-
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-2">
-
           {["All Patients", "Stable", "Needs Attention", "Urgent"].map(
             (filter) => (
-
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
                   activeFilter === filter
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                    ? "bg-[#6366D8] text-white shadow-soft"
+                    : "border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] text-[#6B6E85] dark:text-[#C5C8D8] hover:bg-stone-50 dark:hover:bg-stone-800"
                 }`}
               >
                 {filter}
               </button>
-
             ),
           )}
-
         </div>
-
       </div>
 
       {/* Summary */}
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-
         <SummaryCard
           title="Total Patients"
           value={totalPatients}
           text="Connected to your care"
         />
-
         <SummaryCard
           title="Stable"
           value={stablePatients}
           text="No immediate attention needed"
           color="green"
         />
-
         <SummaryCard
           title="Needs Attention"
           value={attentionPatients}
           text="Review recommended"
           color="yellow"
         />
-
         <SummaryCard
           title="Urgent"
           value={urgentPatients}
           text="Immediate review recommended"
           color="red"
         />
-
       </div>
 
       {/* Patient Directory */}
       {filteredPatients.length > 0 && (
-
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-
           {filteredPatients.map((patient) => (
-
             <div
               key={patient.id}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              className="rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-6 shadow-soft transition hover:-translate-y-1 hover:shadow-card"
             >
-
               <div className="flex items-start justify-between">
-
                 <div>
-
                   <div className="flex items-center gap-3">
-
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8E8FA] dark:bg-[#25283C] text-2xl border border-[#6366D8]/20">
                       {patient.name === "Asha" ? "👵" : "👤"}
                     </div>
-
                     <div>
-
-                      <h2 className="text-lg font-semibold text-slate-900">
+                      <h2 className="text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
                         {patient.name}
                       </h2>
-
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-0.5 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
                         {patient.age} years • Room {patient.room}
                       </p>
-
                       {patient.syncStatus && (
                         <div className="mt-1.5 flex items-center gap-1.5">
                           <span
                             className={`h-1.5 w-1.5 rounded-full ${
                               patient.syncStatus.state === "synced"
-                                ? "bg-emerald-500"
+                                ? "bg-[#78CFA3]"
                                 : patient.syncStatus.state === "pending"
-                                ? "bg-amber-500"
-                                : "bg-slate-400"
+                                ? "bg-[#F3B562]"
+                                : "bg-stone-400"
                             }`}
                           />
                           <span className={`text-[11px] font-semibold ${
                             patient.syncStatus.state === "synced"
-                              ? "text-emerald-700"
+                              ? "text-[#78CFA3]"
                               : patient.syncStatus.state === "pending"
-                              ? "text-amber-700"
-                              : "text-slate-500"
+                              ? "text-[#F3B562]"
+                              : "text-[#6B6E85]"
                           }`}>
                             {patient.syncStatus.label}
                           </span>
                         </div>
                       )}
-
                     </div>
-
                   </div>
-
                 </div>
 
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
                     patient.status === "Stable"
-                      ? "bg-emerald-50 text-emerald-700"
+                      ? "bg-[#78CFA3]/15 text-[#78CFA3] border border-[#78CFA3]/30"
                       : patient.status === "Needs Attention"
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-red-50 text-red-700"
+                        ? "bg-[#F3B562]/15 text-[#F3B562] border border-[#F3B562]/30"
+                        : "bg-[#E98B9B]/15 text-[#E98B9B] border border-[#E98B9B]/30"
                   }`}
                 >
                   {patient.status}
                 </span>
-
               </div>
 
               {/* Cognitive Performance */}
               <div className="mt-6">
-
-                <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#6366D8] dark:text-[#8B8FE8]">
                   Cognitive Performance
                 </p>
 
-                <div className="mb-4">
-
-                  <div className="mb-1 flex justify-between text-sm">
-
-                    <span className="text-slate-500">
-                      Memory
-                    </span>
-
-                    <span className="font-semibold text-slate-700">
-                      {patient.memory}%
-                    </span>
-
+                <div className="mb-3">
+                  <div className="mb-1 flex justify-between text-xs">
+                    <span className="text-[#6B6E85] dark:text-[#9A9DB5]">Memory</span>
+                    <span className="font-bold text-[#202238] dark:text-[#F3F4F6]">{patient.memory}%</span>
                   </div>
-
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-
+                  <div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
                     <div
-                      className="h-full rounded-full bg-slate-800"
+                      className="h-full rounded-full bg-[#6366D8]"
                       style={{ width: `${patient.memory}%` }}
                     />
-
                   </div>
-
                 </div>
 
                 <div>
-
-                  <div className="mb-1 flex justify-between text-sm">
-
-                    <span className="text-slate-500">
-                      Attention
-                    </span>
-
-                    <span className="font-semibold text-slate-700">
-                      {patient.attention}%
-                    </span>
-
+                  <div className="mb-1 flex justify-between text-xs">
+                    <span className="text-[#6B6E85] dark:text-[#9A9DB5]">Attention</span>
+                    <span className="font-bold text-[#202238] dark:text-[#F3F4F6]">{patient.attention}%</span>
                   </div>
-
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-
+                  <div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
                     <div
-                      className="h-full rounded-full bg-slate-500"
+                      className="h-full rounded-full bg-[#8B8FE8]"
                       style={{ width: `${patient.attention}%` }}
                     />
-
                   </div>
-
                 </div>
-
               </div>
 
               {/* Footer */}
-              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-
-                <span className="text-xs text-slate-400">
+              <div className="mt-6 flex items-center justify-between border-t border-stone-100 dark:border-stone-800 pt-4">
+                <span className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
                   Last active: {patient.lastActive}
                 </span>
-
                 <button
                   onClick={() => setSelectedPatient(patient)}
-                  className="text-sm font-semibold text-slate-700 transition hover:text-slate-950"
+                  className="text-xs font-bold text-[#6366D8] dark:text-[#8B8FE8] hover:underline"
                 >
                   View Profile →
                 </button>
-
               </div>
-
             </div>
-
           ))}
-
         </div>
-
       )}
 
       {/* Empty State */}
       {filteredPatients.length === 0 && (
-
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">
+        <div className="rounded-3xl border border-dashed border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1B1D2A] px-6 py-12 text-center shadow-soft">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800 text-xl">
             🔍
           </div>
-
-          <h3 className="text-lg font-semibold text-slate-900">
+          <h3 className="text-lg font-bold text-[#202238] dark:text-[#F3F4F6]">
             No patients found
           </h3>
-
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[#6B6E85] dark:text-[#9A9DB5]">
             Try changing your search or status filter.
           </p>
-
         </div>
-
       )}
 
       {/* Add Patient Modal */}
       {showAddForm && (
-
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-
-          <div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl">
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-[#1B1D2A] p-7 shadow-2xl border border-stone-200/80 dark:border-stone-800/80">
             <div className="mb-6">
-
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-[#202238] dark:text-[#F3F4F6]">
                 Add Patient
               </h2>
-
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
                 Add a new patient to the caregiver dashboard.
               </p>
-
             </div>
 
-            <form
-              onSubmit={handleAddPatient}
-              className="space-y-4"
-            >
-
+            <form onSubmit={handleAddPatient} className="space-y-4">
               <div>
-
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
                   Patient Name
                 </label>
-
                 <input
                   type="text"
                   value={newPatient.name}
@@ -1440,17 +1354,14 @@ function Patients({ setCurrentView }) {
                     })
                   }
                   placeholder="e.g. Rina Sharma"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20"
                 />
-
               </div>
 
               <div>
-
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
                   Age
                 </label>
-
                 <input
                   type="number"
                   value={newPatient.age}
@@ -1461,17 +1372,14 @@ function Patients({ setCurrentView }) {
                     })
                   }
                   placeholder="e.g. 76"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20"
                 />
-
               </div>
 
               <div>
-
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                <label className="mb-1.5 block text-xs font-semibold text-[#202238] dark:text-[#C5C8D8]">
                   Room
                 </label>
-
                 <input
                   type="text"
                   value={newPatient.room}
@@ -1482,38 +1390,29 @@ function Patients({ setCurrentView }) {
                     })
                   }
                   placeholder="e.g. 204"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] px-4 py-3 text-sm text-[#202238] dark:text-[#F3F4F6] outline-none focus:border-[#6366D8] focus:ring-2 focus:ring-[#6366D8]/20"
                 />
-
               </div>
 
               <div className="flex gap-3 pt-2">
-
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  className="flex-1 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#11121C] py-3 text-sm font-semibold text-[#6B6E85] dark:text-[#C5C8D8] hover:bg-stone-50 dark:hover:bg-stone-800 transition"
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
-                  className="flex-1 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+                  className="flex-1 rounded-xl bg-[#6366D8] hover:bg-[#5255C5] py-3 text-sm font-semibold text-white shadow-soft transition"
                 >
                   Add Patient
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 }
@@ -1526,13 +1425,12 @@ function QuickAction({ label, icon, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-left transition hover:border-slate-300 hover:bg-slate-100"
+      className="rounded-2xl border border-stone-200/80 dark:border-stone-800/80 bg-stone-50 dark:bg-[#11121C] p-3 text-left transition hover:border-[#6366D8]/40 hover:bg-[#E8E8FA]/40 dark:hover:bg-[#25283C]/40"
     >
       <div className="text-lg">
         {icon}
       </div>
-
-      <p className="mt-2 text-xs font-semibold text-slate-700">
+      <p className="mt-2 text-xs font-semibold text-[#202238] dark:text-[#F3F4F6]">
         {label}
       </p>
     </button>
@@ -1541,24 +1439,18 @@ function QuickAction({ label, icon, onClick }) {
 
 function InfoCard({ title, value, icon }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
+    <div className="rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-5 shadow-soft">
       <div className="flex items-center justify-between">
-
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#6B6E85] dark:text-[#9A9DB5]">
           {title}
         </p>
-
         <span className="text-lg">
           {icon}
         </span>
-
       </div>
-
-      <p className="mt-3 text-sm font-bold text-slate-900">
+      <p className="mt-3 text-sm font-bold text-[#202238] dark:text-[#F3F4F6]">
         {value}
       </p>
-
     </div>
   );
 }
@@ -1570,29 +1462,25 @@ function SummaryCard({
   color = "slate",
 }) {
   const valueColor = {
-    slate: "text-slate-900",
-    green: "text-emerald-600",
-    yellow: "text-amber-600",
-    red: "text-red-600",
+    slate: "text-[#202238] dark:text-[#F3F4F6]",
+    green: "text-[#78CFA3]",
+    yellow: "text-[#F3B562]",
+    red: "text-[#E98B9B]",
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
-      <p className="text-sm text-slate-500">
+    <div className="rounded-3xl border border-stone-200/80 dark:border-stone-800/80 bg-white dark:bg-[#1B1D2A] p-5 shadow-soft">
+      <p className="text-xs font-medium text-[#6B6E85] dark:text-[#9A9DB5]">
         {title}
       </p>
-
       <p
-        className={`mt-2 text-3xl font-bold ${valueColor[color]}`}
+        className={`mt-2 text-3xl font-extrabold ${valueColor[color]}`}
       >
         {value}
       </p>
-
-      <p className="mt-1 text-xs text-slate-400">
+      <p className="mt-1 text-xs text-[#6B6E85]/80 dark:text-[#9A9DB5]/80">
         {text}
       </p>
-
     </div>
   );
 }

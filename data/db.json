@@ -16,22 +16,25 @@
     "sleep": "7h 20m",
     "familyContact": "Priya Sharma",
     "familyRelation": "Daughter",
-    "safetyStatus": "Safe",
+    "safetyStatus": "Triggered",
     "emergencyContact": "Priya Sharma",
     "mood": "Calm",
     "currentLocation": {
-      "latitude": 28.737317572731797,
-      "longitude": 77.11294886994527,
-      "accuracy": 92,
+      "latitude": 28.736980675723167,
+      "longitude": 77.11266613759125,
+      "accuracy": 90,
       "address": "Current Device Location",
       "sharingEnabled": true,
-      "timestamp": "2026-09-20T12:07:29.743Z",
-      "updatedAt": "2026-09-20T12:07:29.801Z"
+      "timestamp": "2026-09-24T20:51:58.355Z",
+      "updatedAt": "2026-09-24T20:51:58.232Z"
     },
     "lastActive": "Just now",
-    "lastSyncedAt": "2026-09-20T12:07:29.801Z",
+    "lastSyncedAt": "2026-09-24T20:51:58.232Z",
     "isOnline": true,
-    "pendingSyncCount": 0
+    "pendingSyncCount": 0,
+    "activityTime": "Just now",
+    "recentActivity": "Family Memory Recall",
+    "gameScore": 100
   },
   "patients": [
     {
@@ -39,14 +42,14 @@
       "name": "Asha",
       "age": 78,
       "room": "402",
-      "status": "Stable",
-      "memory": 73,
+      "status": "active",
+      "memory": 88,
       "attention": 97,
       "lastActive": "Just now",
-      "recentActivity": "Memory Game",
+      "recentActivity": "Family Memory Recall",
       "gameScore": 100,
       "mood": "Calm",
-      "alert": "No immediate alerts",
+      "alert": "SOS button has been triggered",
       "activityTime": "Just now",
       "language": "Assamese",
       "location": "Assam, NER",
@@ -57,9 +60,30 @@
       "engagement": "87%",
       "familyContact": "Priya Sharma",
       "familyRelation": "Daughter",
-      "safetyStatus": "Safe",
+      "safetyStatus": "Triggered",
       "emergencyContact": "Priya Sharma",
       "activityHistory": [
+        {
+          "name": "Family Memory Recall",
+          "score": 100,
+          "time": "Today • 8:29 pm",
+          "timestamp": "2026-09-24T20:29:27.221Z",
+          "icon": "🧠"
+        },
+        {
+          "name": "Family Memory Recall",
+          "score": 100,
+          "time": "Today • 8:29 pm",
+          "timestamp": "2026-09-24T20:29:22.094Z",
+          "icon": "🧠"
+        },
+        {
+          "name": "Memory Game",
+          "score": 100,
+          "time": "Today • 8:29 pm",
+          "timestamp": "2026-09-24T20:29:02.510Z",
+          "icon": "🧠"
+        },
         {
           "name": "Memory Game",
           "score": 75,
@@ -101,180 +125,109 @@
           "score": 60,
           "time": "Today • 11:32 am",
           "icon": "🧠"
-        },
-        {
-          "name": "Memory Game",
-          "score": 75,
-          "time": "Today • 11:31 am",
-          "icon": "🧠"
-        },
-        {
-          "name": "Memory Game",
-          "score": 38,
-          "time": "Today • 12:22 pm",
-          "icon": "🧠"
-        },
-        {
-          "name": "Memory Game",
-          "score": 60,
-          "time": "Today • 12:20 pm",
-          "icon": "🧠"
         }
       ],
       "currentLocation": {
-        "latitude": 28.737317572731797,
-        "longitude": 77.11294886994527,
-        "accuracy": 92,
+        "latitude": 28.736980675723167,
+        "longitude": 77.11266613759125,
+        "accuracy": 90,
         "address": "Current Device Location",
         "sharingEnabled": true,
-        "timestamp": "2026-09-20T12:07:29.743Z",
-        "updatedAt": "2026-09-20T12:07:29.801Z"
+        "timestamp": "2026-09-24T20:51:58.355Z",
+        "updatedAt": "2026-09-24T20:51:58.232Z"
       },
-      "lastSyncedAt": "2026-09-20T12:07:29.801Z",
+      "lastSyncedAt": "2026-09-24T20:51:58.232Z",
       "isOnline": true,
-      "pendingSyncCount": 0
+      "pendingSyncCount": 0,
+      "hasDemoData": true,
+      "patientId": "P001"
     },
     {
       "id": "P002",
-      "name": "Martha Washington",
-      "age": 82,
-      "room": "112",
-      "status": "Needs Attention",
-      "memory": 68,
-      "attention": 61,
-      "lastActive": "30 minutes ago",
-      "recentActivity": "Pattern Recognition",
-      "gameScore": 67,
-      "mood": "Neutral",
-      "alert": "Cognitive performance needs review",
-      "activityTime": "30 minutes ago",
-      "language": "English",
-      "location": "NER Facility",
+      "name": "Ramesh",
+      "age": 74,
+      "room": "205",
+      "status": "active",
+      "memory": null,
+      "attention": null,
+      "lastActive": "No sessions yet",
+      "recentActivity": null,
+      "gameScore": null,
+      "mood": "Not logged",
+      "alert": "None",
+      "activityTime": null,
+      "language": "Hindi",
+      "location": "Care Wing B",
       "caregiver": "Dr. Sarah Jenkins",
-      "medication": "Overdue 30m",
-      "hydration": "Moderate",
-      "sleep": "6h 10m",
-      "engagement": "62%",
-      "familyContact": "Robert Washington",
-      "familyRelation": "Son",
+      "medication": "Pending",
+      "hydration": "Pending",
+      "sleep": "Not recorded",
+      "engagement": null,
+      "familyContact": "Anita Kumar",
+      "familyRelation": "Spouse",
       "safetyStatus": "Safe",
-      "emergencyContact": "Robert Washington",
-      "activityHistory": [
-        {
-          "name": "Pattern Recognition",
-          "score": 67,
-          "time": "Today • 1:30 PM",
-          "icon": "🎯"
-        },
-        {
-          "name": "Memory Recall",
-          "score": 64,
-          "time": "Today • 10:15 AM",
-          "icon": "🧠"
-        }
-      ]
+      "emergencyContact": "Anita Kumar",
+      "activityHistory": [],
+      "patientId": "P002",
+      "hasDemoData": false
     },
     {
       "id": "P003",
-      "name": "Eleanor Vance",
-      "age": 79,
-      "room": "At Home",
-      "status": "Critical Attention",
-      "memory": 58,
-      "attention": 52,
-      "lastActive": "10 minutes ago",
-      "recentActivity": "Daily Check-in",
-      "gameScore": 55,
-      "mood": "Worried",
-      "alert": "SOS button has been triggered",
-      "activityTime": "10 minutes ago",
+      "name": "Kavita",
+      "age": 69,
+      "room": "318",
+      "status": "active",
+      "memory": null,
+      "attention": null,
+      "lastActive": "No sessions yet",
+      "recentActivity": null,
+      "gameScore": null,
+      "mood": "Not logged",
+      "alert": "None",
+      "activityTime": null,
       "language": "English",
-      "location": "Home Monitoring",
+      "location": "Care Wing C",
       "caregiver": "Dr. Sarah Jenkins",
       "medication": "Pending",
-      "hydration": "Low",
-      "sleep": "5h 45m",
-      "engagement": "48%",
-      "familyContact": "Claire Vance",
-      "familyRelation": "Daughter",
-      "safetyStatus": "Triggered",
-      "emergencyContact": "Claire Vance",
-      "activityHistory": [
-        {
-          "name": "Memory Recall",
-          "score": 58,
-          "time": "Today • 9:30 AM",
-          "icon": "🧠"
-        }
-      ]
+      "hydration": "Pending",
+      "sleep": "Not recorded",
+      "engagement": null,
+      "familyContact": "Suresh Patel",
+      "familyRelation": "Son",
+      "safetyStatus": "Safe",
+      "emergencyContact": "Suresh Patel",
+      "activityHistory": [],
+      "patientId": "P003",
+      "hasDemoData": false
     },
     {
       "id": "P004",
-      "name": "Arthur Pendelton",
-      "age": 78,
-      "room": "402",
-      "status": "Stable",
-      "memory": 80,
-      "attention": 74,
-      "lastActive": "1 hour ago",
-      "recentActivity": "Memory Recall",
-      "gameScore": 82,
-      "mood": "Calm",
-      "alert": "No immediate alerts",
-      "activityTime": "1 hour ago",
+      "name": "David",
+      "age": 81,
+      "room": "114",
+      "status": "active",
+      "memory": null,
+      "attention": null,
+      "lastActive": "No sessions yet",
+      "recentActivity": null,
+      "gameScore": null,
+      "mood": "Not logged",
+      "alert": "None",
+      "activityTime": null,
       "language": "English",
-      "location": "NER Facility",
+      "location": "Care Wing A",
       "caregiver": "Dr. Sarah Jenkins",
-      "medication": "Taken",
-      "hydration": "Good",
-      "sleep": "7h 00m",
-      "engagement": "82%",
-      "familyContact": "Thomas Pendelton",
-      "familyRelation": "Brother",
+      "medication": "Pending",
+      "hydration": "Pending",
+      "sleep": "Not recorded",
+      "engagement": null,
+      "familyContact": "Grace Chen",
+      "familyRelation": "Daughter",
       "safetyStatus": "Safe",
-      "emergencyContact": "Thomas Pendelton",
-      "activityHistory": [
-        {
-          "name": "Memory Recall",
-          "score": 82,
-          "time": "Today • 12:45 PM",
-          "icon": "🧠"
-        }
-      ]
-    },
-    {
-      "id": "P005",
-      "name": "Hector Rivera",
-      "age": 74,
-      "room": "305",
-      "status": "Stable",
-      "memory": 85,
-      "attention": 79,
-      "lastActive": "45 minutes ago",
-      "recentActivity": "Word Association",
-      "gameScore": 86,
-      "mood": "Happy",
-      "alert": "No immediate alerts",
-      "activityTime": "45 minutes ago",
-      "language": "Spanish / English",
-      "location": "NER Facility",
-      "caregiver": "Dr. Sarah Jenkins",
-      "medication": "Taken",
-      "hydration": "Good",
-      "sleep": "7h 40m",
-      "engagement": "89%",
-      "familyContact": "Elena Rivera",
-      "familyRelation": "Spouse",
-      "safetyStatus": "Safe",
-      "emergencyContact": "Elena Rivera",
-      "activityHistory": [
-        {
-          "name": "Word Association",
-          "score": 86,
-          "time": "Today • 1:15 PM",
-          "icon": "🔤"
-        }
-      ]
+      "emergencyContact": "Grace Chen",
+      "activityHistory": [],
+      "patientId": "P004",
+      "hasDemoData": false
     }
   ],
   "reminders": [
@@ -397,6 +350,84 @@
     }
   ],
   "activityResults": [
+    {
+      "id": 1790281767221,
+      "gameId": "family-recall",
+      "game": "Family Memory Recall",
+      "difficulty": "easy",
+      "theme": "Family Recognition",
+      "category": "memory",
+      "accuracy": 100,
+      "score": 100,
+      "performanceLevel": "Strong",
+      "moves": 1,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 15,
+      "completedAt": "2026-09-24T20:29:27.221Z",
+      "dateLabel": "Today • 8:29 pm",
+      "patientId": "P001",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 100,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1790281762094,
+      "gameId": "family-recall",
+      "game": "Family Memory Recall",
+      "difficulty": "easy",
+      "theme": "Family Recognition",
+      "category": "memory",
+      "accuracy": 100,
+      "score": 100,
+      "performanceLevel": "Strong",
+      "moves": 1,
+      "hintsUsed": 0,
+      "mistakes": 0,
+      "elapsedTime": 15,
+      "completedAt": "2026-09-24T20:29:22.094Z",
+      "dateLabel": "Today • 8:29 pm",
+      "patientId": "P001",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "medium",
+        "performanceScore": 100,
+        "performanceBand": "strong",
+        "reason": "Strong recent performance detected. Increasing cognitive challenge gradually.",
+        "recommendedTime": "10–15 min"
+      }
+    },
+    {
+      "id": 1790281742510,
+      "gameId": "memory-match",
+      "game": "Memory Game",
+      "difficulty": "easy",
+      "theme": "Family",
+      "category": "memory",
+      "accuracy": 67,
+      "score": 100,
+      "performanceLevel": "Steady Recall",
+      "moves": 6,
+      "hintsUsed": 0,
+      "mistakes": 2,
+      "elapsedTime": 14,
+      "completedAt": "2026-09-24T20:29:02.510Z",
+      "dateLabel": "Today • 8:29 pm",
+      "patientId": "P001",
+      "adaptivePlan": {
+        "activity": "Memory Game",
+        "difficulty": "easy",
+        "performanceScore": 72,
+        "performanceBand": "moderate",
+        "reason": "Performance is stable. Maintaining challenge while reinforcing cognitive rhythm.",
+        "recommendedTime": "5–10 min"
+      }
+    },
     {
       "id": 1789897363166,
       "gameId": "memory-match",
@@ -875,6 +906,19 @@
   ],
   "alerts": [
     {
+      "id": 1790281688222,
+      "patient": "Asha",
+      "patientId": "P001",
+      "age": 78,
+      "room": "Rm 402",
+      "type": "Emergency SOS",
+      "message": "Emergency SOS button was pressed by Asha in Today's Care.",
+      "time": "Just now",
+      "priority": "EMERGENCY",
+      "icon": "🚨",
+      "status": "Pending"
+    },
+    {
       "id": 1789530035749,
       "patient": "Asha",
       "patientId": "P001",
@@ -1020,20 +1064,174 @@
   ],
   "analytics": {
     "trend": [
-      60,
-      100,
-      100,
       100,
       100,
       60,
-      75
+      75,
+      67,
+      100,
+      100
     ],
-    "memory": 73,
+    "memory": 88,
     "attention": 97,
     "engagement": 87,
     "completion": 92
   },
   "locationHistory": [
+    {
+      "patientId": "P001",
+      "latitude": 28.736980675723167,
+      "longitude": 77.11266613759125,
+      "accuracy": 90,
+      "timestamp": "2026-09-24T20:51:58.355Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.736980675723167,
+      "longitude": 77.11266613759125,
+      "accuracy": 90,
+      "timestamp": "2026-09-24T20:51:58.355Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.736996891550167,
+      "longitude": 77.11266398631786,
+      "accuracy": 90,
+      "timestamp": "2026-09-24T20:49:52.858Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.736996891550167,
+      "longitude": 77.11266398631786,
+      "accuracy": 90,
+      "timestamp": "2026-09-24T20:49:52.858Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.736935004213304,
+      "longitude": 77.11260507758772,
+      "accuracy": 93,
+      "timestamp": "2026-09-24T20:32:28.284Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.736935004213304,
+      "longitude": 77.11260507758772,
+      "accuracy": 93,
+      "timestamp": "2026-09-24T20:32:28.284Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737018210284653,
+      "longitude": 77.11266743508455,
+      "accuracy": 95,
+      "timestamp": "2026-09-24T20:30:01.248Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737018210284653,
+      "longitude": 77.11266743508455,
+      "accuracy": 95,
+      "timestamp": "2026-09-24T20:30:01.248Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737091678556745,
+      "longitude": 77.11274568317229,
+      "accuracy": 90,
+      "timestamp": "2026-09-24T20:28:36.189Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737091678556745,
+      "longitude": 77.11274568317229,
+      "accuracy": 90,
+      "timestamp": "2026-09-24T20:28:36.189Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737161221442605,
+      "longitude": 77.11279268845543,
+      "accuracy": 90,
+      "timestamp": "2026-09-24T20:27:52.051Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737161221442605,
+      "longitude": 77.11279268845543,
+      "accuracy": 90,
+      "timestamp": "2026-09-24T20:27:52.051Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737105358834786,
+      "longitude": 77.11274258709176,
+      "accuracy": 91,
+      "timestamp": "2026-09-24T20:27:21.548Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737105358834786,
+      "longitude": 77.11274258709176,
+      "accuracy": 91,
+      "timestamp": "2026-09-24T20:27:21.548Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737105358834786,
+      "longitude": 77.11274258709176,
+      "accuracy": 91,
+      "timestamp": "2026-09-24T20:27:21.548Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.737105358834786,
+      "longitude": 77.11274258709176,
+      "accuracy": 91,
+      "timestamp": "2026-09-24T20:27:21.548Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.736986786694292,
+      "longitude": 77.11263714647485,
+      "accuracy": 92,
+      "timestamp": "2026-09-24T20:22:06.294Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.736986786694292,
+      "longitude": 77.11263714647485,
+      "accuracy": 92,
+      "timestamp": "2026-09-24T20:22:06.294Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.73697558701717,
+      "longitude": 77.11265177670602,
+      "accuracy": 92,
+      "timestamp": "2026-09-24T20:18:58.221Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.73697558701717,
+      "longitude": 77.11265177670602,
+      "accuracy": 92,
+      "timestamp": "2026-09-24T20:18:58.221Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.73697558701717,
+      "longitude": 77.11265177670602,
+      "accuracy": 92,
+      "timestamp": "2026-09-24T20:18:58.221Z"
+    },
+    {
+      "patientId": "P001",
+      "latitude": 28.73697558701717,
+      "longitude": 77.11265177670602,
+      "accuracy": 92,
+      "timestamp": "2026-09-24T20:18:58.221Z"
+    },
     {
       "patientId": "P001",
       "latitude": 28.737317572731797,

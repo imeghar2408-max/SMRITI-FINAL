@@ -1,0 +1,187 @@
+{
+  "users": [
+    {
+      "userId": "USR-PAT-001",
+      "phone": "+919876543210",
+      "name": "Savitri Devi",
+      "role": "patient",
+      "patientId": "PAT-REAL-001",
+      "caregiverId": null,
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "verifiedAt": "2026-09-24T20:48:20.595Z"
+    },
+    {
+      "userId": "USR-CG-001",
+      "phone": "+919876511111",
+      "name": "Dr. Ananya Roy",
+      "role": "caregiver",
+      "patientId": null,
+      "caregiverId": "CG-REAL-001",
+      "createdAt": "2026-09-01T09:00:00.000Z",
+      "verifiedAt": "2026-09-24T20:48:20.615Z"
+    },
+    {
+      "userId": "USR-PAT-906259",
+      "phone": "+919999988888",
+      "name": "Ramesh Chandra Sharma",
+      "role": "patient",
+      "patientId": "PAT-REAL-6259",
+      "caregiverId": null,
+      "createdAt": "2026-09-24T20:48:26.259Z",
+      "verifiedAt": "2026-09-24T20:48:26.259Z"
+    }
+  ],
+  "patients": [
+    {
+      "patientId": "PAT-REAL-001",
+      "userId": "USR-PAT-001",
+      "name": "Savitri Devi",
+      "age": 74,
+      "room": "204",
+      "language": "Hindi",
+      "languageCode": "hi-IN",
+      "condition": "Mild Cognitive Impairment (Observational Routine Support)",
+      "emergencyContact": "+919876511111",
+      "reminders": [
+        {
+          "id": "rem-101",
+          "title": "Morning Blood Pressure & Water",
+          "time": "08:30 AM",
+          "completed": true
+        },
+        {
+          "id": "rem-102",
+          "title": "Memory Tile Activity",
+          "time": "11:30 AM",
+          "completed": false
+        },
+        {
+          "id": "rem-103",
+          "title": "Gentle Evening Walk in Courtyard",
+          "time": "05:00 PM",
+          "completed": false
+        }
+      ],
+      "metrics": {
+        "cognitiveScore": 84,
+        "activityStreak": 6,
+        "sleepQuality": "Restful (7.5 hrs)",
+        "adherenceRate": 96
+      }
+    },
+    {
+      "patientId": "PAT-REAL-6259",
+      "userId": "USR-PAT-906259",
+      "name": "Ramesh Chandra Sharma",
+      "age": 72,
+      "room": "305",
+      "language": "Assamese",
+      "languageCode": "as-IN",
+      "condition": "Cognitive Care & Daily Routine Support",
+      "emergencyContact": "",
+      "reminders": [
+        {
+          "id": "rem-auto-1",
+          "title": "Morning Medication & Hydration",
+          "time": "08:00 AM",
+          "completed": false
+        },
+        {
+          "id": "rem-auto-2",
+          "title": "Cognitive Memory Game",
+          "time": "02:00 PM",
+          "completed": false
+        },
+        {
+          "id": "rem-auto-3",
+          "title": "Evening Rest & Reflection",
+          "time": "08:30 PM",
+          "completed": false
+        }
+      ],
+      "metrics": {
+        "cognitiveScore": 80,
+        "activityStreak": 1,
+        "sleepQuality": "Good (7.0 hrs)",
+        "adherenceRate": 100
+      }
+    }
+  ],
+  "caregivers": [
+    {
+      "caregiverId": "CG-REAL-001",
+      "userId": "USR-CG-001",
+      "name": "Dr. Ananya Roy",
+      "email": "ananya.roy@eldercare.org",
+      "phone": "+919876511111",
+      "roleTitle": "Consultant Geriatric Specialist"
+    }
+  ],
+  "caregiver_patient_links": [
+    {
+      "linkId": "LNK-001",
+      "caregiverId": "CG-REAL-001",
+      "patientId": "PAT-REAL-001",
+      "relationship": "Assigned Primary Specialist",
+      "status": "active",
+      "createdAt": "2026-09-01T09:10:00.000Z"
+    }
+  ],
+  "otp_sessions": [
+    {
+      "sessionId": "OTP-c18c15ff-980f-4ad3-83cb-a5e86baf2c75",
+      "phone": "+919876543210",
+      "otpHash": "ee24e8c4112e79efb8b93dc17e1d5abd3e719e21e7825ba13f9e28211c615a9f",
+      "attempts": 0,
+      "maxAttempts": 3,
+      "verified": true,
+      "active": false,
+      "createdAt": "2026-09-24T20:44:41.484Z",
+      "expiresAt": "2026-09-24T20:49:41.481Z"
+    },
+    {
+      "sessionId": "OTP-6cf27ad5-b628-4e3c-9f72-fc627a4ea83e",
+      "phone": "+919876511111",
+      "otpHash": "e5b4d015f398a8f4907189a09fd1c94cb7abcad15ee57f444ad6bd82e4fcf6b1",
+      "attempts": 1,
+      "maxAttempts": 3,
+      "verified": false,
+      "active": false,
+      "createdAt": "2026-09-24T20:44:46.022Z",
+      "expiresAt": "2026-09-24T20:49:46.021Z"
+    },
+    {
+      "sessionId": "OTP-6391bdc4-7247-4382-9f3d-0f1d8157df01",
+      "phone": "+919876543210",
+      "otpHash": "a64fedaf10d3c8f69e98f9561d95342a3cd0b566e04154ad22cb7c30005f71b4",
+      "attempts": 0,
+      "maxAttempts": 3,
+      "verified": true,
+      "active": false,
+      "createdAt": "2026-09-24T20:48:20.589Z",
+      "expiresAt": "2026-09-24T20:53:20.588Z"
+    },
+    {
+      "sessionId": "OTP-7e82c590-0d6f-4f57-8ee2-87188f68dc9c",
+      "phone": "+919876511111",
+      "otpHash": "aba3559bce8d7085c1b9cd8e90a85670fea1e37f21bb1ba5757c2c62a4558a59",
+      "attempts": 0,
+      "maxAttempts": 3,
+      "verified": true,
+      "active": false,
+      "createdAt": "2026-09-24T20:48:20.610Z",
+      "expiresAt": "2026-09-24T20:53:20.610Z"
+    },
+    {
+      "sessionId": "OTP-5c5647bf-0567-48b3-a01c-92e31134904d",
+      "phone": "+919999988888",
+      "otpHash": "434f3fc10ab1860a110b9bf4f40bfabd4d7b13548ecda5812322702ef0f00420",
+      "attempts": 0,
+      "maxAttempts": 3,
+      "verified": true,
+      "active": false,
+      "createdAt": "2026-09-24T20:48:26.239Z",
+      "expiresAt": "2026-09-24T20:53:26.239Z"
+    }
+  ]
+}
